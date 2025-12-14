@@ -1,16 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
+import { FileText, Trash2, Menu, Plus, Save, Edit2, Check } from 'lucide-react'
+
+import { cn } from '../lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,12 +14,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { FileText, Trash2, Menu, Plus, Save, Edit2, Check } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
-import { ToastAction } from '@/components/ui/toast'
-import { Input } from '@/components/ui/input'
+  Button,
+  Input,
+  ScrollArea,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  ToastAction,
+  useToast,
+} from './ui'
 
 interface Article {
   id: string
