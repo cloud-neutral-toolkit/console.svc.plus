@@ -1,12 +1,12 @@
 import React from 'react'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+} from '../../ui'
 import { HelpCircle } from 'lucide-react'
 
 const cheatSheet = [

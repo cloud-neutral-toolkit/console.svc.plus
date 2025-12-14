@@ -1,14 +1,15 @@
 'use client'
 
-import { cn } from '@/lib/utils'
-import { PREVIEW_SIZES, type PreviewSize } from '../constants'
-import { Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react'
-import { templates } from '@/config/wechat-templates'
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { type CodeThemeId } from '@/config/code-themes'
-import { useTheme } from 'next-themes'
-import '@/styles/code-themes.css'
+import { Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react'
 import mermaid from 'mermaid'
+import { useTheme } from 'next-themes'
+
+import { type CodeThemeId } from '../../../config/code-themes'
+import { templates } from '../../../config/wechat-templates'
+import { cn } from '../../../lib/utils'
+import '../../../styles/code-themes.css'
+import { PREVIEW_SIZES, type PreviewSize } from '../constants'
 import { useScrollSync } from '../hooks/useScrollSync'
 
 interface EditorPreviewProps {
