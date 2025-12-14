@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { Logo } from '@/components/icons/Logo'
 import { Github } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+
+import { cn } from '../../lib/utils'
+import { Logo } from '../icons/Logo'
+import { ThemeToggle } from '../theme-toggle'
+import { Button } from '../ui'
 
 const navigation = [
   { name: '微信公众号', href: '/wechat' },

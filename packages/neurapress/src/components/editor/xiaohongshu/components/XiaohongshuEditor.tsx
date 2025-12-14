@@ -1,6 +1,6 @@
 'use client'
 
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '../../../ui'
 import { XiaohongshuMarkdownToolbar } from './XiaohongshuMarkdownToolbar'
 
 interface XiaohongshuEditorProps {
