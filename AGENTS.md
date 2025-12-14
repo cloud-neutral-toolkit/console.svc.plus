@@ -1,205 +1,246 @@
 # Agent Guidelines for dashboard/
 
-These instructions apply only to the dashboard/ subtree of XControl. They augment
-the root-level AGENTS.md with stricter rules specifically for the Next.js UI codebase.
+These rules apply to the entire dashboard repository.
+They exist to keep architecture stable when humans or AI agents modify code.
 
-The dashboard is a Next.js App Router application implemented in TypeScript with
-Tailwind CSS, Zustand state management, and Vitest/Playwright tests.
+This repo contains:
+- A large Next.js App Router application (dashboard)
+- Vendored internal libraries under packages/*
+- No monorepo tooling assumptions beyond local file dependencies
 
-This document defines the architectural rules that all contributors — human or AI agents —
-must follow when modifying any code under dashboard/.
+AI agents MUST respect these boundaries.
 
-## 📌 1. State Management Rules (Zustand-Only Architecture)
+---
 
-Global state inconsistencies are the primary source of UI bugs and unpredictability.
-To eliminate this entire class of issues, the dashboard enforces:
+## 1. Repository Mental Model (Read This First)
 
-✅ Zustand is the ONLY allowed global/shared state mechanism.
-❌ React Context Providers are disallowed for global state.
+This repository has **three clearly separated layers**:
 
-This includes:
+### A. Application Layer (Next.js App Router)
 
-No createContext, useContext, or <Context.Provider> for app-level data
-(auth/session/user/theme/language/insight/workbench/shared config).
-No “hybrid” patterns where Zustand data is mirrored inside a Provider.
-No component-level useState / useEffect holding cross-component state.
+src/app/**
+src/components/**
+src/lib/**
+src/state/**
+src/modules/**
 
-✔ All shared state MUST live inside Zustand slices
+yaml
+复制代码
 
-Each slice must:
-Export a useXStore(selector) function.
-Expose clear state + actions.
-Remain serializable for hydration when needed.
-Keep the shape stable and predictable.
+This is the **only place** where:
+- Routing exists
+- Global state exists
+- Runtime config is loaded
+- Zustand is allowed
 
-✔ Recommended slice structure (pattern)
-/dashboard/src/state/
-  user.ts            → auth/session
-  theme.ts           → light/dark/system
-  language.ts        → i18n
-  insight.ts         → insight editor / workbench
-  runtime.ts         → runtime service config (hydrated from YAML)
+---
 
+### B. Vendored Library Layer
 
-Slices should follow this format:
+packages/neurapress/**
 
-export const useUserStore = create<UserState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      isLoading: false,
-      setUser: (u) => set({ user: u }),
-      clearUser: () => set({ user: null }),
-    }),
-    { name: 'user' }
-  )
-)
+yaml
+复制代码
 
-📌 2. URL-Synchronized State Must Live in Zustand
+This is a **library**, not an application.
 
-Features such as:
+It may contain:
+- React components
+- Editor logic
+- Markdown utilities
+- Styles and assets
 
-insight editor / workbench state
-encoded shareable links
-URL → state hydration
-state → URL serialization
-MUST be handled inside the Zustand slice not in the component tree.
+It MUST NOT:
+- Behave like a Next.js app
+- Depend on dashboard routing or aliases
+- Own global state
 
-❌ Forbidden
+---
 
-Components containing URL parsing logic
-Components reading searchParams and storing them in local state
-Effects that attempt to “mirror” global data into component-local state
-✔ Mandatory
+### C. Build / Runtime Glue
 
-Zustand slices must expose helpers such as:
+scripts/**
+config/**
+public/**
 
-hydrateFromURL(searchParams: URLSearchParams)
-syncToURL(router: AppRouterInstance)
-serialize(): string
+yaml
+复制代码
 
+Used for build-time or runtime wiring only.
 
-This keeps the UI stateless and predictable.
+---
 
-📌 3. Component-level State Rules
+## 2. Global State Rules (Dashboard Only)
 
-Local UI state (modal open, hover, controlled inputs) is allowed:
+✅ Zustand is the **only** allowed global state mechanism  
+❌ React Context for shared/global state is forbidden
+
+Allowed only in:
+src/state/**
+src/app/store/**
+
+yaml
+复制代码
+
+Forbidden everywhere else (including packages/*).
+
+Rule:
+> If state must survive navigation or be shared → it lives in Zustand.
+
+---
+
+## 3. URL-Synchronized State
+
+Anything involving:
+- URL ↔ state
+- Editor deep links
+- Shareable views
+
+MUST be handled inside Zustand slices.
+
+❌ Forbidden:
+- Parsing URL params inside components
+- Sync logic inside useEffect
+
+---
+
+## 4. Component State Rules
 
 Allowed:
+- useState for local UI only
+- useEffect for browser-only effects
+- useRef for DOM access
 
-useState for purely local visuals
-useEffect for browser-only side effects
-useRef for DOM details
+Forbidden:
+- useState for cross-component data
+- Local state mirroring global state
 
-Not allowed:
+---
 
-useState for data needed across pages/components
-useEffect that propagates shared state upward
+## 5. Import & Alias Rules (Critical)
 
-When unsure:
-If two components could ever read it → it belongs in Zustand.
+### Dashboard code (src/**)
 
-📌 4. File Structure & Code Conventions
-Directory structure
+Allowed:
+```ts
+import { X } from '@/components/X'
+import { Y } from '@/lib/Y'
+Vendored packages (packages/**)
+🚫 ABSOLUTELY FORBIDDEN:
 
-Maintain component, state, and utility layout:
+ts
+复制代码
+import { X } from '@/components/X'
+import { Y } from '@/lib/Y'
+These aliases do not exist inside packages.
 
-src/
-  app/               → routes (App Router)
-  components/        → presentational components
-  state/             → Zustand slices
-  hooks/             → reusable UI hooks
-  lib/               → shared utilities (non-state)
-  config/            → runtime-service-config.yaml and loaders
+✅ Allowed inside packages:
 
-Code style
+ts
+复制代码
+import { ArticleList } from '../components/ArticleList'
+or
 
-ESLint + Prettier formatting
+ts
+复制代码
+import { ArticleList } from '@internal/neurapress/components'
+Packages must be path-self-contained.
 
-2-space indentation
+Dashboard config MUST NOT be modified to “fix” package imports.
 
-Single quotes
+6. packages/neurapress Rules (Very Important)
+packages/neurapress is treated as a vendored internal library.
 
-No unused exports
+MUST:
+Keep its own internal structure
 
-No default exports for slices or large utilities
-(Easier for static analysis + tree shaking)
+Use relative imports or package exports
 
-📌 5. Environment, Config & Runtime Rules
-Declarative configuration only
+Remain usable outside this repo
 
-Do not add browser-only environment variables.
+Export public APIs via:
 
-All new runtime config fields must go into:
+src/index.ts
 
-dashboard/config/runtime-service-config.yaml
+src/editor/index.ts
 
+src/components/index.ts
 
-And be hydrated by a Zustand slice (e.g., runtime.ts).
+src/lib/index.ts
 
-📌 6. AI Agent (Codex/GPT) Rules — Strict Mode
+MUST NOT:
+Assume Next.js App Router context
 
-Because the dashboard often uses AI to refactor/upgrade code, the following constraints
-apply specifically to code generated by agents:
+Introduce app/, page.tsx, layout.tsx dependencies into dashboard
 
-🚫 Agents MUST NOT:
+Introduce Zustand, Context, or global state
 
-Generate any form of React Provider for global state
+Depend on dashboard-specific CSS or runtime config
 
-Introduce hybrid Context+Zustand patterns
+7. Fixing Build Errors Involving packages/*
+When a build error originates from packages/*:
 
-Use component-level state for shared logic
+✅ Correct approach:
 
-Use browser APIs (window, localStorage) in server-compatible modules
+Fix the import inside the package
 
-Change directory structure without explicit instruction
+Adjust package-level exports
 
-Generate environment variables not reflected in runtime-service-config.yaml
+Preserve original behavior
 
-✅ Agents MUST:
+🚫 Forbidden shortcuts:
 
-Implement all shared logic as Zustand slices
+Adding webpack aliases in dashboard
 
-Keep slices serializable and deterministic
+Moving package files into src/
 
-Produce code compatible with Next.js App Router (SSR + CSR safe)
+Duplicating components across layers
 
-Follow ESLint and existing style conventions
+8. Directory Safety Rules
+AI agents MUST NOT:
 
-Ensure newly generated slices include proper actions/selectors
+Reorganize directories unless explicitly instructed
 
-Prefer pure functions and stable keys for Zustand persist middlewares
+Move files across src/ ↔ packages/
 
-📌 7. Testing Requirements
+Collapse packages into app code
 
-Contributors must run:
+9. Environment & Runtime Config
+No new environment variables without approval
 
-yarn --cwd dashboard lint
-yarn --cwd dashboard test
-yarn --cwd dashboard test:e2e
+All runtime config must live in:
 
+arduino
+复制代码
+src/config/runtime-service-config*.yaml
+Runtime config is hydrated in dashboard only
 
-Slices that handle URL hydration must include unit tests verifying:
+packages/* must remain config-agnostic.
 
-URL → state correctness
+10. Testing Expectations (When Applicable)
+Before considering a change complete:
 
-state → URL correctness
+bash
+复制代码
+yarn lint
+yarn test
+If touching:
 
-shareable link determinism
+URL state
 
-Insight-related state should always include at least minimal test coverage.
+Editor routing
 
-📌 8. Summary of Key Constraints (TL;DR)
-🚫 Forbidden
+Insight / CMS behavior
 
-React Context for shared/global state
+→ add or update tests accordingly.
 
-useState/useEffect for cross-component data
+11. TL;DR for AI Agents
+dashboard = application
 
-Ad-hoc URL parsing inside components
+packages = libraries
 
-✔ Required
-Zustand-only global state
-URL hydration inside Zustand slices
-Declarative runtime config (YAML → slice)
-AI agents must follow deterministic slice architecture
+Zustand only in dashboard
+
+No @/ imports inside packages
+
+Never “fix” libraries by polluting the app
