@@ -94,4 +94,13 @@ export async function redirects() {
   ];
 }
 
+export async function rewrites() {
+  return [
+    {
+      source: '/editor/:path*',
+      destination: 'http://localhost:4000/:path*',
+    },
+  ];
+}
+
 export default nextConfig;
