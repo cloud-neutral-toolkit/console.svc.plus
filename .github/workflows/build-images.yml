@@ -70,6 +70,7 @@ jobs:
       matrix:
         service:
           - { name: dashboard,  workdir: .,   dockerfile: Dockerfile }
+          - { name: neurapress,  workdir: .,   dockerfile: packages/neurapress/docker/Dockerfile.prod }
 
     steps:
       # -------------------------------------------------------------
@@ -157,6 +158,7 @@ jobs:
       matrix:
         service:
           - { name: dashboard,  workdir: .,   dockerfile: Dockerfile }
+          - { name: neurapress,  workdir: .,   dockerfile: packages/neurapress/docker/Dockerfile.prod }
 
     steps:
       # -------------------------------------------------------------

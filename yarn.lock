@@ -945,7 +945,7 @@ __metadata:
     react-dom: "npm:^18.2.0"
     tailwind-merge: "npm:^2.6.0"
     tailwindcss-animate: "npm:^1.0.7"
-  checksum: 10/16eca58164408c27beb16bdcc3b480f424d77df7df45f473ec9b17629851849265605c313d90aa61ee31793ecb870e056457a8e938f5dde3310f43ad4c417f8f
+  checksum: 10/217c5288a84d502daf03173de5def03d2b82efe4576b0dd37331317ca73c6697c83e8041100fe531f167f72d682ab37d5fa90554df8686fc168f1595baf86879
   languageName: node
   linkType: hard
 
