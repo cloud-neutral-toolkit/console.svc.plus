@@ -66,6 +66,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      dashboard-digest: ${{ steps.build.outputs.digest }}
+
     strategy:
       matrix:
         service:
@@ -169,7 +172,7 @@ jobs:
       # -------------------------------------------------------------
       - uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ steps.build.outputs.digest }}
+          image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
           output-file: sbom.spdx.json
 
       - uses: actions/upload-artifact@v4
@@ -182,7 +185,7 @@ jobs:
       # -------------------------------------------------------------
       - uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ steps.build.outputs.digest }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
           severity: HIGH,CRITICAL
           exit-code: '1'
 
@@ -197,5 +200,5 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          IMG=${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ steps.build.outputs.digest }}
+          IMG=${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
           cosign sign --yes "$IMG"

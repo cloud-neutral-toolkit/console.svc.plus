@@ -97,6 +97,10 @@ export async function redirects() {
 export async function rewrites() {
   return [
     {
+      source: '/editor',
+      destination: 'http://localhost:4000',
+    },
+    {
       source: '/editor/:path*',
       destination: 'http://localhost:4000/:path*',
     },
