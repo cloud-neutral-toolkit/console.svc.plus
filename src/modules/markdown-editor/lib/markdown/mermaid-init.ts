@@ -1,31 +1,34 @@
-import mermaid from 'mermaid'
 import type { MermaidConfig } from 'mermaid'
+import { loadMermaid } from './mermaid-utils'
 
 let initialized = false
 
-// Initialize mermaid with default configuration
-const config: MermaidConfig = {
-  startOnLoad: false,
-  theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-  securityLevel: 'loose' as const,
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif',
-  themeVariables: {
-    'fontSize': '16px',
-    'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif',
-    'primaryColor': document.documentElement.classList.contains('dark') ? '#7c3aed' : '#4f46e5',
-    'primaryTextColor': document.documentElement.classList.contains('dark') ? '#fff' : '#000',
-    'primaryBorderColor': document.documentElement.classList.contains('dark') ? '#7c3aed' : '#4f46e5',
-    'lineColor': document.documentElement.classList.contains('dark') ? '#666' : '#999',
-    'textColor': document.documentElement.classList.contains('dark') ? '#fff' : '#333'
-  },
-  pie: {
-    textPosition: 0.75,
-    useMaxWidth: true
-  }
-}
-
 // 缓存已渲染的图表
 const renderedDiagrams = new Map<string, string>()
+
+const createMermaidConfig = (): MermaidConfig => {
+  return {
+    startOnLoad: false,
+    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+    securityLevel: 'loose' as const,
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif',
+    themeVariables: {
+      fontSize: '16px',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif',
+      primaryColor: document.documentElement.classList.contains('dark') ? '#7c3aed' : '#4f46e5',
+      primaryTextColor: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+      primaryBorderColor: document.documentElement.classList.contains('dark') ? '#7c3aed' : '#4f46e5',
+      lineColor: document.documentElement.classList.contains('dark') ? '#666' : '#999',
+      textColor: document.documentElement.classList.contains('dark') ? '#fff' : '#333',
+    },
+    pie: {
+      textPosition: 0.75,
+      useMaxWidth: true,
+    },
+  }
+}
 
 // Generate a valid ID for mermaid diagrams
 function generateMermaidId() {
@@ -70,9 +73,16 @@ function processPieChart(definition: string): string {
 // Function to initialize Mermaid diagrams
 export async function initMermaid() {
   try {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const mermaid = await loadMermaid()
+    if (!mermaid) return
+
     // 确保只初始化一次
     if (!initialized) {
-      mermaid.initialize(config)
+      mermaid.initialize(createMermaidConfig())
       initialized = true
     }
 

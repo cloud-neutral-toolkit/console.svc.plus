@@ -7,8 +7,8 @@ import { templates } from '../../../config/wechat-templates'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { type CodeThemeId } from '../../../config/code-themes'
 import { useTheme } from 'next-themes'
-import mermaid from 'mermaid'
 import { useScrollSync } from '../hooks/useScrollSync'
+import { loadMermaid } from '../../../lib/markdown/mermaid-utils'
 
 interface EditorPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
@@ -37,41 +37,57 @@ export function EditorPreview({
   const contentRef = useRef<HTMLDivElement>(null)
   const { handlePreviewScroll } = useScrollSync()
   const { theme } = useTheme()
+  const mermaidRef = useRef<Awaited<ReturnType<typeof loadMermaid>>>()
 
   // 初始化 Mermaid
   useEffect(() => {
-    mermaid.initialize({
-      theme: theme === 'dark' ? 'dark' : 'default',
-      startOnLoad: false,
-      securityLevel: 'loose',
-      fontFamily: 'var(--font-sans)',
-      fontSize: 14,
-      flowchart: {
-        htmlLabels: true,
-        curve: 'basis',
-        padding: 15,
-        useMaxWidth: false,
-        defaultRenderer: 'dagre-d3'
-      },
-      sequence: {
-        useMaxWidth: false,
-        boxMargin: 10,
-        mirrorActors: false,
-        bottomMarginAdj: 2,
-        rightAngles: true,
-        showSequenceNumbers: false
-      },
-      pie: {
-        useMaxWidth: true,
-        textPosition: 0.5,
-        useWidth: 800
-      },
-      gantt: {
-        useMaxWidth: false,
-        leftPadding: 75,
-        rightPadding: 20
-      }
-    })
+    let cancelled = false
+
+    const initializeMermaidTheme = async () => {
+      const mermaid = await loadMermaid()
+      if (!mermaid || cancelled) return
+
+      mermaid.initialize({
+        theme: theme === 'dark' ? 'dark' : 'default',
+        startOnLoad: false,
+        securityLevel: 'loose',
+        fontFamily: 'var(--font-sans)',
+        fontSize: 14,
+        flowchart: {
+          htmlLabels: true,
+          curve: 'basis',
+          padding: 15,
+          useMaxWidth: false,
+          defaultRenderer: 'dagre-d3'
+        },
+        sequence: {
+          useMaxWidth: false,
+          boxMargin: 10,
+          mirrorActors: false,
+          bottomMarginAdj: 2,
+          rightAngles: true,
+          showSequenceNumbers: false
+        },
+        pie: {
+          useMaxWidth: true,
+          textPosition: 0.5,
+          useWidth: 800
+        },
+        gantt: {
+          useMaxWidth: false,
+          leftPadding: 75,
+          rightPadding: 20
+        }
+      })
+
+      mermaidRef.current = mermaid
+    }
+
+    initializeMermaidTheme()
+
+    return () => {
+      cancelled = true
+    }
   }, [theme])
 
   // 使用 memo 包装预览内容
@@ -93,6 +109,9 @@ export function EditorPreview({
   // 渲染 Mermaid 图表
   useEffect(() => {
     const renderMermaid = async () => {
+      const mermaid = mermaidRef.current ?? (await loadMermaid())
+      if (!mermaid) return
+
       try {
         const elements = document.querySelectorAll('.mermaid')
         if (!elements.length) return

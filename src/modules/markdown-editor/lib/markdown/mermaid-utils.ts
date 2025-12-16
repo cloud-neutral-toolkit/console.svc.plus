@@ -1,5 +1,3 @@
-import mermaid from 'mermaid'
-
 declare global {
   interface Window {
     mermaid: {
@@ -43,10 +41,35 @@ export const MERMAID_CONFIG = {
   securityLevel: 'loose' as const
 }
 
+type MermaidModule = typeof import('mermaid')
+
+let mermaidLoader: Promise<MermaidModule> | null = null
+
+export const loadMermaid = async (): Promise<MermaidModule | null> => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  if (!mermaidLoader) {
+    mermaidLoader = import('mermaid').then((module) => {
+      const mermaidModule = module.default ?? (module as unknown as MermaidModule)
+      window.mermaid = mermaidModule as unknown as Window['mermaid']
+      return mermaidModule
+    })
+  }
+
+  return mermaidLoader
+}
+
 /**
  * 初始化 Mermaid
  */
 export const initializeMermaid = async () => {
+  const mermaid = await loadMermaid()
+  if (!mermaid || typeof window === 'undefined') {
+    return
+  }
+
   try {
     // 初始化配置
     mermaid.initialize(MERMAID_CONFIG)

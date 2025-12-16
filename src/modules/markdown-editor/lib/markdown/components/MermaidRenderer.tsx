@@ -22,7 +22,7 @@ export function MermaidRenderer({
       try {
         // 初始化 mermaid
         const currentTheme = getCurrentTheme()
-        initializeMermaid(currentTheme, config)
+        await initializeMermaid(currentTheme, config)
 
         // 清空容器内容
         containerRef.current.innerHTML = ''
