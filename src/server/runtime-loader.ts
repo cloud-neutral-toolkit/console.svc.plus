@@ -8,6 +8,33 @@ import yaml from 'js-yaml'
 // 使用 process.cwd() 获取项目根目录，避免 __dirname 在生产环境的问题
 const configDir = path.join(process.cwd(), 'src', 'config')
 
+const FORBIDDEN_IMPORT_CONTEXTS = [
+  `${path.sep}src${path.sep}modules${path.sep}markdown-editor${path.sep}`,
+  `${path.sep}src${path.sep}components${path.sep}ui${path.sep}`,
+  'tiptap',
+  'mermaid',
+  'next-themes',
+]
+
+function assertServerOnlyContext() {
+  if (typeof window !== 'undefined') {
+    throw new Error('runtime-loader.ts is server-only and cannot run in the browser.')
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    const stack = new Error().stack ?? ''
+    const forbiddenCaller = FORBIDDEN_IMPORT_CONTEXTS.find((pattern) => stack.includes(pattern))
+
+    if (forbiddenCaller) {
+      throw new Error(
+        `[runtime-config] runtime-loader.ts must not be imported alongside UI/editor runtimes (${forbiddenCaller}).`,
+      )
+    }
+  }
+}
+
+assertServerOnlyContext()
+
 function loadYamlSource(sourceKey: RuntimeSourceKey): string | undefined {
   try {
     const filePath = path.join(configDir, `runtime-service-config.${sourceKey}.yaml`)
