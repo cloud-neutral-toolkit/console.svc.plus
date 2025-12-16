@@ -1,17 +1,29 @@
-import mermaid from 'mermaid'
 import type { MermaidConfig } from 'mermaid'
 import type { MermaidError, MermaidTheme } from '../types/mermaid'
 import { createMermaidConfig } from '../config/mermaid'
+import { loadMermaid } from '../mermaid-utils'
+
+const getMermaid = async () => {
+  const mermaid = await loadMermaid()
+  return mermaid ?? null
+}
 
 /**
  * 初始化 Mermaid
  */
-export const initializeMermaid = (theme: MermaidTheme = 'default', config?: Partial<MermaidConfig>) => {
-  const defaultConfig = createMermaidConfig(theme)
-  mermaid.initialize({
-    ...defaultConfig,
-    ...config
-  })
+export const initializeMermaid = async (theme: MermaidTheme = 'default', config?: Partial<MermaidConfig>) => {
+  try {
+    const mermaid = await getMermaid()
+    if (!mermaid) return
+
+    const defaultConfig = createMermaidConfig(theme)
+    mermaid.initialize({
+      ...defaultConfig,
+      ...config
+    })
+  } catch (error) {
+    console.error('Failed to initialize mermaid runtime:', error)
+  }
 }
 
 /**
@@ -22,6 +34,11 @@ export const renderMermaidDiagram = async (
   config?: Partial<MermaidConfig>
 ): Promise<{ svg: string }> => {
   try {
+    const mermaid = await getMermaid()
+    if (!mermaid) {
+      throw new Error('Mermaid is only available in the browser environment.')
+    }
+
     // 先尝试解析，检查语法错误
     await mermaid.parse(content)
 
@@ -45,6 +62,9 @@ export const renderMermaidDiagram = async (
  */
 export const renderMermaidDiagrams = async (selector = '.mermaid') => {
   try {
+    const mermaid = await getMermaid()
+    if (!mermaid) return
+
     const elements = document.querySelectorAll<HTMLElement>(selector)
     if (!elements.length) return
 
