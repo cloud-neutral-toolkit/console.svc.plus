@@ -32,7 +32,7 @@ function formatDate(dateStr: string | undefined, language: 'zh' | 'en'): string 
 }
 
 type PageProps = {
-  searchParams?: { page?: string; category?: string } | Promise<{ page?: string; category?: string }>
+  searchParams?: { page?: string; category?: string }
 }
 
 const CATEGORY_TABS: { key: string; label: string }[] = [
@@ -56,8 +56,7 @@ function buildCategoryCounts(posts: Awaited<ReturnType<typeof getHomepagePosts>>
 
 export default async function BlogPage({ searchParams }: PageProps) {
   const posts = await getHomepagePosts()
-  const resolvedSearchParams = await Promise.resolve(searchParams ?? {})
-  const { page, category } = resolvedSearchParams ?? {}
+  const { page, category } = searchParams ?? {}
   const categoryCounts = buildCategoryCounts(posts)
   const selectedCategory = CATEGORY_TABS.find((tab) => tab.key === category)?.key
   const filteredPosts = selectedCategory ? posts.filter((post) => post.category?.key === selectedCategory) : posts
