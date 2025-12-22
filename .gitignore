@@ -18,6 +18,7 @@ public/dl-index/
 
 # Contentlayer cache
 ui/docs/.contentlayer/
+src/content/blog/
 
 # Lock files (如果不希望追踪)
 uyarn.lock
