@@ -18,13 +18,17 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
 # 基础镜像升级到最新
 # ---------------------------
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends curl git \
     && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable \
     && corepack prepare yarn@4.12.0 --activate
 
 COPY . .
+RUN git clone https://github.com/Cloud-Neutral-Workshop/knowledge.git /tmp/knowledge \
+    && rm -rf src/content/blog/* \
+    && cp -R /tmp/knowledge/content/* src/content/blog/ \
+    && rm -rf /tmp/knowledge
 RUN find . -name "package-lock.json" -delete
 RUN yarn install --immutable
 RUN yarn next build
@@ -57,6 +61,7 @@ RUN apt-get update \
 COPY --from=builder /app/dashboard/.next/standalone ./
 COPY --from=builder /app/dashboard/.next/static ./static
 COPY --from=builder /app/dashboard/public ./public
+COPY --from=builder /app/dashboard/src/content/blog ./src/content/blog
 
 # ---------------------------
 # 额外瘦身（可减少 15–40 MB）
