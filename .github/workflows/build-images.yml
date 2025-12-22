@@ -1,4 +1,4 @@
-name: Build Service Images
+name: Build Dashboard Images
 
 on:
   workflow_call:
