@@ -59,8 +59,8 @@ ensure-deps:
 	fi
 
 dev: ensure-deps
-	@echo "🚀 Starting Next.js dev server (dashboard)..."
-	@echo "ℹ️  /editor is proxied to an external NeuraPress front-end at http://localhost:4000."
+	@echo "Starting Next.js dev server (dashboard)..."
+	@echo "/editor is proxied to an external NeuraPress front-end at http://localhost:4000."
 	yarn dev -p 3001
 
 start:

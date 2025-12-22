@@ -232,7 +232,7 @@ export default function Navbar() {
   const labels = {
     home: isChinese ? '首页' : 'Home',
     docs: isChinese ? '文档' : 'Docs',
-    download: isChinese ? '下载' : 'Download',
+    download: isChinese ? '博客' : 'blog',
     openSource: isChinese ? '开源项目' : 'Open source',
     editor: isChinese ? '编辑器' : 'Editor',
     moreServices: isChinese ? '更多服务' : 'More services',
@@ -273,7 +273,7 @@ export default function Navbar() {
     { key: 'docs', label: labels.docs, href: '/docs' },
   ]
 
-  const downloadLink = { key: 'download', label: labels.download, href: '/download' }
+  const downloadLink = { key: 'blog', label: labels.download, href: '/blog' }
 
   const editorLink = {
     key: 'editor',

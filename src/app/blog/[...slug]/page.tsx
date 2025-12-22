@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 
 import { getBlogPostBySlug } from '@lib/blogContent'
 import { renderMarkdownContent } from '@server/render-markdown'
+import BrandCTA from '@components/BrandCTA'
 
 type PageProps = {
   params: { slug: string | string[] }
@@ -54,6 +55,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   const html = renderMarkdownContent(post.content)
+  const language: 'zh' | 'en' = /[\u4e00-\u9fff]/.test(`${post.title} ${post.content}`) ? 'zh' : 'en'
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
@@ -86,9 +88,13 @@ export default async function BlogPostPage({ params }: PageProps) {
         </header>
 
         <article
-          className="prose prose-slate max-w-none prose-headings:scroll-mt-24 prose-a:text-brand prose-a:no-underline hover:prose-a:underline"
+          className="prose prose-slate max-w-none text-[15px] prose-headings:scroll-mt-24 prose-a:text-brand prose-a:no-underline hover:prose-a:underline"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        <div className="mt-12">
+          <BrandCTA lang={language} />
+        </div>
 
         <footer className="mt-16 border-t border-slate-200 pt-8">
           <Link

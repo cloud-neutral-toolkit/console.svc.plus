@@ -73,14 +73,45 @@ function buildExcerpt(markdown: string): string {
   return ''
 }
 
+function normalizeHeadingText(value: string): string {
+  return value
+    .replace(/[`*_]/g, '')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .trim()
+}
+
+function extractTitleFromContent(markdown: string): { title?: string; content: string } {
+  const lines = markdown.split(/\r?\n/)
+  let firstContentLine = 0
+
+  while (firstContentLine < lines.length && lines[firstContentLine].trim() === '') {
+    firstContentLine += 1
+  }
+
+  if (firstContentLine < lines.length) {
+    const match = lines[firstContentLine].match(/^#{1,6}\s+(.*)$/)
+    if (match && match[1]?.trim()) {
+      const title = normalizeHeadingText(match[1])
+      const content = [...lines.slice(0, firstContentLine), ...lines.slice(firstContentLine + 1)].join('\n')
+      return { title, content }
+    }
+  }
+
+  return { content: markdown }
+}
+
 function normalizePost(file: Awaited<ReturnType<typeof readBlogFiles>>[number]): BlogPost {
-  const title = typeof file.metadata.title === 'string' ? file.metadata.title : file.slug
+  const metadataTitle = typeof file.metadata.title === 'string' ? file.metadata.title : undefined
+  const { title: derivedTitle, content } = metadataTitle
+    ? { title: undefined, content: file.content }
+    : extractTitleFromContent(file.content)
+  const title = metadataTitle ?? derivedTitle ?? file.slug
   const author = typeof file.metadata.author === 'string' ? file.metadata.author : undefined
   const date = typeof file.metadata.date === 'string' ? file.metadata.date : undefined
   const tags = Array.isArray(file.metadata.tags)
     ? file.metadata.tags.filter((tag): tag is string => typeof tag === 'string')
     : []
-  const excerpt = typeof file.metadata.excerpt === 'string' ? file.metadata.excerpt : buildExcerpt(file.content)
+  const excerpt = typeof file.metadata.excerpt === 'string' ? file.metadata.excerpt : buildExcerpt(content)
   const categoryKey = typeof file.metadata.category === 'string' ? file.metadata.category : undefined
   const categoryLabel = typeof file.metadata.categoryLabel === 'string' ? file.metadata.categoryLabel : categoryKey
   const category =
@@ -95,7 +126,7 @@ function normalizePost(file: Awaited<ReturnType<typeof readBlogFiles>>[number]):
     date,
     tags,
     excerpt,
-    content: file.content,
+    content,
     category,
   }
 }
@@ -103,7 +134,7 @@ function normalizePost(file: Awaited<ReturnType<typeof readBlogFiles>>[number]):
 export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
   try {
     const files = await readBlogFiles()
-    const posts = files.map(normalizePost)
+    const posts = files.map(normalizePost).filter((post) => post.content.trim().length > 0)
 
     return posts
       .map((post) => ({

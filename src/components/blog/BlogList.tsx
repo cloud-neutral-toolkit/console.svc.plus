@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
+import BrandCTA from '@components/BrandCTA'
 import SearchComponent from '@components/search'
 import type { BlogPost } from '@lib/blogContent'
 
@@ -50,6 +51,15 @@ function buildCategoryCounts(posts: BlogPost[]) {
   }, {})
 }
 
+function detectLanguage(posts: BlogPost[]): 'zh' | 'en' {
+  for (const post of posts) {
+    if (/[\u4e00-\u9fff]/.test(`${post.title} ${post.excerpt}`)) {
+      return 'zh'
+    }
+  }
+  return 'en'
+}
+
 export default function BlogList({ posts }: BlogListProps) {
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get('category')
@@ -72,6 +82,7 @@ export default function BlogList({ posts }: BlogListProps) {
   const startIndex = (currentPage - 1) * postsPerPage
   const endIndex = startIndex + postsPerPage
   const paginatedPosts = filteredPosts.slice(startIndex, endIndex)
+  const language = useMemo(() => detectLanguage(filteredPosts), [filteredPosts])
 
   return (
     <div className="bg-white text-slate-900">
@@ -231,8 +242,13 @@ export default function BlogList({ posts }: BlogListProps) {
                   </Link>
                 </nav>
               )}
+
             </>
           )}
+
+          <div className="mt-12">
+            <BrandCTA lang={language} variant="compact" />
+          </div>
         </div>
       </main>
     </div>
