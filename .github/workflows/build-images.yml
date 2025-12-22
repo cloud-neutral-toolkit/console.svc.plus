@@ -105,6 +105,27 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       # -------------------------------------------------------------
+      # Prepare knowledge content for Docker build (avoid git clone in Dockerfile)
+      # -------------------------------------------------------------
+      - name: Checkout knowledge content
+        uses: actions/checkout@v4
+        with:
+          repository: Cloud-Neutral-Workshop/knowledge
+          path: .tmp/knowledge
+          token: ${{ secrets.KNOWLEDGE_REPO_TOKEN || github.token }}
+
+      - name: Sync knowledge content into build context
+        run: |
+          set -euo pipefail
+          rm -rf src/content/blog/*
+          cp -R .tmp/knowledge/content/* src/content/blog/
+
+      - name: Create CI Dockerfile without knowledge clone
+        run: |
+          set -euo pipefail
+          perl -0777 -pe 's#RUN git clone https://github.com/Cloud-Neutral-Workshop/knowledge.git /tmp/knowledge\\\n    && rm -rf src/content/blog/\\*\\\n    && cp -R /tmp/knowledge/content/\\* src/content/blog/\\\n    && rm -rf /tmp/knowledge#RUN echo "knowledge content provided by CI"#' Dockerfile > Dockerfile.ci
+
+      # -------------------------------------------------------------
       # Build service image
       # -------------------------------------------------------------
       - name: Build & Push Service Image
@@ -112,7 +133,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.workdir }}
-          file: ${{ matrix.service.dockerfile }}
+          file: ${{ matrix.service.dockerfile == 'Dockerfile' && 'Dockerfile.ci' || matrix.service.dockerfile }}
           platforms: linux/amd64,linux/arm64
           push: ${{ env.PUSH_IMAGES == 'true' || env.PUSH_IMAGES == true }}
           tags: ${{ steps.meta.outputs.tags }}
