@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { compileMDX } from 'next-mdx-remote/rsc'
 import type { Metadata } from 'next'
 
 import { getBlogPostBySlug } from '@lib/blogContent'
+import { renderMarkdownContent } from '@server/render-markdown'
 
 type PageProps = {
   params: { slug: string | string[] }
@@ -53,9 +53,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound()
   }
 
-  const mdx = await compileMDX({
-    source: post.content,
-  })
+  const html = renderMarkdownContent(post.content)
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
@@ -87,9 +85,10 @@ export default async function BlogPostPage({ params }: PageProps) {
           )}
         </header>
 
-        <article className="prose prose-slate max-w-none prose-headings:scroll-mt-24 prose-a:text-brand prose-a:no-underline hover:prose-a:underline">
-          {mdx.content}
-        </article>
+        <article
+          className="prose prose-slate max-w-none prose-headings:scroll-mt-24 prose-a:text-brand prose-a:no-underline hover:prose-a:underline"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
 
         <footer className="mt-16 border-t border-slate-200 pt-8">
           <Link

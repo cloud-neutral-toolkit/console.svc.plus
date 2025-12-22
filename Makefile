@@ -59,9 +59,9 @@ ensure-deps:
 	fi
 
 dev: ensure-deps
-        @echo "🚀 Starting Next.js dev server (dashboard)..."
-        @echo "ℹ️  /editor is proxied to an external NeuraPress front-end at http://localhost:4000."
-        yarn dev -p 3001
+	@echo "🚀 Starting Next.js dev server (dashboard)..."
+	@echo "ℹ️  /editor is proxied to an external NeuraPress front-end at http://localhost:4000."
+	yarn dev -p 3001
 
 start:
 	@echo "🚀 Starting Next.js dev server (dashboard) in background..."
@@ -88,6 +88,7 @@ build: init
 		 $(MAKE) sync-dl-index; \
 	fi
 	@echo "🔨 Building dashboard..."
+	yarn prebuild
 	NEXT_TELEMETRY_DISABLED=1 NEXT_PRIVATE_TURBOPACK=1 yarn next build
 
 sync-dl-index:
@@ -110,4 +111,3 @@ clean:
 
 info:
 	@echo "🧾 Node.js version: $(NODE_VERSION)"
-

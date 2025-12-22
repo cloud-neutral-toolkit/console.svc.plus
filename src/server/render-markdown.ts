@@ -27,6 +27,11 @@ function sanitize(html: string): string {
   })
 }
 
+export function renderMarkdownContent(content: string): string {
+  const rawHtml = marked.parse(content, { async: false }) as string
+  return sanitize(rawHtml)
+}
+
 function serializeFrontmatter(data: Record<string, unknown> | undefined): Record<string, unknown> {
   if (!data || typeof data !== 'object') {
     return {}
@@ -61,8 +66,7 @@ export async function renderMarkdownFile(requestPath: string): Promise<MarkdownR
   const fileContent = await fs.readFile(absolutePath, 'utf8')
   const { content, data } = matter(fileContent)
 
-  const rawHtml = marked.parse(content, { async: false }) as string
-  const html = sanitize(rawHtml)
+  const html = renderMarkdownContent(content)
 
   const result: MarkdownRenderResult = {
     path: toContentRelativePath(absolutePath),
