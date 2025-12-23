@@ -12,6 +12,11 @@ on:
         description: "Docker Hub namespace (user/org)"
         type: string
 
+      skip_security:
+        description: "Skip security scans and signing"
+        type: boolean
+        default: false
+
       # Base image references (full image URL)
       node_builder_image:
         type: string
@@ -32,6 +37,11 @@ on:
         type: string
         default: "cloudneutral"
 
+      skip_security:
+        description: "Skip security scans and signing"
+        type: boolean
+        default: false
+
       node_builder_image:
         type: string
         default: "node:22-bookworm"
@@ -51,11 +61,11 @@ permissions:
 env:
   REGISTRY: ghcr.io
   ORG: cloud-neutral-toolkit
+  SKIP_SECURITY: ${{ inputs.skip_security || github.event.inputs.skip_security || 'false' }}
 
   # Base image references (tag or digest)
   NODE_BUILDER_IMAGE: ${{ inputs.node_builder_image || github.event.inputs.node_builder_image || 'node:22-bookworm' }}
   NODE_RUNTIME_IMAGE: ${{ inputs.node_runtime_image || github.event.inputs.node_runtime_image || 'node:22-slim' }}
-
 
   # Push control
   PUSH_IMAGES: ${{ github.event_name == 'push'
@@ -71,6 +81,9 @@ jobs:
 
     strategy:
       matrix:
+        arch:
+          - { platform: linux/amd64, artifact: linux-amd64 }
+          - { platform: linux/arm64, artifact: linux-arm64 }
         service:
           - { name: dashboard,  workdir: .,   dockerfile: Dockerfile }
 
@@ -113,14 +126,14 @@ jobs:
       # -------------------------------------------------------------
       # Build service image
       # -------------------------------------------------------------
-      - name: Build & Push Service Image
+      - name: Build Service Image
         id: build
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.workdir }}
           file: ${{ matrix.service.dockerfile }}
           platforms: linux/amd64,linux/arm64
-          push: ${{ env.PUSH_IMAGES == 'true' || env.PUSH_IMAGES == true }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -130,55 +143,28 @@ jobs:
             CONTENTLAYER_BUILD=true
 
       # -------------------------------------------------------------
-      # Validate runtime mount for blog content
+      # Record digest for downstream stages
       # -------------------------------------------------------------
-      - name: Validate blog content mount
-        if: env.PUSH_IMAGES == 'true'
+      - name: Record digest
         run: |
           set -euo pipefail
-          IMAGE="${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ steps.build.outputs.digest }}"
-          docker pull "$IMAGE"
-          docker run --rm \
-            -v "${{ github.workspace }}/knowledge/content:/app/dashboard/src/content/blog:ro" \
-            "$IMAGE" \
-            sh -c 'test -d /app/dashboard/src/content/blog'
+          echo "${{ steps.build.outputs.digest }}" > digest-${{ matrix.arch.artifact }}.txt
 
-      # -------------------------------------------------------------
-      # Push to Docker Hub (optional)
-      # -------------------------------------------------------------
-      - name: Login to Docker Hub
-        if: env.PUSH_IMAGES == 'true'
-        uses: docker/login-action@v3
+      - uses: actions/upload-artifact@v4
         with:
-          registry: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          name: digest-${{ matrix.arch.artifact }}
+          path: digest-${{ matrix.arch.artifact }}.txt
 
-      # -------------------------------------------------------------
-      # Re-tag & Push image to Docker Hub
-      # -------------------------------------------------------------
-      - name: Re-tag & Push Service Image (Docker Hub)
-        if: env.PUSH_IMAGES == 'true'
-        env:
-          TARGET_NS: ${{ inputs.dockerhub_namespace || github.event.inputs.dockerhub_namespace || 'cloudneutral' }}
-        run: |
-          set -euo pipefail
-
-          SERVICE="${{ matrix.service.name }}"
-          ORIGIN_IMG="${{ env.REGISTRY }}/${{ env.ORG }}/${SERVICE}@${{ steps.build.outputs.digest }}"
-          TARGET_REPO="docker.io/${TARGET_NS}/${SERVICE}"
-
-          TAG="latest"
-          docker pull "$ORIGIN_IMG"
-          docker tag "$ORIGIN_IMG" "$TARGET_REPO:$TAG"
-          docker push "$TARGET_REPO:$TAG"
-
-  Security:
+  security:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ env.SKIP_SECURITY != 'true' }}
 
     strategy:
       matrix:
+        arch:
+          - { platform: linux/amd64, artifact: linux-amd64 }
+          - { platform: linux/arm64, artifact: linux-arm64 }
         service:
           - { name: dashboard,  workdir: .,   dockerfile: Dockerfile }
           - { name: neurapress,  workdir: .,   dockerfile: packages/neurapress/docker/Dockerfile.prod }
@@ -189,17 +175,26 @@ jobs:
       # -------------------------------------------------------------
       - uses: actions/checkout@v4
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: digest-${{ matrix.arch.artifact }}
+
+      - name: Load image digest
+        run: |
+          set -euo pipefail
+          echo "IMAGE_DIGEST=$(cat digest-${{ matrix.arch.artifact }}.txt)" >> "$GITHUB_ENV"
+
       # -------------------------------------------------------------
       # SBOM Generation
       # -------------------------------------------------------------
       - uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
+          image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ env.IMAGE_DIGEST }}
           output-file: sbom.spdx.json
 
       - uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ matrix.service.name }}
+          name: sbom-${{ matrix.service.name }}-${{ matrix.arch.artifact }}
           path: sbom.spdx.json
 
       # -------------------------------------------------------------
@@ -207,7 +202,7 @@ jobs:
       # -------------------------------------------------------------
       - uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ env.IMAGE_DIGEST }}
           severity: HIGH,CRITICAL
           exit-code: '1'
 
@@ -222,5 +217,119 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          IMG=${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ needs.build.outputs.dashboard-digest }}
+          IMG=${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}@${{ env.IMAGE_DIGEST }}
           cosign sign --yes "$IMG"
+
+  push:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - security
+    if: ${{ needs.build.result == 'success' && (env.SKIP_SECURITY == 'true' || needs.security.result == 'success') && (env.PUSH_IMAGES == 'true' || env.PUSH_IMAGES == true) }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        registry:
+          - ghcr.io
+          - docker.io
+
+    steps:
+      # -------------------------------------------------------------
+      # Checkout source
+      # -------------------------------------------------------------
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: digest-linux-amd64
+
+      - name: Load image digest
+        run: |
+          set -euo pipefail
+          echo "IMAGE_DIGEST=$(cat digest-linux-amd64.txt)" >> "$GITHUB_ENV"
+
+      # -------------------------------------------------------------
+      # Auto Tag
+      # -------------------------------------------------------------
+      - name: Generate Auto Tags
+        id: meta
+        uses: ./.github/actions/auto-tag
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.ORG }}/dashboard
+
+      # -------------------------------------------------------------
+      # Login to GHCR
+      # -------------------------------------------------------------
+      - uses: docker/login-action@v3
+        if: matrix.registry == 'ghcr.io'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # -------------------------------------------------------------
+      # Push image to GHCR
+      # -------------------------------------------------------------
+      - name: Push Service Image (GHCR)
+        if: matrix.registry == 'ghcr.io'
+        run: |
+          set -euo pipefail
+          IMAGE="${{ env.REGISTRY }}/${{ env.ORG }}/dashboard"
+          docker pull "$IMAGE@${{ env.IMAGE_DIGEST }}"
+          echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | while read -r TAG; do
+            [ -z "$TAG" ] && continue
+            docker tag "$IMAGE@${{ env.IMAGE_DIGEST }}" "$TAG"
+            docker push "$TAG"
+          done
+
+      # -------------------------------------------------------------
+      # Checkout knowledge content for runtime mount
+      # -------------------------------------------------------------
+      - name: Clone knowledge content
+        if: matrix.registry == 'ghcr.io'
+        run: git clone https://github.com/Cloud-Neutral-Workshop/knowledge.git knowledge
+
+      # -------------------------------------------------------------
+      # Validate runtime mount for blog content
+      # -------------------------------------------------------------
+      - name: Validate blog content mount
+        if: matrix.registry == 'ghcr.io'
+        run: |
+          set -euo pipefail
+          IMAGE="${{ env.REGISTRY }}/${{ env.ORG }}/dashboard@${{ env.IMAGE_DIGEST }}"
+          docker pull "$IMAGE"
+          docker run --rm \
+            -v "${{ github.workspace }}/knowledge/content:/app/dashboard/src/content/blog:ro" \
+            "$IMAGE" \
+            sh -c 'test -d /app/dashboard/src/content/blog'
+
+      # -------------------------------------------------------------
+      # Login to Docker Hub
+      # -------------------------------------------------------------
+      - name: Login to Docker Hub
+        if: matrix.registry == 'docker.io'
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # -------------------------------------------------------------
+      # Re-tag & Push image to Docker Hub
+      # -------------------------------------------------------------
+      - name: Re-tag & Push Service Image (Docker Hub)
+        if: matrix.registry == 'docker.io'
+        env:
+          TARGET_NS: ${{ inputs.dockerhub_namespace || github.event.inputs.dockerhub_namespace || 'cloudneutral' }}
+        run: |
+          set -euo pipefail
+
+          SERVICE="dashboard"
+          ORIGIN_IMG="${{ env.REGISTRY }}/${{ env.ORG }}/${SERVICE}@${{ env.IMAGE_DIGEST }}"
+          TARGET_REPO="docker.io/${TARGET_NS}/${SERVICE}"
+
+          TAG="latest"
+          docker pull "$ORIGIN_IMG"
+          docker tag "$ORIGIN_IMG" "$TARGET_REPO:$TAG"
+          docker push "$TARGET_REPO:$TAG"
