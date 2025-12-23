@@ -29,9 +29,9 @@ COPY . .
 RUN rm -rf src/content/blog/* \
     && mkdir -p src/content/blog
 RUN find . -name "package-lock.json" -delete
-RUN yarn install --immutable
-RUN if [ "$CONTENTLAYER_BUILD" = "true" ]; then yarn contentlayer build; fi
-RUN yarn next build
+RUN yarn install --immutable && \
+    yarn prebuild && \
+    yarn next build
 
 # -------------------------------------------------------
 # Stage 2 — Runtime (极致瘦身)
