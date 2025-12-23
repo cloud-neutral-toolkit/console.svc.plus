@@ -3,6 +3,7 @@
 # =======================================================
 ARG NODE_BUILDER_IMAGE=node:22-bookworm
 ARG NODE_RUNTIME_IMAGE=node:22-slim
+ARG CONTENTLAYER_BUILD=true
 
 # -------------------------------------------------------
 # Stage 1 — Builder (Turbopack + standalone)
@@ -29,6 +30,7 @@ RUN rm -rf src/content/blog/* \
     && mkdir -p src/content/blog
 RUN find . -name "package-lock.json" -delete
 RUN yarn install --immutable
+RUN if [ "$CONTENTLAYER_BUILD" = "true" ]; then yarn contentlayer build; fi
 RUN yarn next build
 
 # -------------------------------------------------------
