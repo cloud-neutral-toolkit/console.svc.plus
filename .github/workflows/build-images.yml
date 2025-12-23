@@ -127,6 +127,7 @@ jobs:
             GO_RUNTIME_IMAGE=${{ env.GO_RUNTIME_IMAGE }}
             NODE_BUILDER_IMAGE=${{ env.NODE_BUILDER_IMAGE }}
             NODE_RUNTIME_IMAGE=${{ env.NODE_RUNTIME_IMAGE }}
+            CONTENTLAYER_BUILD=true
 
       # -------------------------------------------------------------
       # Validate runtime mount for blog content
