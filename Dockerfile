@@ -25,10 +25,8 @@ RUN apt-get update \
     && corepack prepare yarn@4.12.0 --activate
 
 COPY . .
-RUN git clone https://github.com/Cloud-Neutral-Workshop/knowledge.git /tmp/knowledge \
-    && rm -rf src/content/blog/* \
-    && cp -R /tmp/knowledge/content/* src/content/blog/ \
-    && rm -rf /tmp/knowledge
+RUN rm -rf src/content/blog/* \
+    && mkdir -p src/content/blog
 RUN find . -name "package-lock.json" -delete
 RUN yarn install --immutable
 RUN yarn next build
