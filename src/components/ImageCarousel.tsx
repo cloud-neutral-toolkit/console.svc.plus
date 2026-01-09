@@ -10,7 +10,7 @@ export default function ImageCarousel({ items }: { items: ContentItem[] }) {
       {items.map((item) => (
         <article
           key={item.slug}
-          className="min-w-[260px] max-w-[320px] flex-shrink-0 rounded-2xl bg-white/5 p-4 text-slate-100"
+          className="min-w-[260px] max-w-[320px] flex-shrink-0 rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm"
         >
           {item.cover && (
             <div className="overflow-hidden rounded-xl">
@@ -26,7 +26,7 @@ export default function ImageCarousel({ items }: { items: ContentItem[] }) {
             </div>
           )}
           <h3 className="mt-4 text-base font-semibold">{item.title}</h3>
-          {item.equipment && <p className="mt-2 text-xs text-slate-400">{item.equipment}</p>}
+          {item.equipment && <p className="mt-2 text-xs text-slate-500">{item.equipment}</p>}
         </article>
       ))}
     </div>

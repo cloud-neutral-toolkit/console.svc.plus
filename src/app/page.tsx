@@ -16,39 +16,55 @@ export default async function HomePage() {
   ])
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="relative min-h-screen bg-slate-50 text-slate-900">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.18),transparent_35%),radial-gradient(circle_at_80%_0,rgba(253,224,71,0.18),transparent_30%),radial-gradient(circle_at_60%_70%,rgba(148,163,184,0.2),transparent_35%)]" aria-hidden />
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-20">
-        <section className="space-y-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">影像为入口 · 文字为结构</p>
-          <h1 className="text-3xl font-semibold md:text-4xl">一个可长期生长的影像与思想档案</h1>
-          <p className="max-w-2xl text-sm text-slate-300">
+      <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-24">
+        <section className="grid gap-8 rounded-[32px] border border-slate-200 bg-white/80 p-10 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
+          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-slate-500">
+            <span className="rounded-full border border-slate-300 px-3 py-1">Index</span>
+            <span>影像为入口 · 文字为结构</span>
+          </div>
+          <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">一个可长期生长的影像与思想档案</h1>
+          <p className="max-w-2xl text-sm text-slate-600">
             记录城市与山野的影像实践，让每一段图像有清晰的文字骨架。
           </p>
+          <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+            <span className="rounded-full bg-slate-900 px-3 py-1 font-medium text-white">影像聚合</span>
+            <span className="rounded-full border border-slate-200 px-3 py-1">Moments / Image</span>
+            <span className="rounded-full border border-slate-200 px-3 py-1">Theater / Video</span>
+            <span className="rounded-full border border-slate-200 px-3 py-1">Journal / Blog</span>
+          </div>
         </section>
 
         <section className="space-y-6">
-          <div className="flex items-end justify-between">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <h2 className="text-xl font-semibold">行摄笔记</h2>
-            <span className="text-xs text-slate-400">影像为入口，文字为结构</span>
+            <span className="text-xs text-slate-500">影像为入口，文字为结构</span>
           </div>
-          <MasonryGrid posts={walk} />
+          <div className="rounded-[28px] border border-slate-200 bg-white/80 p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+            <MasonryGrid posts={walk} />
+          </div>
         </section>
 
         <section className="space-y-6">
-          <div className="flex items-end justify-between">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <h2 className="text-xl font-semibold">一图一文</h2>
-            <span className="text-xs text-slate-400">胶片式浏览</span>
+            <span className="text-xs text-slate-500">胶片式浏览</span>
           </div>
-          <ImageCarousel items={image} />
+          <div className="rounded-[28px] border border-slate-200 bg-white/80 p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+            <ImageCarousel items={image} />
+          </div>
         </section>
 
         <section className="space-y-6">
-          <div className="flex items-end justify-between">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <h2 className="text-xl font-semibold">一图一视频</h2>
-            <span className="text-xs text-slate-400">剧场式观看</span>
+            <span className="text-xs text-slate-500">剧场式观看</span>
           </div>
-          <VideoGrid items={video} />
+          <div className="rounded-[28px] border border-slate-200 bg-white/80 p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+            <VideoGrid items={video} />
+          </div>
         </section>
       </main>
       <SiteFooter />

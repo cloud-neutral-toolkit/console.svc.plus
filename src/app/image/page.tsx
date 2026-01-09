@@ -15,13 +15,13 @@ export default async function ImagePage() {
   const images = await getContent('image')
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
       <main className="mx-auto w-full max-w-4xl px-6 pb-20">
         <header className="space-y-3 pb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">一图一文</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">一图一文</p>
           <h1 className="text-3xl font-semibold">以影像为入口的单页阅读</h1>
-          <p className="text-sm text-slate-300">每一张照片对应一段文字，让图像延续成叙事。</p>
+          <p className="text-sm text-slate-600">每一张照片对应一段文字，让图像延续成叙事。</p>
         </header>
         <div className="space-y-24">
           {images.map((img) => (
@@ -39,14 +39,14 @@ export default async function ImagePage() {
               )}
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold">{img.title}</h2>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-slate-500">
                   {img.equipment}
                   {img.location ? ` · ${img.location}` : ''}
                 </div>
               </div>
               {img.content && (
                 <div
-                  className="prose prose-invert max-w-none text-sm leading-relaxed prose-p:leading-relaxed"
+                  className="prose max-w-none text-sm leading-relaxed prose-p:leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: renderMarkdownContent(img.content) }}
                 />
               )}

@@ -13,11 +13,11 @@ export default function MasonryGrid({ posts }: { posts: ContentItem[] }) {
   return (
     <div className="columns-1 gap-8 md:columns-2 lg:columns-3">
       {posts.map((post) => (
-        <article key={post.slug} className="mb-8 break-inside-avoid rounded-2xl bg-white/5 p-4 text-slate-100">
+        <article key={post.slug} className="mb-8 break-inside-avoid rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm">
           {post.cover && <img src={post.cover} alt={post.title ?? post.slug} className="mb-4 w-full rounded-xl object-cover" />}
           <h3 className="text-lg font-semibold">{post.title}</h3>
-          {post.location && <p className="mt-1 text-xs text-slate-400">{post.location}</p>}
-          {post.content && <p className="mt-3 text-sm text-slate-300">{buildExcerpt(post.content)}...</p>}
+          {post.location && <p className="mt-1 text-xs text-slate-500">{post.location}</p>}
+          {post.content && <p className="mt-3 text-sm text-slate-600">{buildExcerpt(post.content)}...</p>}
         </article>
       ))}
     </div>

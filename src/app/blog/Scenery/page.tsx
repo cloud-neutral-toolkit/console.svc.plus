@@ -17,13 +17,13 @@ export default async function SceneryPage() {
   const posts = (await getContent('blog')).filter((post) => post.category === 'Scenery')
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
       <main className="mx-auto w-full max-w-6xl px-6 pb-20">
         <header className="space-y-4 pb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">行者影像</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">行者影像</p>
           <h1 className="text-3xl font-semibold">影像先行的动态记录</h1>
-          <p className="text-sm text-slate-300">用影像先行，再用文字收束。</p>
+          <p className="text-sm text-slate-600">用影像先行，再用文字收束。</p>
           <SubNav items={categories} activeHref="/blog/Scenery" />
         </header>
         <div className="grid gap-6 md:grid-cols-2">

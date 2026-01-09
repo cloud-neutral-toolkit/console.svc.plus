@@ -17,13 +17,13 @@ export default async function BlogPage() {
   const posts = await getContent('blog')
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
       <main className="mx-auto w-full max-w-6xl px-6 pb-20">
         <header className="space-y-4 pb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">行摄笔记</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">行摄笔记</p>
           <h1 className="text-3xl font-semibold">以文字整理影像里的路径</h1>
-          <p className="text-sm text-slate-300">深度阅读与影像观察共存的地方。</p>
+          <p className="text-sm text-slate-600">深度阅读与影像观察共存的地方。</p>
           <SubNav items={categories} activeHref="/blog" />
         </header>
         <div className="grid gap-6 md:grid-cols-2">

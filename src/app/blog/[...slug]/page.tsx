@@ -46,19 +46,19 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl px-6 pb-20">
-        <Link href="/blog" className="inline-flex items-center text-xs text-slate-400 hover:text-white">
+        <Link href="/blog" className="inline-flex items-center text-xs text-slate-500 hover:text-slate-900">
           ← 返回行摄笔记
         </Link>
         <header className="mt-6 space-y-3">
           <h1 className="text-3xl font-semibold">{post.title}</h1>
-          {post.date && <p className="text-xs text-slate-400">{post.date}</p>}
+          {post.date && <p className="text-xs text-slate-500">{post.date}</p>}
           {post.cover && <img src={post.cover} alt={post.title ?? post.slug} className="mt-6 rounded-2xl" />}
         </header>
         <article
-          className="prose prose-invert mt-8 max-w-none text-sm leading-relaxed"
+          className="prose mt-8 max-w-none text-sm leading-relaxed"
           dangerouslySetInnerHTML={{ __html: renderMarkdownContent(post.content) }}
         />
       </main>

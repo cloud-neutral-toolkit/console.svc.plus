@@ -7,7 +7,7 @@ type SubNavItem = {
 
 export default function SubNav({ items, activeHref }: { items: SubNavItem[]; activeHref?: string }) {
   return (
-    <nav className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
+    <nav className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
       {items.map((item) => {
         const isActive = activeHref === item.href
         return (
@@ -15,7 +15,7 @@ export default function SubNav({ items, activeHref }: { items: SubNavItem[]; act
             key={item.href}
             href={item.href}
             className={`rounded-full px-4 py-2 transition ${
-              isActive ? 'bg-white/15 text-white' : 'bg-white/5 hover:bg-white/10'
+              isActive ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white hover:bg-slate-50'
             }`}
           >
             {item.label}

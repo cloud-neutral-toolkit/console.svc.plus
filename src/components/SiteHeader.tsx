@@ -10,13 +10,13 @@ const navItems = [
 
 export default function SiteHeader() {
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-8">
-      <Link href="/" className="text-lg font-semibold tracking-wide text-slate-100">
+    <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-10">
+      <Link href="/" className="text-lg font-semibold tracking-[0.18em] text-slate-900">
         行者影像档案
       </Link>
-      <nav className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+      <nav className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href} className="transition hover:text-white">
+          <Link key={item.href} href={item.href} className="transition hover:text-slate-900">
             {item.label}
           </Link>
         ))}
