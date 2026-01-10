@@ -10,7 +10,7 @@ export default function SiteHeader() {
   const { language, setLanguage } = useLanguage()
   const navItems = [
     { label: copy.header.nav.home, href: '/' },
-    { label: copy.header.nav.image, href: '/image' },
+    { label: copy.header.nav.image, href: '/images' },
     { label: copy.header.nav.video, href: '/video' },
     { label: copy.header.nav.blog, href: '/blog' },
     { label: copy.header.nav.about, href: '/about' },
