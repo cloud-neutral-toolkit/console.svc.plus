@@ -29,14 +29,24 @@ export default function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <button
-          type="button"
-          onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
-          className="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
-          aria-label={language === 'zh' ? 'Switch to English' : '切换到中文'}
-        >
-          {language === 'zh' ? 'EN' : '中文'}
-        </button>
+        <div className="flex items-center rounded-full border border-slate-200 bg-white/80 p-0.5 text-xs font-semibold text-slate-500">
+          <button
+            type="button"
+            onClick={() => setLanguage('zh')}
+            className={`rounded-full px-3 py-1 transition ${language === 'zh' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'}`}
+            aria-pressed={language === 'zh'}
+          >
+            中文
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage('en')}
+            className={`rounded-full px-3 py-1 transition ${language === 'en' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'}`}
+            aria-pressed={language === 'en'}
+          >
+            EN
+          </button>
+        </div>
       </div>
     </header>
   )
