@@ -47,7 +47,7 @@ export default function VideoGrid({ items, variant = 'full' }: { items: ContentI
         ]
   const [pageIndex, setPageIndex] = useState(0)
   const totalPages = Math.max(1, Math.ceil(videoItems.length / PAGE_SIZE))
-  const currentItems = useMemo(() => {
+  const pagedItems = useMemo(() => {
     const start = pageIndex * PAGE_SIZE
     return videoItems.slice(start, start + PAGE_SIZE)
   }, [videoItems, pageIndex])
@@ -109,27 +109,29 @@ export default function VideoGrid({ items, variant = 'full' }: { items: ContentI
           </div>
         ))}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-[#747775]">
-        <span>
-          {copy.video.pageLabel ?? 'Page'} {pageIndex + 1} / {totalPages}
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
-            disabled={!canGoBack}
-          >
-            {copy.video.prev ?? '上一页'}
-          </button>
-          <button
-            type="button"
-            className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setPageIndex((prev) => Math.min(totalPages - 1, prev + 1))}
-            disabled={!canGoForward}
-          >
-            {copy.video.next ?? '下一页'}
-          </button>
+      {variant === 'full' && (
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-[#747775]">
+          <span>
+            {copy.video.pageLabel ?? 'Page'} {pageIndex + 1} / {totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
+              disabled={!canGoBack}
+            >
+              {copy.video.prev ?? '上一页'}
+            </button>
+            <button
+              type="button"
+              className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setPageIndex((prev) => Math.min(totalPages - 1, prev + 1))}
+              disabled={!canGoForward}
+            >
+              {copy.video.next ?? '下一页'}
+            </button>
+          </div>
         </div>
       )}
     </div>
