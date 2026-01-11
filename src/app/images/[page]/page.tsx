@@ -15,10 +15,11 @@ export async function generateStaticParams() {
 export default async function ImagesPagedPage({
   params,
 }: {
-  params: { page: string }
+  params: Promise<{ page: string }>
 }) {
   const files = await getImageFiles()
-  const pageNumber = Number.parseInt(params.page, 10)
+  const { page } = await params
+  const pageNumber = Number.parseInt(page, 10)
   const { currentPage, totalPages, totalImages, pagedFiles } = paginateImages(
     files,
     Number.isNaN(pageNumber) ? 1 : pageNumber,
