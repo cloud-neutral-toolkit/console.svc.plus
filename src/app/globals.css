@@ -30,9 +30,9 @@
   --color-primary-muted: #f0f4ff;
   --color-primary-border: #d6e0ff;
   --color-primary-foreground: #ffffff;
-  --color-accent: #254edb;
-  --color-accent-muted: #e3e9ff;
-  --color-accent-foreground: #162a6b;
+  --color-accent: #1f1f1f;
+  --color-accent-muted: #f0f2f5;
+  --color-accent-foreground: #1f1f1f;
   --color-success: #16a34a;
   --color-success-muted: #dcfce7;
   --color-success-foreground: #166534;
@@ -53,11 +53,11 @@
   --color-badge-muted: #f3f4f6;
   --color-badge-foreground: #1f2937;
 
-  --gradient-app-from: #f5f8ff;
-  --gradient-app-via: #eef3ff;
-  --gradient-app-to: #f4f9ff;
-  --gradient-primary-from: #3366ff;
-  --gradient-primary-to: #254edb;
+  --gradient-app-from: #f9f9f9;
+  --gradient-app-via: #f0f2f5;
+  --gradient-app-to: #f9f9f9;
+  --gradient-primary-from: #1f1f1f;
+  --gradient-primary-to: #3b3b3b;
 
   --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.08);

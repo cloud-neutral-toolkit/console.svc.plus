@@ -8,7 +8,9 @@ import type { ContentItem } from '@/lib/content'
 
 const PAGE_SIZE = 12
 
-export default function VideoGrid({ items }: { items: ContentItem[] }) {
+type VideoGridVariant = 'overview' | 'full'
+
+export default function VideoGrid({ items, variant = 'full' }: { items: ContentItem[]; variant?: VideoGridVariant }) {
   const copy = useOnwalkCopy()
   const videoItems: Array<ContentItem & { tone?: string }> =
     items.length > 0
@@ -50,14 +52,15 @@ export default function VideoGrid({ items }: { items: ContentItem[] }) {
     return videoItems.slice(start, start + PAGE_SIZE)
   }, [videoItems, pageIndex])
 
+  const currentItems = variant === 'overview' ? items.slice(0, 4) : pagedItems
   const canGoBack = pageIndex > 0
   const canGoForward = pageIndex < totalPages - 1
 
   useEffect(() => {
-    if (pageIndex > totalPages - 1) {
+    if (variant === 'full' && pageIndex > totalPages - 1) {
       setPageIndex(Math.max(0, totalPages - 1))
     }
-  }, [pageIndex, totalPages])
+  }, [pageIndex, totalPages, variant])
 
   return (
     <div className="space-y-8">
@@ -128,7 +131,7 @@ export default function VideoGrid({ items }: { items: ContentItem[] }) {
             {copy.video.next ?? '下一页'}
           </button>
         </div>
-      </div>
+      )}
     </div>
   )
 }
