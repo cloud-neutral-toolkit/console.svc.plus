@@ -11,7 +11,7 @@ export const metadata = {
   description: onwalkSeoDescription,
 }
 
-const GA_ID = 'G-Z621W698Q6'
+const GA_ID = 'G-P0FR8RGH87'
 
 const htmlAttributes = { lang: 'zh' }
 const bodyClassName = 'bg-[var(--color-background)] text-[var(--color-text)]'
