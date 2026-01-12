@@ -18,7 +18,7 @@ import SiteHeader from '@/components/SiteHeader'
 import VideoGrid from '@/components/VideoGrid'
 import HomeHero from '@/components/onwalk/HomeHero'
 import HomeSectionHeader from '@/components/onwalk/HomeSectionHeader'
-import { getContent } from '@/lib/content'
+import { getContent, sortContentByDate } from '@/lib/content'
 import { getLatestPublicImages, getLatestPublicVideos } from '@/lib/publicMedia'
 
 export default async function HomePage() {
@@ -27,15 +27,7 @@ export default async function HomePage() {
     getLatestPublicImages(5),
     getLatestPublicVideos(6),
   ])
-  const latestBlogs = [...blogPosts]
-    .sort((a, b) => {
-      const aTime = a.date ? new Date(a.date).getTime() : 0
-      const bTime = b.date ? new Date(b.date).getTime() : 0
-      const safeATime = Number.isNaN(aTime) ? 0 : aTime
-      const safeBTime = Number.isNaN(bTime) ? 0 : bTime
-      return safeBTime - safeATime
-    })
-    .slice(0, 3)
+  const latestBlogs = sortContentByDate(blogPosts).slice(0, 3)
 
   return (
     <div className="relative min-h-screen bg-[#f9f9f9] text-[#1f1f1f]">

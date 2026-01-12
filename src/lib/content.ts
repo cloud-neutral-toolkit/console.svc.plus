@@ -89,3 +89,16 @@ export const getContentSlugs = cache(async (type: ContentType): Promise<string[]
   const items = await getContent(type)
   return items.map((item) => item.slug)
 })
+
+export function sortContentByDate(items: ContentItem[]): ContentItem[] {
+  return [...items].sort((a, b) => {
+    const aTime = a.date ? new Date(a.date).getTime() : 0
+    const bTime = b.date ? new Date(b.date).getTime() : 0
+    const safeATime = Number.isNaN(aTime) ? 0 : aTime
+    const safeBTime = Number.isNaN(bTime) ? 0 : bTime
+    if (safeATime === safeBTime) {
+      return a.slug.localeCompare(b.slug)
+    }
+    return safeBTime - safeATime
+  })
+}

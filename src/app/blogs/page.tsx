@@ -8,11 +8,11 @@ import PostCard from '@/components/PostCard'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import BlogHeader from '@/components/onwalk/BlogHeader'
-import { getContent } from '@/lib/content'
+import { getContent, sortContentByDate } from '@/lib/content'
 
 const PAGE_SIZE = 6
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '博客 | Onwalk',
   description: 'Onwalk 博客，记录行走、摄影与城市观察的故事与更新。',
   alternates: {
@@ -24,28 +24,15 @@ type PageProps = {
   searchParams?: Promise<{ page?: string }> | { page?: string }
 }
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+async function resolvePagination(
+  searchParams: PageProps['searchParams'],
+  totalPosts: number,
+) {
   const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? {}
   const page = Number(resolvedSearchParams.page ?? 1)
   const safePage = Number.isFinite(page) && page > 0 ? page : 1
-  const canonicalSuffix = safePage > 1 ? `?page=${safePage}` : ''
-
-  return {
-    ...metadata,
-    alternates: {
-      canonical: `/blogs${canonicalSuffix}`,
-    },
-  }
-}
-
-export default async function BlogPage({ searchParams }: PageProps) {
-  const posts = await getContent('blog')
-  const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? {}
   const totalPages = Math.max(1, Math.ceil(totalPosts / PAGE_SIZE))
-  const currentPage = Math.min(
-    Math.max(Number(resolvedSearchParams.page ?? 1) || 1, 1),
-    totalPages,
-  )
+  const currentPage = Math.min(safePage, totalPages)
 
   return { currentPage, totalPages }
 }
@@ -53,7 +40,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
 export async function generateMetadata({
   searchParams,
 }: PageProps): Promise<Metadata> {
-  const posts = await getContent('blog')
+  const posts = sortContentByDate(await getContent('blog'))
   const { currentPage, totalPages } = await resolvePagination(
     searchParams,
     posts.length,
@@ -75,6 +62,7 @@ export async function generateMetadata({
   }
 
   return {
+    ...baseMetadata,
     alternates: {
       canonical:
         currentPage === 1 ? basePath : `${basePath}?page=${currentPage}`,
@@ -84,11 +72,8 @@ export async function generateMetadata({
 }
 
 export default async function BlogPage({ searchParams }: PageProps) {
-  const posts = await getContent('blog')
-  const { currentPage, totalPages } = await resolvePagination(
-    searchParams,
-    posts.length,
-  )
+  const posts = sortContentByDate(await getContent('blog'))
+  const { currentPage, totalPages } = await resolvePagination(searchParams, posts.length)
   const startIndex = (currentPage - 1) * PAGE_SIZE
   const pagedPosts = posts.slice(startIndex, startIndex + PAGE_SIZE)
 
