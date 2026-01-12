@@ -20,6 +20,7 @@ public/dl-index/
 
 # Contentlayer cache
 ui/docs/.contentlayer/
+src/content/about/
 src/content/blog/
 src/content/workshop/
 src/lib/workshopContent.ts
