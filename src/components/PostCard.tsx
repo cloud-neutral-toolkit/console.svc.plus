@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 import type { ContentItem } from '@/lib/content'
 
 function buildExcerpt(content: string): string {
@@ -13,7 +15,16 @@ export default function PostCard({ post }: { post: ContentItem }) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm">
       <div className="flex flex-col gap-4">
-        {post.cover && <img src={post.cover} alt={post.title ?? post.slug} className="h-48 w-full rounded-xl object-cover" />}
+        {post.cover && (
+          <Image
+            src={post.cover}
+            alt={post.title ?? post.slug}
+            width={1200}
+            height={800}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="h-48 w-full rounded-xl object-cover"
+          />
+        )}
         <div>
           <h2 className="text-xl font-semibold">{post.title}</h2>
           {post.date && <p className="mt-1 text-xs text-slate-500">{post.date}</p>}

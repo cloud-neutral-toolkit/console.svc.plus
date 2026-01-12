@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import SiteFooter from '@/components/SiteFooter'
@@ -48,11 +49,13 @@ export default function ImagesGallery({
                   key={filename}
                   className="mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]"
                 >
-                  <img
+                  <Image
                     src={`/images/${filename}`}
                     alt={formatImageTitle(filename)}
+                    width={1200}
+                    height={800}
+                    sizes="(max-width: 1024px) 100vw, 33vw"
                     className="h-auto w-full object-cover"
-                    loading="lazy"
                   />
                   <div className="space-y-2 px-4 pb-4 pt-3">
                     <h2 className="text-base font-semibold text-slate-900">

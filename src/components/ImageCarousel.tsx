@@ -6,35 +6,7 @@ const blurDataURL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiMyM2I0YmUiLz48L3N2Zz4='
 
 export default function ImageCarousel({ items }: { items: ContentItem[] }) {
-  const galleryItems: Array<ContentItem & { tone?: string }> =
-    items.length > 0
-      ? items
-      : [
-          {
-            slug: 'urban-geometry',
-            title: 'Urban Geometry',
-            content: '',
-            tone: 'from-slate-200 via-slate-100 to-slate-50',
-          },
-          {
-            slug: 'misty-forest',
-            title: 'Misty Forest',
-            content: '',
-            tone: 'from-emerald-100 via-green-50 to-emerald-50',
-          },
-          {
-            slug: 'night-contrast',
-            title: 'Night Contrast',
-            content: '',
-            tone: 'from-slate-300 via-slate-200 to-slate-100',
-          },
-          {
-            slug: 'soft-light',
-            title: 'Soft Light',
-            content: '',
-            tone: 'from-amber-100 via-orange-50 to-amber-50',
-          },
-        ]
+  const galleryItems: Array<ContentItem & { tone?: string }> = items
 
   return (
     <div className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 pt-2">

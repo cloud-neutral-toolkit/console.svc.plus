@@ -11,32 +11,7 @@ function buildExcerpt(content: string): string {
 }
 
 export default function MasonryGrid({ posts }: { posts: ContentItem[] }) {
-  const postItems =
-    posts.length > 0
-      ? posts
-      : [
-          {
-            slug: 'intelligent-notes',
-            title: '智性笔记：街区微光',
-            date: '2024-06-20',
-            content:
-              '将步行路径拆解成可视化的纹理，记录街区的影子、风声与建筑交叠出的安静秩序。',
-          },
-          {
-            slug: 'edge-of-city',
-            title: '城市边缘的呼吸',
-            date: '2024-05-28',
-            content:
-              '在被忽略的街角寻找光与结构的对比，让摄影成为一种温柔而克制的观察方式。',
-          },
-          {
-            slug: 'quiet-morning',
-            title: '清晨步行手记',
-            date: '2024-05-12',
-            content:
-              '一段缓慢的步伐，记录光线在玻璃上的滑动，以及被时间留下的细节。',
-          },
-        ]
+  const postItems = posts
 
   return (
     <div className="space-y-4">

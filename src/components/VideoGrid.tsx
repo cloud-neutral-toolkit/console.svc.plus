@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -21,39 +22,7 @@ export default function VideoGrid({
   columns?: VideoGridColumns
 }) {
   const copy = useOnwalkCopy()
-  const videoItems: Array<ContentItem & { tone?: string }> =
-    items.length > 0
-      ? items
-      : [
-          {
-            slug: 'city-light',
-            title: 'City Light',
-            duration: '04:20',
-            content: '',
-            tone: 'from-slate-200 via-slate-100 to-slate-50',
-          },
-          {
-            slug: 'morning-walk',
-            title: 'Morning Walk',
-            duration: '02:58',
-            content: '',
-            tone: 'from-emerald-100 via-green-50 to-emerald-50',
-          },
-          {
-            slug: 'ocean-silence',
-            title: 'Ocean Silence',
-            duration: '05:12',
-            content: '',
-            tone: 'from-sky-100 via-blue-50 to-sky-50',
-          },
-          {
-            slug: 'trail-notes',
-            title: 'Trail Notes',
-            duration: '03:46',
-            content: '',
-            tone: 'from-amber-100 via-orange-50 to-amber-50',
-          },
-        ]
+  const videoItems = items
   const [pageIndex, setPageIndex] = useState(0)
   const totalPages = Math.max(1, Math.ceil(videoItems.length / PAGE_SIZE))
   const pagedItems = useMemo(() => {
@@ -61,7 +30,7 @@ export default function VideoGrid({
     return videoItems.slice(start, start + PAGE_SIZE)
   }, [videoItems, pageIndex])
 
-  const currentItems = variant === 'overview' ? items.slice(0, 4) : pagedItems
+  const currentItems = variant === 'overview' ? videoItems.slice(0, 4) : pagedItems
   const canGoBack = pageIndex > 0
   const canGoForward = pageIndex < totalPages - 1
 
@@ -92,9 +61,15 @@ export default function VideoGrid({
                   onMouseLeave={(event) => event.currentTarget.pause()}
                 />
               ) : item.poster ? (
-                <img src={item.poster} alt={item.title ?? item.slug} className="h-48 w-full object-cover sm:h-56" />
-              ) : item.tone ? (
-                <div className={`h-48 w-full bg-gradient-to-br sm:h-56 ${item.tone}`} />
+                <Image
+                  src={item.poster}
+                  alt={item.title ?? item.slug}
+                  width={1280}
+                  height={720}
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  unoptimized
+                  className="h-48 w-full object-cover sm:h-56"
+                />
               ) : (
                 <div className="flex h-48 items-center justify-center text-sm text-[#747775]">{copy.video.empty}</div>
               )}

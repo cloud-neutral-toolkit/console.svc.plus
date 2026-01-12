@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 import type { BillingPaymentMethod } from '@modules/products/registry'
@@ -97,7 +98,14 @@ export default function CryptoBillingWidget({
 
       {qrCode ? (
         <div className="mt-3 rounded-lg bg-white p-3">
-          <img src={qrCode} alt={`${label} QR`} className="mx-auto h-36 w-36 object-contain" />
+          <Image
+            src={qrCode}
+            alt={`${label} QR`}
+            width={144}
+            height={144}
+            unoptimized
+            className="mx-auto h-36 w-36 object-contain"
+          />
         </div>
       ) : null}
 

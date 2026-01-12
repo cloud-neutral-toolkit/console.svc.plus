@@ -1,6 +1,8 @@
 export const dynamic = 'error'
 export const revalidate = false
 
+import Link from 'next/link'
+
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
 
 export const metadata = {
@@ -17,13 +19,23 @@ import VideoGrid from '@/components/VideoGrid'
 import HomeHero from '@/components/onwalk/HomeHero'
 import HomeSectionHeader from '@/components/onwalk/HomeSectionHeader'
 import { getContent } from '@/lib/content'
+import { getLatestPublicImages, getLatestPublicVideos } from '@/lib/publicMedia'
 
 export default async function HomePage() {
-  const [walk, image, video] = await Promise.all([
-    getContent('walk'),
-    getContent('image'),
-    getContent('video'),
+  const [blogPosts, latestImages, latestVideos] = await Promise.all([
+    getContent('blog'),
+    getLatestPublicImages(5),
+    getLatestPublicVideos(6),
   ])
+  const latestBlogs = [...blogPosts]
+    .sort((a, b) => {
+      const aTime = a.date ? new Date(a.date).getTime() : 0
+      const bTime = b.date ? new Date(b.date).getTime() : 0
+      const safeATime = Number.isNaN(aTime) ? 0 : aTime
+      const safeBTime = Number.isNaN(bTime) ? 0 : bTime
+      return safeBTime - safeATime
+    })
+    .slice(0, 3)
 
   return (
     <div className="relative min-h-screen bg-[#f9f9f9] text-[#1f1f1f]">
@@ -34,21 +46,29 @@ export default async function HomePage() {
         <section className="space-y-6">
           <HomeSectionHeader section="blog" />
           <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
-            <MasonryGrid posts={walk} />
+            <MasonryGrid posts={latestBlogs} />
           </div>
         </section>
 
         <section className="space-y-6">
           <HomeSectionHeader section="image" />
           <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
-            <ImageCarousel items={image} />
+            <ImageCarousel items={latestImages} />
           </div>
         </section>
 
         <section className="space-y-6">
           <HomeSectionHeader section="video" />
           <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
-            <VideoGrid items={video} />
+            <VideoGrid items={latestVideos} columns={3} />
+          </div>
+          <div className="flex">
+            <Link
+              href="/videos"
+              className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-[#1f1f1f] transition hover:border-gray-400"
+            >
+              更多
+            </Link>
           </div>
         </section>
       </main>
