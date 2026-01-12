@@ -4,18 +4,28 @@ export const revalidate = false
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
-import WorkshopArticle from '@/components/workshop/WorkshopArticle'
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
-import { allWorkshops } from 'contentlayer/generated'
 
-export const generateStaticParams = async () => allWorkshops.map((workshop) => ({ slug: workshop.slug }))
+type WorkshopEntry = {
+  slug: string
+  title: string
+  summary: string
+  level?: string
+  duration?: string
+  updatedAt?: string
+  body?: string
+}
+
+const workshops: WorkshopEntry[] = []
+
+export const generateStaticParams = async () => []
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string }
 }): Promise<Metadata> {
-  const workshop = allWorkshops.find((entry) => entry.slug === params.slug)
+  const workshop = workshops.find((entry) => entry.slug === params.slug)
   if (!workshop) {
     return {
       title: onwalkSeoTitle,
@@ -29,7 +39,7 @@ export async function generateMetadata({
 }
 
 export default function WorkshopDetailPage({ params }: { params: { slug: string } }) {
-  const workshop = allWorkshops.find((entry) => entry.slug === params.slug)
+  const workshop = workshops.find((entry) => entry.slug === params.slug)
   if (!workshop) {
     notFound()
   }
@@ -49,7 +59,11 @@ export default function WorkshopDetailPage({ params }: { params: { slug: string 
         </header>
 
         <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
-          <WorkshopArticle code={workshop.body.code} />
+          {workshop.body ? (
+            <div className="prose max-w-none text-sm leading-relaxed text-brand-heading/80">{workshop.body}</div>
+          ) : (
+            <div className="text-sm text-brand-heading/70">Workshop content will appear here once published.</div>
+          )}
         </div>
       </div>
     </main>

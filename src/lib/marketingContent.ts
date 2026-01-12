@@ -154,7 +154,7 @@ const CONTACT_PANEL: ContactPanelContent = {
       description: '了解商业产品和专业支持服务',
       bodyHtml: '关注 XControl 官方公众号，解锁上云实践案例与专家分享。',
       qrValue: 'https://xcontrol.cloud/contact/wechat-official',
-      qrImage: 'https://dl.svc.plus/images/contact/wechat-official.jpg',
+      qrImage: 'https://dl.onwalk.net/images/contact/wechat-official.jpg',
     },
     {
       slug: 'wechat-group',
@@ -163,7 +163,7 @@ const CONTACT_PANEL: ContactPanelContent = {
       description: '与产品团队和同行实时交流',
       bodyHtml: '添加 XControl 社区小助手，获取最新活动信息并加入兴趣小组。',
       qrValue: 'https://xcontrol.cloud/contact/wechat-community',
-      qrImage: 'https://dl.svc.plus/images/contact/wechat-group.jpg',
+      qrImage: 'https://dl.onwalk.net/images/contact/wechat-group.jpg',
     },
     {
       slug: 'support',

@@ -638,7 +638,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
     download: {
       home: {
         title: 'Download Center',
-        description: 'Browse offline packages, releases, and other curated resources hosted on dl.svc.plus.',
+        description: 'Browse offline packages, releases, and other curated resources hosted on dl.onwalk.net.',
         stats: {
           categories: 'Top-level categories',
           collections: 'Resource collections',
@@ -681,7 +681,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         infoTitle: 'Directory info',
         infoPath: 'Path',
         infoSource: 'Source',
-        infoNotice: 'Data sourced from dl.svc.plus.',
+        infoNotice: 'Data sourced from dl.onwalk.net.',
       },
       fileTable: {
         sortName: 'Name',
@@ -1301,7 +1301,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
     download: {
       home: {
         title: '下载中心',
-        description: '浏览托管于 dl.svc.plus 的离线安装包、发布版本和精选资源。',
+        description: '浏览托管于 dl.onwalk.net 的离线安装包、发布版本和精选资源。',
         stats: {
           categories: '顶级分类',
           collections: '资源集合',
@@ -1344,7 +1344,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         infoTitle: '目录信息',
         infoPath: '路径',
         infoSource: '来源',
-        infoNotice: '数据来源于 dl.svc.plus。',
+        infoNotice: '数据来源于 dl.onwalk.net。',
       },
       fileTable: {
         sortName: '名称',

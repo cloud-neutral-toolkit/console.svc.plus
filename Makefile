@@ -94,10 +94,10 @@ build: init
 sync-dl-index:
 	@echo "📥 Fetching download & docs manifests..."
 	@mkdir -p public/dl-index
-	@if ! curl -fsSL https://dl.svc.plus/manifest.json -o public/dl-index/artifacts-manifest.json; then \
+	@if ! curl -fsSL https://dl.onwalk.net/manifest.json -o public/dl-index/artifacts-manifest.json; then \
             echo "⚠️  Unable to download artifacts manifest. Using existing snapshot."; \
 			fi
-	@if ! curl -fsSL https://dl.svc.plus/docs/all.json -o public/dl-index/docs-manifest.json; then \
+	@if ! curl -fsSL https://dl.onwalk.net/docs/all.json -o public/dl-index/docs-manifest.json; then \
             echo "⚠️  Unable to download docs manifest. Using existing snapshot."; \
     fi
 

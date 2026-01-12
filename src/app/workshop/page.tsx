@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 
-import WorkshopCard from '@/components/workshop/WorkshopCard'
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
-import { allWorkshops } from 'contentlayer/generated'
+import Link from 'next/link'
 
 export const dynamic = 'error'
 export const revalidate = false
@@ -12,13 +11,17 @@ export const metadata: Metadata = {
   description: onwalkSeoDescription,
 }
 
+type WorkshopEntry = {
+  slug: string
+  title: string
+  summary: string
+  level?: string
+  duration?: string
+  updatedAt?: string
+}
+
 export default function WorkshopIndexPage() {
-  const workshops = [...allWorkshops].sort((a, b) => {
-    const aDate = a.updatedAt ? Date.parse(a.updatedAt) : 0
-    const bDate = b.updatedAt ? Date.parse(b.updatedAt) : 0
-    if (aDate && bDate && aDate !== bDate) return bDate - aDate
-    return a.title.localeCompare(b.title)
-  })
+  const workshops: WorkshopEntry[] = []
 
   return (
     <main className="bg-brand-surface px-6 py-12 sm:px-8">
@@ -38,7 +41,28 @@ export default function WorkshopIndexPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {workshops.map((workshop) => (
-              <WorkshopCard key={workshop.slug} workshop={workshop} />
+              <Link
+                key={workshop.slug}
+                href={`/workshop/${workshop.slug}`}
+                className="rounded-2xl border border-brand-border bg-white p-6 text-left shadow-sm transition hover:shadow-md"
+              >
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">Workshop</p>
+                    <h2 className="text-lg font-semibold text-brand-heading">{workshop.title}</h2>
+                    <p className="text-sm text-brand-heading/80">{workshop.summary}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-brand-heading/70">
+                    {workshop.level ? (
+                      <span className="rounded-full bg-brand-surface px-3 py-1 font-semibold text-brand-heading">
+                        {workshop.level}
+                      </span>
+                    ) : null}
+                    {workshop.duration ? <span>{workshop.duration}</span> : null}
+                    {workshop.updatedAt ? <span suppressHydrationWarning>Updated {workshop.updatedAt}</span> : null}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

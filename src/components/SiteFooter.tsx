@@ -24,7 +24,7 @@ export default function SiteFooter() {
     {
       label: copy.footer.socials.wechat,
       icon: MessageCircle,
-      qrImage: 'https://dl.svc.plus/images/contact/wechat-official.jpg',
+      qrImage: 'https://dl.onwalk.net/images/contact/wechat-official.jpg',
       qrAlt: copy.footer.socials.wechatQrAlt,
       qrHint: copy.footer.socials.wechatQrHint,
     },

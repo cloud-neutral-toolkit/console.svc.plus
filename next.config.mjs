@@ -16,7 +16,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dl.svc.plus',
+        hostname: 'dl.onwalk.net',
       },
       {
         protocol: 'https',
