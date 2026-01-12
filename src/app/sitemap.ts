@@ -15,7 +15,7 @@ type ContentSection = {
 const sections: ContentSection[] = [
   {
     folder: 'blog',
-    route: 'blog',
+    route: 'blogs',
     changeFrequency: 'weekly',
     priority: 0.7,
   },
@@ -40,7 +40,7 @@ const indexEntries: MetadataRoute.Sitemap = [
     priority: 1.0,
   },
   {
-    url: `${baseUrl}/blog/`,
+    url: `${baseUrl}/blogs/`,
     changeFrequency: 'weekly',
     priority: 0.9,
   },
