@@ -1,11 +1,10 @@
 SHELL := /bin/bash
 NODE_VERSION := $(shell node -v 2>/dev/null || echo "Not Found")
-YARN := $(shell command -v yarn 2>/dev/null)
 MAGICK := $(shell command -v magick 2>/dev/null || command -v convert 2>/dev/null)
 OS := $(shell uname -s)
 YARN_VERSION ?= 4.12.0
 
-.PHONY: init ensure-deps dev build export clean info icon start stop restart test sync-dl-index
+.PHONY: init ensure-deps dev build export clean info icon test
 
 icon:
 	@echo "🎨 Generating favicon and icon images..."
@@ -30,32 +29,13 @@ init:
 	@corepack enable && corepack prepare yarn@$(YARN_VERSION) --activate
 	@echo "🧹 Removing npm lockfiles to mirror Docker build..."
 	@find . -name "package-lock.json" -delete
-	@if [ -z "$(YARN)" ]; then \
-		 echo "⚠️  Yarn not found. Attempting to install..."; \
-		 if [ "$(OS)" = "Darwin" ]; then \
-			 if command -v brew >/dev/null 2>&1; then \
-				 brew install yarn; \
-			 else \
-				 echo "❌ Homebrew not found. Please install Yarn manually."; exit 1; \
-			 fi; \
-		 elif [ -f /etc/debian_version ]; then \
-			 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && \
-			 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list && \
-			 sudo apt update && sudo apt install -y yarn; \
-		 elif [ -f /etc/redhat-release ]; then \
-			 curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo && \
-			 sudo yum install -y yarn; \
-		 else \
-			 echo "❌ Unsupported OS. Please install Yarn manually."; exit 1; \
-		 fi; \
-	fi
-	yarn config set npmRegistryServer https://registry.npmmirror.com
-	yarn install --immutable
+	@yarn config set npmRegistryServer https://registry.npmmirror.com
+	@yarn install --immutable
 
 ensure-deps:
-	@if [ ! -f .yarn/install-state.gz ] || [ ! -d node_modules ] || [ ! -d node_modules/sanitize-html ]; then \
+	@if [ ! -d node_modules ]; then \
 		echo "📦 Installing dependencies..."; \
-		yarn install --immutable; \
+		$(MAKE) init; \
 	fi
 
 dev: ensure-deps
@@ -63,43 +43,15 @@ dev: ensure-deps
 	@echo "/editor is proxied to an external NeuraPress front-end at http://localhost:4000."
 	yarn dev -p 3001
 
-start:
-	@echo "🚀 Starting Next.js dev server (dashboard) in background..."
-	@nohup yarn dev -p 3001 >/tmp/dashboard.log 2>&1 & echo $$! > dashboard.pid
-
-stop:
-	@echo "🛑 Stopping Next.js dev server (dashboard)..."
-	@if [ -f dashboard.pid ]; then \
-	        kill `cat dashboard.pid` >/dev/null 2>&1 || true; \
-	        rm dashboard.pid; \
-	else \
-	        echo "No running server"; \
-	fi
-
-restart: stop start
-
 test:
 	@echo "🔍 Running tests..."
 	@yarn test || echo "No tests configured"
 
 build: init
-	yarn config set npmRegistryServer https://registry.npmmirror.com
-	@if [ -z "$(SKIP_SYNC)" ]; then \
-		 $(MAKE) sync-dl-index; \
-	fi
+	@yarn config set npmRegistryServer https://registry.npmmirror.com
 	@echo "🔨 Building dashboard..."
 	yarn prebuild
 	NEXT_TELEMETRY_DISABLED=1 NEXT_PRIVATE_TURBOPACK=1 yarn next build
-
-sync-dl-index:
-	@echo "📥 Fetching download & docs manifests..."
-	@mkdir -p public/dl-index
-	@if ! curl -fsSL https://dl.onwalk.net/manifest.json -o public/dl-index/artifacts-manifest.json; then \
-            echo "⚠️  Unable to download artifacts manifest. Using existing snapshot."; \
-			fi
-	@if ! curl -fsSL https://dl.onwalk.net/docs/all.json -o public/dl-index/docs-manifest.json; then \
-            echo "⚠️  Unable to download docs manifest. Using existing snapshot."; \
-    fi
 
 export:
 	@echo "📦 Exporting dashboard static site to ./out ..."
