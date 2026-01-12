@@ -68,9 +68,9 @@ export default function SiteFooter() {
             )
           })}
         </div>
-        <div className="flex flex-col gap-2 text-sm text-slate-500">
+        <div className="flex flex-col gap-2 text-center text-sm text-slate-500">
           <p>{copy.footer.tagline}</p>
-          <p>{copy.footer.description}</p>
+          {copy.footer.description ? <p>{copy.footer.description}</p> : null}
         </div>
       </div>
     </footer>

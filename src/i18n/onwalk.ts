@@ -115,8 +115,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       },
     },
     footer: {
-      tagline: '行者影像与思想档案 · 影像为入口，文字为结构。',
-      description: '影像与文字均来自个人行摄记录，持续更新。',
+      tagline: '影像为入口，文字为结构。记录个人多年的行走拍摄，文字与结构由 AI 协作整理。',
+      description: '',
       socials: {
         twitter: 'X (Twitter)',
         xiaohongshu: '小红书',
@@ -133,9 +133,9 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
         description: '记录城市与山野的影像实践，让每一段图像有清晰的文字骨架。',
         chips: {
           featured: '影像聚合',
-          moments: 'Moments / Image',
-          theater: 'Theater / Video',
-          journal: 'Journal / Blog',
+          moments: 'Moments',
+          theater: 'Theater',
+          journal: 'Journal',
         },
       },
       sections: {
@@ -212,14 +212,14 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       title: 'Onwalk Image Archive',
       nav: {
         home: 'Home',
-        image: 'Moments / Image',
-        video: 'Theater / Video',
-        blog: 'Journal / Blog',
+        image: 'Moments',
+        video: 'Theater',
+        blog: 'Journal',
         about: 'About',
       },
     },
     footer: {
-      tagline: 'Onwalk Image & Idea Archive · Images as the entry, words as the structure.',
+      tagline: 'Images as the entry point, words as the structure — personal walking and photography, with text shaped in collaboration with AI.',
       description: 'Images and words come from personal journeys, updated regularly.',
       socials: {
         twitter: 'X (Twitter)',
@@ -237,9 +237,9 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
         description: 'Documenting visual journeys across cities and wilds, giving each image a clear textual frame.',
         chips: {
           featured: 'Image Collection',
-          moments: 'Moments / Image',
-          theater: 'Theater / Video',
-          journal: 'Journal / Blog',
+          moments: 'Moments',
+          theater: 'Theater',
+          journal: 'Journal',
         },
       },
       sections: {
@@ -248,11 +248,11 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
           subtitle: 'Images lead, words structure.',
         },
         image: {
-          title: 'Moments / Image',
+          title: 'Moments',
           subtitle: 'Filmstrip browsing',
         },
         video: {
-          title: 'Theater / Video',
+          title: 'Theater',
           subtitle: 'Theater-style viewing',
         },
       },
@@ -297,12 +297,12 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       backLabel: '← Back to Photo Journal',
     },
     image: {
-      eyebrow: 'Moments / Image',
+      eyebrow: 'Moments',
       title: 'Single-page reading led by images',
       subtitle: 'Each photo pairs with a passage so images carry on the narrative.',
     },
     video: {
-      eyebrow: 'Theater / Video',
+      eyebrow: 'Theater',
       title: 'Image Theater',
       subtitle: 'Short films add breath and rhythm to the stills.',
       empty: 'No video yet',
