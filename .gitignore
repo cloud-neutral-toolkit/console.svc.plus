@@ -15,6 +15,7 @@ out/
 public/_build/
 public/dl-index/
 .contentlayer/
+.dev-logs/
 
 # Contentlayer cache
 ui/docs/.contentlayer/
