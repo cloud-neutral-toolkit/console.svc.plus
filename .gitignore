@@ -1,6 +1,7 @@
 models/
 *.tsbuildinfo
 .dev-logs/
+.env
 
 # macOS
 .DS_Store

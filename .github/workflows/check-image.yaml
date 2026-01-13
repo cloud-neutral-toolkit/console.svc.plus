@@ -1,4 +1,4 @@
-name: Check XControl Image Ready
+name: Check Portal Site Images
 
 on:
   workflow_dispatch:
