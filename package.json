@@ -11,6 +11,7 @@
     "prebuild": "bash scripts/clone-content.sh && tsx scripts/generate-content.ts",
     "build": "next build",
     "build:static": "npm run prebuild && next build",
+    "prod": "bash scripts/prod.sh",
     "start": "node ./scripts/start.js",
     "lint": "eslint --no-eslintrc -c ./.eslintrc.json .",
     "typecheck": "tsc --noEmit",
