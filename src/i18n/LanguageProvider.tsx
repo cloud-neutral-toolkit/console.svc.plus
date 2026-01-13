@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react'
 import { create } from 'zustand'
-
-export type Language = 'en' | 'zh'
+import { DEFAULT_LANGUAGE, LANGUAGE_COOKIE, normalizeLanguage, type Language } from './language'
 
 type LanguageState = {
   language: Language
@@ -15,12 +14,28 @@ const STORAGE_KEY = 'cloudnative-suite.language'
 
 function detectPreferredLanguage(): Language {
   if (typeof window === 'undefined') {
-    return 'zh'
+    return DEFAULT_LANGUAGE
   }
 
   const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (stored === 'en' || stored === 'zh') {
-    return stored
+  const normalizedStored = normalizeLanguage(stored)
+  if (normalizedStored) {
+    return normalizedStored
+  }
+
+  const cookieValue = typeof document !== 'undefined' ? document.cookie : ''
+  if (cookieValue) {
+    const cookieMatch = cookieValue
+      .split(';')
+      .map((entry) => entry.trim())
+      .find((entry) => entry.startsWith(`${LANGUAGE_COOKIE}=`))
+    if (cookieMatch) {
+      const value = cookieMatch.split('=')[1]
+      const normalizedCookie = normalizeLanguage(value)
+      if (normalizedCookie) {
+        return normalizedCookie
+      }
+    }
   }
 
   const [primaryLocale] = window.navigator.languages?.length
@@ -37,7 +52,7 @@ function detectPreferredLanguage(): Language {
     }
   }
 
-  return 'zh'
+  return DEFAULT_LANGUAGE
 }
 
 function syncDocumentLanguage(language: Language) {
@@ -54,6 +69,7 @@ export const useLanguageStore = create<LanguageState>((set) => ({
   setLanguage: (language) => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(STORAGE_KEY, language)
+      document.cookie = `${LANGUAGE_COOKIE}=${language}; Path=/; Max-Age=31536000; SameSite=Lax`
     }
     syncDocumentLanguage(language)
     set({ language })

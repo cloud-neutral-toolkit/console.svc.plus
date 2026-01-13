@@ -1,21 +1,56 @@
-'use client'
+import type { JSX } from 'react'
 
-import MarkdownSection from '@/components/MarkdownSection'
-import { useLanguage } from '@/i18n/LanguageProvider'
-import { useOnwalkCopy } from '@/i18n/useOnwalkCopy'
+import type { Language } from '@/i18n/language'
+import { onwalkCopy } from '@/i18n/onwalk'
+import type { MarkdownRenderResult } from '@/server/render-markdown'
+import { ContentNotFoundError, renderMarkdownFile } from '@/server/render-markdown'
 
-export default function AboutContent() {
-  const copy = useOnwalkCopy()
-  const { language } = useLanguage()
-  const contentPath = `about/${language}.md`
+function resolveHeading(meta: Record<string, unknown>, fallback: keyof JSX.IntrinsicElements) {
+  const allowed = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+  const requested = typeof meta.heading === 'string' ? meta.heading.toLowerCase() : undefined
+  return (requested && allowed.has(requested) ? (requested as keyof JSX.IntrinsicElements) : fallback)
+}
 
-  const fallbackContent = (
+async function loadMarkdown(language: Language): Promise<MarkdownRenderResult | null> {
+  try {
+    return await renderMarkdownFile(`about/${language}.md`)
+  } catch (error) {
+    if (error instanceof ContentNotFoundError) {
+      return null
+    }
+    throw error
+  }
+}
+
+function renderFallback(copy: (typeof onwalkCopy)[Language]) {
+  return (
     <div className="space-y-6 text-sm leading-relaxed text-slate-600">
       {copy.about.paragraphs.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>
       ))}
     </div>
   )
+}
+
+function renderMarkdown(result: MarkdownRenderResult) {
+  const { meta, html } = result
+  const title = typeof meta.title === 'string' ? meta.title : undefined
+  const HeadingTag = resolveHeading(meta, 'h2')
+
+  return (
+    <section className="text-sm leading-relaxed text-slate-600" aria-label={title ?? undefined}>
+      {title ? <HeadingTag className="text-2xl font-semibold text-slate-900">{title}</HeadingTag> : null}
+      <div
+        className="prose prose-slate mt-4 max-w-none text-sm leading-relaxed text-slate-600"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </section>
+  )
+}
+
+export default async function AboutContent({ language }: { language: Language }) {
+  const copy = onwalkCopy[language]
+  const content = await loadMarkdown(language)
 
   return (
     <>
@@ -24,13 +59,7 @@ export default function AboutContent() {
         <h1 className="text-3xl font-semibold">{copy.about.title}</h1>
         <p className="text-sm text-slate-600">{copy.about.subtitle}</p>
       </header>
-      <MarkdownSection
-        src={contentPath}
-        className="text-sm leading-relaxed text-slate-600"
-        contentClassName="text-sm leading-relaxed text-slate-600"
-        loadingFallback={fallbackContent}
-        errorFallback={fallbackContent}
-      />
+      {content ? renderMarkdown(content) : renderFallback(copy)}
     </>
   )
 }

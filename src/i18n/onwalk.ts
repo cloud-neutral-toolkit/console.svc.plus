@@ -1,4 +1,4 @@
-import type { Language } from './LanguageProvider'
+import type { Language } from './language'
 
 type OnwalkCopy = {
   header: {
