@@ -48,6 +48,7 @@ coverage/
 *.test-cache/
 *.test-data/
 .env.test
+.env
 .env.local
 .env.*.local
 

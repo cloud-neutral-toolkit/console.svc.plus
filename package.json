@@ -6,7 +6,7 @@
     "node": ">=18.17 <23"
   },
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "bash scripts/Dev-MCP-Server.sh && next dev --turbo",
     "prebuild": "tsx scripts/generate-content.ts && node scripts/build-contentlayer.mjs",
     "build": "next build",
     "build:static": "npm run prebuild && next build",
