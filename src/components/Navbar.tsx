@@ -310,9 +310,6 @@ export default function Navbar() {
                   unoptimized
                 />
                 <span className="text-sm font-medium opacity-90">Cloud-Neutral</span>
-                <span className="rounded-md bg-indigo-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-200">
-                  Default config
-                </span>
               </Link>
               <div className="hidden items-center gap-5 text-sm font-medium text-slate-200 lg:flex">
                 {mainLinks.map((link) => (
@@ -647,4 +644,3 @@ export default function Navbar() {
     </>
   )
 }
-
