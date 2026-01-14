@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useOnwalkCopy } from '@/i18n/useOnwalkCopy'
 import type { ContentItem } from '@/lib/content'
@@ -25,20 +25,15 @@ export default function VideoGrid({
   const videoItems = items
   const [pageIndex, setPageIndex] = useState(0)
   const totalPages = Math.max(1, Math.ceil(videoItems.length / PAGE_SIZE))
+  const clampedPageIndex = Math.min(pageIndex, totalPages - 1)
   const pagedItems = useMemo(() => {
-    const start = pageIndex * PAGE_SIZE
+    const start = clampedPageIndex * PAGE_SIZE
     return videoItems.slice(start, start + PAGE_SIZE)
-  }, [videoItems, pageIndex])
+  }, [videoItems, clampedPageIndex])
 
   const currentItems = variant === 'overview' ? videoItems.slice(0, 4) : pagedItems
-  const canGoBack = pageIndex > 0
-  const canGoForward = pageIndex < totalPages - 1
-
-  useEffect(() => {
-    if (variant === 'full' && pageIndex > totalPages - 1) {
-      setPageIndex(Math.max(0, totalPages - 1))
-    }
-  }, [pageIndex, totalPages, variant])
+  const canGoBack = clampedPageIndex > 0
+  const canGoForward = clampedPageIndex < totalPages - 1
 
   return (
     <div className="space-y-8">
@@ -96,13 +91,13 @@ export default function VideoGrid({
       {variant === 'full' && (
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-[#747775]">
           <span>
-            {copy.video.pageLabel ?? 'Page'} {pageIndex + 1} / {totalPages}
+            {copy.video.pageLabel ?? 'Page'} {clampedPageIndex + 1} / {totalPages}
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
+              onClick={() => setPageIndex(Math.max(0, clampedPageIndex - 1))}
               disabled={!canGoBack}
             >
               {copy.video.prev ?? '上一页'}
@@ -110,7 +105,7 @@ export default function VideoGrid({
             <button
               type="button"
               className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={() => setPageIndex((prev) => Math.min(totalPages - 1, prev + 1))}
+              onClick={() => setPageIndex(Math.min(totalPages - 1, clampedPageIndex + 1))}
               disabled={!canGoForward}
             >
               {copy.video.next ?? '下一页'}

@@ -5,10 +5,12 @@
  * 参考: https://postcss.org/
  */
 
-export default {
+const postcssConfig = {
   // 插件列表
   plugins: {
     autoprefixer: {},
     tailwindcss: {},
   },
 }
+
+export default postcssConfig
