@@ -1,15 +1,6 @@
 import ImagesGallery from '../ImagesGallery'
-import { getImageFiles, imagesPerPage, paginateImages } from '../image-data'
+import { getImageFiles, paginateImages } from '../image-data'
 
-
-export async function generateStaticParams() {
-  const files = await getImageFiles()
-  const totalPages = Math.max(1, Math.ceil(files.length / imagesPerPage))
-
-  return Array.from({ length: totalPages }, (_, index) => ({
-    page: String(index + 1),
-  }))
-}
 
 export default async function ImagesPagedPage({
   params,

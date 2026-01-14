@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import BlogBackLink from '@/components/onwalk/BlogBackLink'
-import { getContentBySlug, getContentSlugs } from '@/lib/content'
+import { getContentBySlug } from '@/lib/content'
 import { renderMarkdownContent } from '@/server/render-markdown'
 
 type PageProps = {
@@ -77,11 +77,6 @@ function getDescriptionText(post: { content?: string; summary?: string }) {
   }
 
   return rawText.slice(0, DESCRIPTION_MAX).trim()
-}
-
-export async function generateStaticParams() {
-  const slugs = await getContentSlugs('blog')
-  return slugs.map((slug) => ({ slug: slug.split('/') }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
