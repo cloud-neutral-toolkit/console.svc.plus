@@ -7,7 +7,7 @@ export default function Footer() {
   const isDark = useThemeStore((state) => state.isDark)
   const toggleTheme = useThemeStore((state) => state.toggleTheme)
   const socials = [
-    { label: 'GitHub', icon: Github, href: 'https://github.com/CloudNativeSuite/' },
+    { label: 'GitHub', icon: Github, href: 'https://github.com/cloud-neutral-toolkit' },
     { label: 'Repository', icon: Link, href: 'https://hub.docker.com/u/cloudneutral' },
     { label: 'Docs', icon: BookOpen, href: '#' },
     { label: 'Globe', icon: Globe, href: '#' },
