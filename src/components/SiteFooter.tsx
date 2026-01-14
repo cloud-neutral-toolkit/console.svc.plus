@@ -19,7 +19,7 @@ export default function SiteFooter() {
   const copy = useOnwalkCopy()
 
   const socials: SocialItem[] = [
-    { label: copy.footer.socials.twitter, href: 'https://x.com/', icon: Twitter },
+    { label: copy.footer.socials.twitter, href: 'https://x.com/manbuzhe2023', icon: Twitter },
     { label: copy.footer.socials.xiaohongshu, href: 'https://www.xiaohongshu.com/', icon: Sparkles },
     {
       label: copy.footer.socials.wechat,
