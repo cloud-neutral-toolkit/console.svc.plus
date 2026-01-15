@@ -1,8 +1,8 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { promises as fs } from 'fs'
 import matter from 'gray-matter'
 import path from 'path'
-import { Readable } from 'stream'
+
+import { getStorageClient } from '../server/storage'
 
 export type FrontMatterValue = string | string[]
 
@@ -17,61 +17,10 @@ export type MarkdownSource =
   | { type: 'filesystem'; filePath: string }
   | { type: 'volume'; filePath: string }
   | { type: 'http'; url: string; headers?: Record<string, string> }
-  | { type: 's3'; bucket: string; key: string; region?: string; client?: S3Client }
+  | { type: 'storage'; key: string }
 
 const DEFAULT_CONTENT_ROOT = path.join(process.cwd(), 'src', 'content')
 const DEFAULT_EXTENSIONS = ['.md']
-
-async function streamToString(stream: Readable): Promise<string> {
-  const chunks: Buffer[] = []
-  for await (const chunk of stream) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : Buffer.from(chunk))
-  }
-  return Buffer.concat(chunks).toString('utf-8')
-}
-
-async function readableStreamToString(stream: ReadableStream<Uint8Array>): Promise<string> {
-  const reader = stream.getReader()
-  const chunks: Uint8Array[] = []
-
-  while (true) {
-    const { value, done } = await reader.read()
-    if (done) break
-    if (value) {
-      chunks.push(value)
-    }
-  }
-
-  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString('utf-8')
-}
-
-async function objectBodyToString(body: unknown): Promise<string> {
-  if (!body) {
-    throw new Error('S3 object body is empty')
-  }
-
-  if (typeof body === 'string') {
-    return body
-  }
-
-  if (body instanceof Uint8Array) {
-    return Buffer.from(body).toString('utf-8')
-  }
-
-  if (body instanceof Readable) {
-    return streamToString(body)
-  }
-
-  if (body instanceof Blob) {
-    return body.text()
-  }
-
-  if (typeof (body as ReadableStream<Uint8Array>).getReader === 'function') {
-    return readableStreamToString(body as ReadableStream<Uint8Array>)
-  }
-
-  throw new Error('Unsupported S3 body type')
-}
 
 function normalizeMetadata(data: Record<string, unknown>): Record<string, FrontMatterValue> {
   return Object.entries(data).reduce<Record<string, FrontMatterValue>>((acc, [key, value]) => {
@@ -102,10 +51,10 @@ export async function loadMarkdownSource(source: MarkdownSource): Promise<string
       }
       return response.text()
     }
-    case 's3': {
-      const client = source.client ?? new S3Client({ region: source.region })
-      const result = await client.send(new GetObjectCommand({ Bucket: source.bucket, Key: source.key }))
-      return objectBodyToString(result.Body)
+    case 'storage': {
+      const client = await getStorageClient()
+      const data = await client.getObject(source.key)
+      return data.toString('utf-8')
     }
     default:
       throw new Error('Unsupported Markdown source')

@@ -1,5 +1,12 @@
 # Overrides for the production environment.
 logLevel: warn
+storage:
+  provider: s3
+  bucket: example-bucket
+  region: ap-southeast-1
+  endpoint: https://s3.example.com
+  prefix: public
+  publicBaseUrl: https://cdn.example.com
 regions:
   cn:
     apiBaseUrl: https://cn-api.svc.plus

@@ -4,3 +4,32 @@ authUrl: https://accounts.svc.plus
 dashboardUrl: https://console.svc.plus
 internalApiBaseUrl: http://127.0.0.1:8090
 logLevel: info
+storage:
+  provider: s3
+  bucket: example-bucket
+  region: ap-southeast-1
+  endpoint: https://s3.example.com
+  prefix: public
+  publicBaseUrl: https://cdn.example.com
+  credentials:
+    accessKeyId: { env: AWS_ACCESS_KEY_ID }
+    secretAccessKey: { env: AWS_SECRET_ACCESS_KEY }
+    sessionToken: { env: AWS_SESSION_TOKEN }
+  gcs:
+    projectId: example-project
+    bucket: example-gcs-bucket
+    publicBaseUrl: https://storage.googleapis.com/example-gcs-bucket
+    credentialsJson: { env: GCP_SERVICE_ACCOUNT_JSON }
+  oss:
+    endpoint: https://oss-cn-shanghai.aliyuncs.com
+    bucket: example-oss-bucket
+    region: cn-shanghai
+    publicBaseUrl: https://example-oss-bucket.oss-cn-shanghai.aliyuncs.com
+  r2:
+    endpoint: https://<accountid>.r2.cloudflarestorage.com
+    bucket: example-r2-bucket
+    region: auto
+    publicBaseUrl: https://assets.example.com
+  vercel:
+    token: { env: BLOB_READ_WRITE_TOKEN }
+    access: public

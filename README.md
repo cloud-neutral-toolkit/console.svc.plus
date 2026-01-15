@@ -77,6 +77,12 @@ These capabilities are optional and additive, and will not change the core natur
 
 ---
 
+## Docs
+
+- `docs/server-runtime-loader-howto.md`
+
+---
+
 ## License
 
 This repository contains both code and content.

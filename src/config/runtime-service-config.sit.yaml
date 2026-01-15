@@ -3,3 +3,10 @@ apiBaseUrl: https://dev-api.svc.plus
 authUrl: https://dev-accounts.svc.plus
 dashboardUrl: https://dev-console.svc.plus
 logLevel: debug
+storage:
+  provider: s3
+  bucket: example-bucket
+  region: ap-southeast-1
+  endpoint: https://s3.example.com
+  prefix: public
+  publicBaseUrl: https://cdn.example.com

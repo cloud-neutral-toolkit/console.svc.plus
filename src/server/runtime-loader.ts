@@ -86,6 +86,33 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+function resolveEnvReferences(value: unknown, pathSegments: string[] = []): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item, index) => resolveEnvReferences(item, [...pathSegments, String(index)]))
+  }
+
+  if (isPlainRecord(value)) {
+    const keys = Object.keys(value)
+    if (keys.length === 1 && keys[0] === 'env' && typeof value.env === 'string') {
+      const envKey = value.env
+      const envValue = process.env[envKey]
+      if (envValue === undefined) {
+        const pathLabel = pathSegments.length ? pathSegments.join('.') : '<root>'
+        console.warn(`[runtime-config] Missing env ${envKey} at ${pathLabel}`)
+      }
+      return envValue
+    }
+
+    const resolved: Record<string, unknown> = {}
+    for (const [key, nested] of Object.entries(value)) {
+      resolved[key] = resolveEnvReferences(nested, [...pathSegments, key])
+    }
+    return resolved
+  }
+
+  return value
+}
+
 function parseYamlSource(sourceKey: RuntimeSourceKey): Record<string, unknown> {
   if (parsedYamlCache[sourceKey]) {
     return parsedYamlCache[sourceKey]!
@@ -99,8 +126,15 @@ function parseYamlSource(sourceKey: RuntimeSourceKey): Record<string, unknown> {
   try {
     const parsed = yaml.load(source)
     if (isPlainRecord(parsed)) {
-      parsedYamlCache[sourceKey] = parsed
-      return parsed
+      const resolved = resolveEnvReferences(parsed)
+      if (isPlainRecord(resolved)) {
+        parsedYamlCache[sourceKey] = resolved
+        return resolved
+      }
+
+      console.warn(
+        `[runtime-config] YAML source "${sourceKey}" did not resolve to an object. Falling back to empty object.`,
+      )
     }
 
     console.warn(
