@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=18.17 <23"
+    "node": ">=18.17 <25"
   },
   "scripts": {
     "dev": "bash scripts/Dev-MCP-Server.sh && next dev --turbo",
