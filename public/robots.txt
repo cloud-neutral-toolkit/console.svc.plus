@@ -1,3 +1,12 @@
+User-agent: Googlebot
+Allow: /
+Allow: /_next/static/
+Allow: /_next/image
+Disallow: /admin/
+Disallow: /api/
+Disallow: /internal/
+Disallow: /_next/
+
 User-agent: *
 Allow: /
 
