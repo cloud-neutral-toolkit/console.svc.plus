@@ -2,6 +2,7 @@ export const dynamic = 'error'
 
 import './globals.css'
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/next'
 import { AppProviders } from './AppProviders'
 
 export const metadata = {
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={bodyClassName}>
         <AppProviders>{children}</AppProviders>
+        <Analytics />
       </body>
     </html>
   )
