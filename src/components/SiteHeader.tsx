@@ -20,7 +20,7 @@ export default function SiteHeader() {
 
   const handleLanguageChange = (nextLanguage: 'zh' | 'en') => {
     setLanguage(nextLanguage)
-    router.refresh()
+    window.location.reload()
   }
 
   return (
