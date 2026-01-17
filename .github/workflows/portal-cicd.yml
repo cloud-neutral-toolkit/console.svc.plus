@@ -99,6 +99,37 @@ jobs:
           echo "image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.image_tag || github.sha }}" >> "$GITHUB_OUTPUT"
 
   # -------------------------------------------------------------
+  # Sync Assets (main push only)
+  # -------------------------------------------------------------
+  sync_assets:
+    name: Sync Assets • R2
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install rclone
+        run: |
+          sudo -v ; curl https://rclone.org/install.sh | sudo bash
+
+      - name: Sync Assets
+        env:
+          ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+          STORAGE_BUCKET: ${{ secrets.R2_BUCKET_NAME }}
+          STORAGE_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          STORAGE_PROVIDER: r2
+        run: make sync-assets
+
+
+  # -------------------------------------------------------------
   # CD — Deploy (only workflow_dispatch)
   # -------------------------------------------------------------
   deploy_portal:

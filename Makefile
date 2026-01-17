@@ -61,9 +61,9 @@ sync-assets:
 	@echo "🔄 Syncing public assets to object storage..."
 	@# Source .env and extract R2 config manually to pass to script
 	@if [ -f .env ]; then set -a; source .env; set +a; fi; \
-	STORAGE_BUCKET=$$(grep "R2_BUCKET_NAME=" .env | cut -d= -f2 | tr -d "'"); \
-	STORAGE_ENDPOINT=$$(grep "R2_ENDPOINT=" .env | cut -d= -f2 | tr -d "'"); \
-	STORAGE_BUCKET="$$STORAGE_BUCKET" STORAGE_ENDPOINT="$$STORAGE_ENDPOINT" bash scripts/sync-public-assets.sh --apply
+	BUCKET=$${STORAGE_BUCKET:-$${R2_BUCKET_NAME}}; \
+	ENDPOINT=$${STORAGE_ENDPOINT:-$${R2_ENDPOINT}}; \
+	STORAGE_BUCKET="$$BUCKET" STORAGE_ENDPOINT="$$ENDPOINT" bash scripts/sync-public-assets.sh --apply
 
 clean:
 	@echo "🧹 Cleaning .next and out directories..."
