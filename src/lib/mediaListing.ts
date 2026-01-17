@@ -31,17 +31,22 @@ export async function listMediaItems(
   const indexItems = await readMediaIndex(kind)
 
   // Transform to ContentItem
-  const baseUrl = process.env.NEXT_PUBLIC_MEDIA_BASE_URL
+  let baseUrl = process.env.NEXT_PUBLIC_MEDIA_BASE_URL
   if (!baseUrl) {
     console.warn('NEXT_PUBLIC_MEDIA_BASE_URL is not defined')
+    baseUrl = ''
   }
 
-  // Canonical URL rule: ${MEDIA_BASE_URL}images/${path}
-  // The index 'path' is relative to /images/ (no public/ prefix)
+  // Normalize baseUrl to remove trailing slash
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1)
+  }
+
+  // Canonical URL rule: ${MEDIA_BASE_URL}/images/${path}
   const items: ContentItem[] = indexItems.map((item) => {
     // Determine the base path segment based on kind
     // e.g. kind='images' -> url = .../images/...
-    const url = `${baseUrl || '/'}${kind}/${item.path}`
+    const url = `${baseUrl}/${kind}/${item.path}`
 
     // Title from filename (simple heuristic)
     const filename = path.basename(item.path)
