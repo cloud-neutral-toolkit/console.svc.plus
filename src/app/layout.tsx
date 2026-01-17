@@ -2,7 +2,6 @@ import './globals.css'
 import { Suspense } from 'react'
 import { AppProviders } from './AppProviders'
 import Script from 'next/script'
-import { Analytics } from '@vercel/analytics/next'
 import { Analytics as GoogleAnalytics } from './Analytics'
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
 
@@ -52,8 +51,6 @@ export default function RootLayout({
           </AppProviders>
         </Suspense>
 
-        {/* Vercel Web Analytics */}
-        <Analytics />
       </body>
     </html>
   )
