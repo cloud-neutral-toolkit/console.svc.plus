@@ -59,6 +59,15 @@ def generate_index(category, config):
     items.sort(key=lambda x: x["path"])
     return items
 
+def load_existing_index(output_file):
+    if os.path.exists(output_file):
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return None
+    return None
+
 def main():
     # Ensure output directory exists
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -67,10 +76,24 @@ def main():
         print(f"Scanning {category}...")
         items = generate_index(category, config)
         
+        output_file = os.path.join(OUTPUT_DIR, f"{category}.json")
+        existing_items = load_existing_index(output_file)
+
+        # Protection Logic:
+        # If we have an existing index with many items, and the new scan returned very few (or None),
+        # assume we are in an environment missing assets (like CI) and PRESERVE existing index.
+        if existing_items and len(existing_items) > 10:
+             # If new items is None (directory missing/empty) or drastically fewer
+             new_count = len(items) if items else 0
+             if new_count < len(existing_items) * 0.1: # Less than 10% of original
+                 print(f"WARNING: Protection triggered for {category}. Existing index has {len(existing_items)} items, scan found {new_count}. Preserving existing index.")
+                 continue
+
         if items is None:
+             # If no existing index to protect, strict behavior might be to do nothing or write empty.
+             # Current logic: continue (do nothing)
             continue
 
-        output_file = os.path.join(OUTPUT_DIR, f"{category}.json")
         
         # Write JSON with deterministic formatting
         with io.open(output_file, "w", encoding="utf-8") as f:
