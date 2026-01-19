@@ -284,6 +284,20 @@ export default function VideoGrid({
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
           type="video"
+          onNext={() => {
+            const currentIndex = sortedItems.findIndex(i => i.slug === selectedItem.slug)
+            if (currentIndex < sortedItems.length - 1) {
+              setSelectedItem(sortedItems[currentIndex + 1])
+            }
+          }}
+          onPrev={() => {
+            const currentIndex = sortedItems.findIndex(i => i.slug === selectedItem.slug)
+            if (currentIndex > 0) {
+              setSelectedItem(sortedItems[currentIndex - 1])
+            }
+          }}
+          hasNext={sortedItems.findIndex(i => i.slug === selectedItem.slug) < sortedItems.length - 1}
+          hasPrev={sortedItems.findIndex(i => i.slug === selectedItem.slug) > 0}
         />
       )}
     </div>

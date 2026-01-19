@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import PostCard from '@/components/PostCard'
 import HeroPostCard from '@/components/HeroPostCard'
 import BlogReadingModal from '@/components/BlogReadingModal'
@@ -22,6 +22,10 @@ export default function BlogInfiniteList({ initialPosts, heroPost, language }: B
     const [selectedPost, setSelectedPost] = useState<ContentItem | null>(null)
 
     const observerTarget = useRef<HTMLDivElement>(null)
+
+    const allItems = useMemo(() => {
+        return heroPost ? [heroPost, ...posts] : posts
+    }, [heroPost, posts])
 
     const loadMore = useCallback(async () => {
         if (loading || !hasMore) return
@@ -61,6 +65,11 @@ export default function BlogInfiniteList({ initialPosts, heroPost, language }: B
         }
     }, [loadMore, hasMore])
 
+    // Navigation Logic
+    const selectedIndex = selectedPost ? allItems.findIndex(p => p.slug === selectedPost.slug) : -1
+    const canNavNext = selectedIndex !== -1 && selectedIndex < allItems.length - 1
+    const canNavPrev = selectedIndex > 0
+
     return (
         <>
             <div className="space-y-12">
@@ -98,6 +107,18 @@ export default function BlogInfiniteList({ initialPosts, heroPost, language }: B
                     post={selectedPost}
                     isOpen={!!selectedPost}
                     onClose={() => setSelectedPost(null)}
+                    onNext={() => {
+                        if (canNavNext) {
+                            setSelectedPost(allItems[selectedIndex + 1])
+                        }
+                    }}
+                    onPrev={() => {
+                        if (canNavPrev) {
+                            setSelectedPost(allItems[selectedIndex - 1])
+                        }
+                    }}
+                    hasNext={canNavNext}
+                    hasPrev={canNavPrev}
                 />
             )}
         </>

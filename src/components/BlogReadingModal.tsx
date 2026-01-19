@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { X, BookOpen, ScrollText, Moon, Sun, Type } from 'lucide-react'
+import { X, BookOpen, ScrollText, Moon, Sun, Type, ChevronLeft, ChevronRight } from 'lucide-react'
 import { marked } from 'marked'
 import type { ContentItem } from '@/lib/content'
 
@@ -19,9 +19,21 @@ type BlogReadingModalProps = {
     post: ContentItem
     isOpen: boolean
     onClose: () => void
+    onNext?: () => void
+    onPrev?: () => void
+    hasNext?: boolean
+    hasPrev?: boolean
 }
 
-export default function BlogReadingModal({ post, isOpen, onClose }: BlogReadingModalProps) {
+export default function BlogReadingModal({
+    post,
+    isOpen,
+    onClose,
+    onNext,
+    onPrev,
+    hasNext,
+    hasPrev
+}: BlogReadingModalProps) {
     const [mode, setMode] = useState<ReadingMode>('scroll')
     const [theme, setTheme] = useState<Theme>('light')
     const contentRef = useRef<HTMLDivElement>(null)
@@ -38,17 +50,60 @@ export default function BlogReadingModal({ post, isOpen, onClose }: BlogReadingM
         }
     }, [isOpen])
 
+    // Keyboard Navigation
+    useEffect(() => {
+        if (!isOpen) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' && onNext && hasNext) onNext()
+            if (e.key === 'ArrowLeft' && onPrev && hasPrev) onPrev()
+            if (e.key === 'Escape') onClose()
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isOpen, onNext, onPrev, hasNext, hasPrev, onClose])
+
     if (!isOpen) return null
 
     const htmlContent = marked.parse(post.content || '')
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <style jsx global>{`
+                @keyframes magazine-turn {
+                0% { opacity: 0; transform: translateX(20px) scale(0.98); }
+                100% { opacity: 1; transform: translateX(0) scale(1); }
+                }
+                .animate-magazine {
+                animation: magazine-turn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+                }
+            `}</style>
+
+            {/* Navigation - PREV */}
+            {hasPrev && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onPrev?.() }}
+                    className="absolute left-4 top-1/2 z-[110] -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md hover:bg-white/20 hidden md:flex transition hover:scale-110"
+                >
+                    <ChevronLeft size={32} />
+                </button>
+            )}
+
+            {/* Navigation - NEXT */}
+            {hasNext && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onNext?.() }}
+                    className="absolute right-4 top-1/2 z-[110] -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md hover:bg-white/20 hidden md:flex transition hover:scale-110"
+                >
+                    <ChevronRight size={32} />
+                </button>
+            )}
+
             <div
-                className={`relative flex h-full w-full flex-col overflow-hidden shadow-2xl transition-colors duration-300 md:h-[90vh] md:w-[90vw] md:rounded-2xl ${THEMES[theme]}`}
+                key={post.slug}
+                className={`relative flex h-full w-full flex-col overflow-hidden shadow-2xl transition-all duration-300 md:h-[90vh] md:w-[90vw] md:rounded-2xl ${THEMES[theme]} animate-magazine`}
             >
                 {/* Header / Controls */}
-                <div className="flex items-center justify-between border-b border-black/5 px-6 py-4 backdrop-blur-md">
+                <div className="flex items-center justify-between border-b border-black/5 px-6 py-4 backdrop-blur-md bg-inherit z-10">
                     <h2 className="line-clamp-1 text-lg font-bold opacity-80">{post.title}</h2>
 
                     <div className="flex items-center gap-2 md:gap-4">
@@ -108,8 +163,8 @@ export default function BlogReadingModal({ post, isOpen, onClose }: BlogReadingM
                 <div
                     ref={contentRef}
                     className={`flex-1 overflow-x-hidden p-6 md:p-12 ${mode === 'book'
-                            ? 'overflow-y-hidden overflow-x-auto whitespace-normal' // Book Mode
-                            : 'overflow-y-auto' // Scroll Mode
+                        ? 'overflow-y-hidden overflow-x-auto whitespace-normal' // Book Mode
+                        : 'overflow-y-auto' // Scroll Mode
                         }`}
                     style={mode === 'book' ? {
                         columnWidth: '80vh',
