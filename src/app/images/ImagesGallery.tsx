@@ -32,35 +32,45 @@ function isLocalImage(src: string) {
 
 
 
-export default function ImagesGallery({ 
+export default function ImagesGallery({
   items,
   currentPage,
   totalPages: externalTotalPages,
   totalImages: externalTotalImages
 }: ImagesGalleryProps) {
   const [sort, setSort] = useState<'latest' | 'location' | 'views'>('latest')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [pageIndex, setPageIndex] = useState(currentPage ? currentPage - 1 : 0)
+
+  const handleSort = (newSort: 'latest' | 'location' | 'views') => {
+    if (sort === newSort) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSort(newSort)
+      setSortDirection('desc') // Default to desc for new sort
+    }
+  }
 
   const sortedItems = useMemo(() => {
     const list = [...items]
-    if (sort === 'location') {
-      list.sort((a, b) => {
+    let comparison = 0
+    list.sort((a, b) => {
+      if (sort === 'location') {
         const locA = Array.isArray(a.location) ? a.location.join(', ') : (a.location || '')
         const locB = Array.isArray(b.location) ? b.location.join(', ') : (b.location || '')
-        return locA.localeCompare(locB)
-      })
-    } else if (sort === 'views') {
-      list.sort((a, b) => (b.views || 0) - (a.views || 0))
-    } else {
-      // latest/date
-      list.sort((a, b) => {
+        comparison = locA.localeCompare(locB)
+      } else if (sort === 'views') {
+        comparison = (a.views || 0) - (b.views || 0)
+      } else {
+        // latest/date
         const tA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
         const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
-        return tB - tA
-      })
-    }
+        comparison = tA - tB
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
     return list
-  }, [items, sort])
+  }, [items, sort, sortDirection])
 
   // Reset page when order changes
   useMemo(() => {
@@ -71,7 +81,7 @@ export default function ImagesGallery({
   const totalPages = externalTotalPages ?? Math.max(1, Math.ceil(totalImages / PAGE_SIZE))
   const clampedPageIndex = Math.min(pageIndex, totalPages - 1)
 
-  const currentItems = (externalTotalImages !== undefined) 
+  const currentItems = (externalTotalImages !== undefined)
     ? sortedItems // If we already have paged items, just use them
     : sortedItems.slice(clampedPageIndex * PAGE_SIZE, (clampedPageIndex + 1) * PAGE_SIZE)
   const canGoBack = clampedPageIndex > 0
@@ -87,22 +97,22 @@ export default function ImagesGallery({
         <div className="mb-6 flex flex-wrap items-center justify-end gap-3 text-sm">
           <span className="text-slate-500 mr-2">排序:</span>
           <button
-            onClick={() => setSort('latest')}
-            className={`rounded-full px-3 py-1 transition ${sort === 'latest' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            onClick={() => handleSort('latest')}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'latest' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
-            更新时间
+            更新时间 {sort === 'latest' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
           <button
-            onClick={() => setSort('location')}
-            className={`rounded-full px-3 py-1 transition ${sort === 'location' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            onClick={() => handleSort('location')}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'location' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
-            位置
+            位置 {sort === 'location' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
           <button
-            onClick={() => setSort('views')}
-            className={`rounded-full px-3 py-1 transition ${sort === 'views' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            onClick={() => handleSort('views')}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'views' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
-            访问量
+            访问量 {sort === 'views' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
         </div>
 
