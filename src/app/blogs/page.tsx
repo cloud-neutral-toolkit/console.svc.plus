@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 
 import PostCard from '@/components/PostCard'
+import HeroPostCard from '@/components/HeroPostCard'
+import BlogInfiniteList from '@/components/BlogInfiniteList'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import BlogHeader from '@/components/onwalk/BlogHeader'
@@ -12,7 +14,8 @@ import { getContent, sortContentByDate, filterPostsByLanguage, type ContentItem 
 
 export const dynamic = 'force-dynamic'
 
-const PAGE_SIZE = 6
+const HERO_PAGE_SIZE = 7 // 1 Hero + 6 Grid items (2 cols * 3 rows)
+const STD_PAGE_SIZE = 6  // 6 Grid items (2 cols * 3 rows)
 
 const baseMetadata: Metadata = {
   title: '博客 | Onwalk',
@@ -33,7 +36,12 @@ async function resolvePagination(
   const resolvedSearchParams = (await Promise.resolve(searchParams)) ?? {}
   const page = Number(resolvedSearchParams.page ?? 1)
   const safePage = Number.isFinite(page) && page > 0 ? page : 1
-  const totalPages = Math.max(1, Math.ceil(totalPosts / PAGE_SIZE))
+
+  // Calculate total pages logic with variable first page
+  const remainingAfterFirst = Math.max(0, totalPosts - HERO_PAGE_SIZE)
+  const additionalPages = Math.ceil(remainingAfterFirst / STD_PAGE_SIZE)
+  const totalPages = 1 + additionalPages
+
   const currentPage = Math.min(safePage, totalPages)
 
   return { currentPage, totalPages }
@@ -82,45 +90,40 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const allPosts = await getContent('blog')
   const posts = filterPostsByLanguage(allPosts, language)
 
-  const { currentPage, totalPages } = await resolvePagination(searchParams, posts.length)
-  const startIndex = (currentPage - 1) * PAGE_SIZE
-  const pagedPosts = posts.slice(startIndex, startIndex + PAGE_SIZE)
+  const { currentPage } = await resolvePagination(searchParams, posts.length)
+
+  // Calculate start index based on variable page size
+  let startIndex = 0
+  let pageSize = HERO_PAGE_SIZE
+
+  if (currentPage > 1) {
+    startIndex = HERO_PAGE_SIZE + (currentPage - 2) * STD_PAGE_SIZE
+    pageSize = STD_PAGE_SIZE
+  }
+
+  const pagedPosts = posts.slice(startIndex, startIndex + pageSize)
+
+  // Determine Hero post logic
+  const showHero = currentPage === 1 && pagedPosts.length > 0
+  const heroPost = showHero ? pagedPosts[0] : null
+  const gridPosts = showHero ? pagedPosts.slice(1) : pagedPosts
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
       <main className="mx-auto w-full max-w-6xl px-6 pb-20">
         <BlogHeader variant="overview" activeHref="/blogs" />
-        <div className="grid gap-6 md:grid-cols-2">
-          {pagedPosts.map((post) => (
-            <PostCard key={post.slug} post={post} />
-          ))}
+
+        <div className="space-y-12">
+          {/* Unified List with Client Interactivity */}
+          <section>
+            <BlogInfiniteList
+              initialPosts={gridPosts}
+              heroPost={heroPost || undefined}
+              language={language}
+            />
+          </section>
         </div>
-        {totalPages > 1 && (
-          <nav className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 text-sm text-slate-600">
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <div className="flex items-center gap-3">
-              {currentPage > 1 && (
-                <Link
-                  href={`/blogs?page=${currentPage - 1}`}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 transition hover:bg-slate-50"
-                >
-                  Previous
-                </Link>
-              )}
-              {currentPage < totalPages && (
-                <Link
-                  href={`/blogs?page=${currentPage + 1}`}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 transition hover:bg-slate-50"
-                >
-                  Next
-                </Link>
-              )}
-            </div>
-          </nav>
-        )}
       </main>
       <SiteFooter />
     </div>

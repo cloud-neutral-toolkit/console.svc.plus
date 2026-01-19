@@ -17,35 +17,54 @@ function isLocalImage(src: string) {
   return src.startsWith('/') && !src.startsWith('//')
 }
 
-export default function PostCard({ post }: { post: ContentItem }) {
+// PostCard.tsx
+import { Eye } from 'lucide-react'
+
+// ...
+
+export default function PostCard({ post, onQuickView }: { post: ContentItem, onQuickView?: (post: ContentItem) => void }) {
   const href = `/blogs/${post.slug}`
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm transition hover:shadow-md">
       <div className="flex flex-col gap-4">
         {post.cover && (
-          <Link href={href} aria-label={post.title ?? post.slug}>
-            {isLocalImage(post.cover) ? (
-              <Image
-                src={post.cover}
-                alt={post.title ?? post.slug}
-                width={1200}
-                height={800}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="h-48 w-full rounded-xl object-cover"
-              />
-            ) : (
-              <img
-                src={post.cover}
-                alt={post.title ?? post.slug}
-                width={1200}
-                height={800}
-                className="h-48 w-full rounded-xl object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+          <div className="relative group">
+            <Link href={href} aria-label={post.title ?? post.slug}>
+              {isLocalImage(post.cover) ? (
+                <Image
+                  src={post.cover}
+                  alt={post.title ?? post.slug}
+                  width={1200}
+                  height={800}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="h-48 w-full rounded-xl object-cover"
+                />
+              ) : (
+                <img
+                  src={post.cover}
+                  alt={post.title ?? post.slug}
+                  width={1200}
+                  height={800}
+                  className="h-48 w-full rounded-xl object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+            </Link>
+            {onQuickView && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  onQuickView(post)
+                }}
+                className="absolute bottom-2 right-2 rounded-full bg-white/90 p-2 text-slate-700 opacity-0 shadow-sm transition group-hover:opacity-100 hover:text-brand"
+                title="Quick View"
+              >
+                <Eye size={18} />
+              </button>
             )}
-          </Link>
+          </div>
         )}
         <div>
           <h2 className="text-xl font-semibold">
@@ -56,9 +75,23 @@ export default function PostCard({ post }: { post: ContentItem }) {
           {post.date && <p className="mt-1 text-xs text-slate-500">{post.date}</p>}
         </div>
         {post.content && <p className="text-sm text-slate-600">{buildExcerpt(post.content)}...</p>}
-        <Link href={href} className="text-sm font-semibold text-brand hover:text-brand-dark">
-          阅读 →
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href={href} className="text-sm font-semibold text-brand hover:text-brand-dark">
+            阅读 →
+          </Link>
+          {!post.cover && onQuickView && (
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                onQuickView(post)
+              }}
+              className="text-slate-400 hover:text-brand"
+              title="Quick View"
+            >
+              <Eye size={18} />
+            </button>
+          )}
+        </div>
       </div>
     </article>
   )
