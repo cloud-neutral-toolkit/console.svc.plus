@@ -216,100 +216,12 @@
     "views": 2326
   },
   {
-    "path": "images/china/shanghai/5e51461672d9270298ca3bfe9f0f387a.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:23:12",
-    "location": "Shanghai, China",
-    "views": 726
-  },
-  {
-    "path": "images/china/shanghai/7209bded32c9e4a210491c1ff47f53de.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:22:05",
-    "location": "Shanghai, China",
-    "views": 4597
-  },
-  {
-    "path": "images/china/shanghai/7566985ae901cf390533045009079fce.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:22:10",
-    "location": "Shanghai, China",
-    "views": 4304
-  },
-  {
-    "path": "images/china/shanghai/IMG_6907.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2025-12-26T21:42:52",
-    "location": "Shanghai, China",
-    "views": 832
-  },
-  {
-    "path": "images/china/shanghai/IMG_6908.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2025-12-26T21:51:19",
-    "location": "Shanghai, China",
-    "views": 4580
-  },
-  {
-    "path": "images/china/shanghai/IMG_6967.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2025-12-27T12:27:47",
-    "location": "Shanghai, China",
-    "views": 739
-  },
-  {
     "path": "images/china/shanghai/IMG_7186.JPG",
     "ext": "jpg",
     "type": "image",
     "updatedAt": "2025-12-29T17:00:19",
     "location": "Shanghai, China",
     "views": 1321
-  },
-  {
-    "path": "images/china/shanghai/IMG_7269.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2025-12-31T13:33:22",
-    "location": "Shanghai, China",
-    "views": 1224
-  },
-  {
-    "path": "images/china/shanghai/b05bae9f15520292d8d738ed7e0acf53.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-03T16:36:05",
-    "location": "Shanghai, China",
-    "views": 2520
-  },
-  {
-    "path": "images/china/shanghai/b6f722f06add7ec061762fc7e53110e4.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:22:18",
-    "location": "Shanghai, China",
-    "views": 130
-  },
-  {
-    "path": "images/china/shanghai/be7c2e987599c2c61bb5c17d4fec5e32.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:23:57",
-    "location": "Shanghai, China",
-    "views": 261
-  },
-  {
-    "path": "images/china/shanghai/c82c4b6c9cc7e88faa95ab821afd7660.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:23:51",
-    "location": "Shanghai, China",
-    "views": 2543
   },
   {
     "path": "images/china/shanghai/chongming/25918ba41f2fc69ee79f43bfd41c53b8.JPG",
@@ -360,12 +272,20 @@
     "views": 3781
   },
   {
-    "path": "images/china/shanghai/f8baaa83537e16c57355c611ed8a0047.JPG",
+    "path": "images/china/shanghai/huangpu/5e51461672d9270298ca3bfe9f0f387a.JPG",
     "ext": "jpg",
     "type": "image",
-    "updatedAt": "2026-01-04T18:22:01",
-    "location": "Shanghai, China",
-    "views": 4141
+    "updatedAt": "2026-01-04T18:23:12",
+    "location": "Huangpu, Shanghai",
+    "views": 2949
+  },
+  {
+    "path": "images/china/shanghai/huangpu/IMG_7269.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2025-12-31T13:33:22",
+    "location": "Huangpu, Shanghai",
+    "views": 432
   },
   {
     "path": "images/china/shanghai/huangpu/architecture/01b25cf5e3bcdc15dbec5d6ae59cf195.JPG",
@@ -398,6 +318,22 @@
     "updatedAt": "2026-01-04T18:23:48",
     "location": "Huangpu, Shanghai",
     "views": 3228
+  },
+  {
+    "path": "images/china/shanghai/huangpu/be7c2e987599c2c61bb5c17d4fec5e32.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:23:57",
+    "location": "Huangpu, Shanghai",
+    "views": 4596
+  },
+  {
+    "path": "images/china/shanghai/huangpu/c82c4b6c9cc7e88faa95ab821afd7660.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:23:51",
+    "location": "Huangpu, Shanghai",
+    "views": 170
   },
   {
     "path": "images/china/shanghai/huangpu/citywalk/13317639417dbf049df37bf1c7e53e0a.JPG",
@@ -448,6 +384,70 @@
     "views": 4700
   },
   {
+    "path": "images/china/shanghai/huangpu/上海-北外滩.jpg",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-01T09:34:12",
+    "location": "Huangpu, Shanghai",
+    "views": 4640
+  },
+  {
+    "path": "images/china/shanghai/huangpu/上海-瑞金宾馆.jpg",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:22:54",
+    "location": "Huangpu, Shanghai",
+    "views": 469
+  },
+  {
+    "path": "images/china/shanghai/huangpu/上海-航拍.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-05T16:52:35",
+    "location": "Huangpu, Shanghai",
+    "views": 4172
+  },
+  {
+    "path": "images/china/shanghai/huangpu/桂林公园.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:23:15",
+    "location": "Huangpu, Shanghai",
+    "views": 236
+  },
+  {
+    "path": "images/china/shanghai/jiading/IMG_6907.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2025-12-26T21:42:52",
+    "location": "Jiading, Shanghai",
+    "views": 4422
+  },
+  {
+    "path": "images/china/shanghai/jiading/IMG_6908.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2025-12-26T21:51:19",
+    "location": "Jiading, Shanghai",
+    "views": 4336
+  },
+  {
+    "path": "images/china/shanghai/jiading/b05bae9f15520292d8d738ed7e0acf53.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-03T16:36:05",
+    "location": "Jiading, Shanghai",
+    "views": 2451
+  },
+  {
+    "path": "images/china/shanghai/pudong/IMG_6967.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2025-12-27T12:27:47",
+    "location": "Pudong, Shanghai",
+    "views": 2737
+  },
+  {
     "path": "images/china/shanghai/pudong/landscape/上海-临港.jpg",
     "ext": "jpg",
     "type": "image",
@@ -462,6 +462,30 @@
     "updatedAt": "2026-01-04T18:26:27",
     "location": "Pudong, Shanghai",
     "views": 399
+  },
+  {
+    "path": "images/china/shanghai/songjiang/7209bded32c9e4a210491c1ff47f53de.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:22:05",
+    "location": "Songjiang, Shanghai",
+    "views": 4211
+  },
+  {
+    "path": "images/china/shanghai/songjiang/7566985ae901cf390533045009079fce.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:22:10",
+    "location": "Songjiang, Shanghai",
+    "views": 4321
+  },
+  {
+    "path": "images/china/shanghai/songjiang/b6f722f06add7ec061762fc7e53110e4.JPG",
+    "ext": "jpg",
+    "type": "image",
+    "updatedAt": "2026-01-04T18:22:18",
+    "location": "Songjiang, Shanghai",
+    "views": 2761
   },
   {
     "path": "images/china/shanghai/songjiang/citywalk/5edce55106d72a53480939563850cedb.JPG",
@@ -488,36 +512,12 @@
     "views": 3563
   },
   {
-    "path": "images/china/shanghai/上海-北外滩.jpg",
+    "path": "images/china/shanghai/songjiang/f8baaa83537e16c57355c611ed8a0047.JPG",
     "ext": "jpg",
     "type": "image",
-    "updatedAt": "2026-01-01T09:34:12",
-    "location": "Shanghai, China",
-    "views": 3459
-  },
-  {
-    "path": "images/china/shanghai/上海-瑞金宾馆.jpg",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:22:54",
-    "location": "Shanghai, China",
-    "views": 4492
-  },
-  {
-    "path": "images/china/shanghai/上海-航拍.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-05T16:52:35",
-    "location": "Shanghai, China",
-    "views": 4452
-  },
-  {
-    "path": "images/china/shanghai/桂林公园.JPG",
-    "ext": "jpg",
-    "type": "image",
-    "updatedAt": "2026-01-04T18:23:15",
-    "location": "Shanghai, China",
-    "views": 4441
+    "updatedAt": "2026-01-04T18:22:01",
+    "location": "Songjiang, Shanghai",
+    "views": 4431
   },
   {
     "path": "images/china/sichuan/c14e3ae0a2ddd064ec71e0ca3a995a7c.JPG",

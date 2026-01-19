@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react'
 import { useOnwalkCopy } from '@/i18n/useOnwalkCopy'
 import type { ContentItem } from '@/lib/content'
 import { copyToClipboard } from '@/lib/clipboard'
+import MediaDetailModal from './MediaDetailModal'
 
 const PAGE_SIZE = 12
 
@@ -33,6 +34,7 @@ export default function VideoGrid({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [pageIndex, setPageIndex] = useState(0)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null)
 
   const handleSort = (newSort: 'latest' | 'location' | 'views') => {
     if (sort === newSort) {
@@ -176,12 +178,12 @@ export default function VideoGrid({
                 <video
                   src={item.src}
                   poster={item.poster}
-                  controls
                   loop
                   playsInline
-                  className="h-48 w-full object-cover sm:h-56"
+                  className="h-48 w-full object-cover sm:h-56 cursor-pointer"
                   onMouseEnter={(event) => event.currentTarget.play()}
                   onMouseLeave={(event) => event.currentTarget.pause()}
+                  onClick={() => setSelectedItem(item)}
                 />
               ) : item.poster ? (
                 isLocalImage(item.poster) ? (
@@ -191,7 +193,8 @@ export default function VideoGrid({
                     width={1280}
                     height={720}
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="h-48 w-full object-cover sm:h-56"
+                    className="h-48 w-full object-cover sm:h-56 cursor-pointer"
+                    onClick={() => setSelectedItem(item)}
                   />
                 ) : (
                   <img
@@ -199,9 +202,10 @@ export default function VideoGrid({
                     alt={item.title ?? item.slug}
                     width={1280}
                     height={720}
-                    className="h-48 w-full object-cover sm:h-56"
+                    className="h-48 w-full object-cover sm:h-56 cursor-pointer"
                     loading="lazy"
                     decoding="async"
+                    onClick={() => setSelectedItem(item)}
                   />
                 )
               ) : (
@@ -273,6 +277,15 @@ export default function VideoGrid({
       >
         {copy.video.markdownCopied}
       </div>
+
+      {selectedItem && (
+        <MediaDetailModal
+          item={selectedItem}
+          isOpen={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          type="video"
+        />
+      )}
     </div>
   )
 }
