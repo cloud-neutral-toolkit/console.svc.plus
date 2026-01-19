@@ -35,9 +35,9 @@ def generate_index(category, config):
             ext = os.path.splitext(file)[1].lower()
             if ext in valid_extensions:
                 has_files = True
-                # Calculate relative path from public/{category}
+                # Calculate relative path from public/ (e.g. images/foo.jpg)
                 full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, base_dir)
+                rel_path = os.path.relpath(full_path, PUBLIC_DIR)
                 
                 # Normalize path separators to forward slash
                 rel_path = rel_path.replace(os.path.sep, "/")

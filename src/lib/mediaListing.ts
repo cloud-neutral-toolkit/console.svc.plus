@@ -53,7 +53,8 @@ export async function listMediaItems(
   const items: ContentItem[] = indexItems.map((item) => {
     // Determine the base path segment based on kind
     // e.g. kind='images' -> url = .../images/...
-    const url = `${baseUrl}/${kind}/${item.path}`
+    // Note: item.path now includes the category prefix (e.g. "images/foo.jpg")
+    const url = `${baseUrl}/${item.path}`
 
     // Title from filename (simple heuristic)
     const filename = path.basename(item.path)
