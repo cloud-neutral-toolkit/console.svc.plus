@@ -90,6 +90,8 @@ type OnwalkCopy = {
     eyebrow: string
     title: string
     subtitle: string
+    copyMarkdown: string
+    markdownCopied: string
   }
   video: {
     eyebrow: string
@@ -99,6 +101,8 @@ type OnwalkCopy = {
     pageLabel: string
     prev: string
     next: string
+    copyMarkdown: string
+    markdownCopied: string
   }
 }
 
@@ -197,6 +201,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       eyebrow: '瞬间',
       title: '以影像为入口的单页阅读',
       subtitle: '每一张照片对应一段文字，让图像延续成叙事。',
+      copyMarkdown: '复制 Markdown 链接',
+      markdownCopied: 'Markdown 链接已复制',
     },
     video: {
       eyebrow: '影像',
@@ -206,6 +212,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       pageLabel: '页码',
       prev: '上一页',
       next: '下一页',
+      copyMarkdown: '复制 Markdown 链接',
+      markdownCopied: 'Markdown 链接已复制',
     },
   },
   en: {
@@ -302,6 +310,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       eyebrow: 'Moments',
       title: 'Single-page reading led by images',
       subtitle: 'Each photo pairs with a passage so images carry on the narrative.',
+      copyMarkdown: 'Copy Markdown Link',
+      markdownCopied: 'Markdown Link Copied',
     },
     video: {
       eyebrow: 'Theater',
@@ -311,6 +321,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       pageLabel: 'Page',
       prev: 'Previous',
       next: 'Next',
+      copyMarkdown: 'Copy Markdown Link',
+      markdownCopied: 'Markdown Link Copied',
     },
   },
 }

@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 
 import { useOnwalkCopy } from '@/i18n/useOnwalkCopy'
 import type { ContentItem } from '@/lib/content'
+import { copyToClipboard } from '@/lib/clipboard'
 
 const PAGE_SIZE = 12
 
@@ -31,6 +32,7 @@ export default function VideoGrid({
   const [sort, setSort] = useState<'latest' | 'location' | 'views'>('latest')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [pageIndex, setPageIndex] = useState(0)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   const handleSort = (newSort: 'latest' | 'location' | 'views') => {
     if (sort === newSort) {
@@ -38,6 +40,23 @@ export default function VideoGrid({
     } else {
       setSort(newSort)
       setSortDirection('desc')
+    }
+  }
+
+  const handleCopyMarkdown = async (e: React.MouseEvent, item: ContentItem) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const baseUrl = process.env.NEXT_PUBLIC_MEDIA_BASE_URL?.replace(/\/+$/, '') || ''
+    const markdown = `[${item.title ?? item.slug}](${baseUrl}/${item.slug})`
+    console.log('[Debug] Generated Markdown:', markdown, 'BaseURL:', baseUrl, 'Slug:', item.slug)
+
+    const success = await copyToClipboard(markdown)
+    if (success) {
+      console.log('Markdown copied successfully')
+      setCopiedKey(item.slug)
+      setTimeout(() => setCopiedKey(null), 2000)
+    } else {
+      console.error('Failed to copy markdown')
     }
   }
 
@@ -113,8 +132,45 @@ export default function VideoGrid({
         {currentItems.map((item) => (
           <div
             key={item.slug}
-            className="overflow-hidden rounded-2xl border border-[#efefef] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.04)]"
+            className="group relative overflow-hidden rounded-2xl border border-[#efefef] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.04)]"
           >
+            <button
+              onClick={(e) => handleCopyMarkdown(e, item)}
+              title={copiedKey === item.slug ? copy.video.markdownCopied : copy.video.copyMarkdown}
+              className={`absolute right-3 top-3 z-10 hidden items-center justify-center rounded-full p-2 text-white backdrop-blur-md transition group-hover:flex ${copiedKey === item.slug ? 'bg-green-500/80 hover:bg-green-600/90' : 'bg-black/50 hover:bg-black/70'
+                }`}
+            >
+              {copiedKey === item.slug ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                </svg>
+              )}
+            </button>
             <div className="relative">
               {item.src ? (
                 <video
@@ -210,6 +266,13 @@ export default function VideoGrid({
           </div>
         </div>
       )}
+      {/* Toast Notification */}
+      <div
+        className={`fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm text-slate-900 shadow-lg backdrop-blur transition-all duration-300 ${copiedKey ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'
+          }`}
+      >
+        {copy.video.markdownCopied}
+      </div>
     </div>
   )
 }
