@@ -4,7 +4,8 @@ import { listMediaItems } from '@/lib/mediaListing'
 export const imagesPerPage = 12
 
 export async function getImageItems(): Promise<ContentItem[]> {
-  return listMediaItems('images', { sort: 'name' })
+  // Sort by name by default from listing, but client side will re-sort
+  return listMediaItems('images', { sort: 'latest' })
 }
 
 export function paginateImages(items: ContentItem[], page: number) {

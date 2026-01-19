@@ -13,14 +13,8 @@ export const metadata: Metadata = {
 
 export default async function ImagesPage() {
   const items = await getImageItems()
-  const { currentPage, totalPages, totalImages, pagedItems } = paginateImages(items, 1)
 
   return (
-    <ImagesGallery
-      items={pagedItems}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      totalImages={totalImages}
-    />
+    <ImagesGallery items={items} />
   )
 }

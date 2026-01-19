@@ -28,20 +28,77 @@ export default function VideoGrid({
 }) {
   const copy = useOnwalkCopy()
   const videoItems = items
+  const [sort, setSort] = useState<'latest' | 'location' | 'views'>('latest')
   const [pageIndex, setPageIndex] = useState(0)
-  const totalPages = Math.max(1, Math.ceil(videoItems.length / PAGE_SIZE))
+
+  // Reset page when order changes
+  useMemo(() => {
+    setPageIndex(0)
+  }, [sort])
+
+  const sortedItems = useMemo(() => {
+    const list = [...items]
+    if (sort === 'location') {
+      list.sort((a, b) => {
+        const locA = Array.isArray(a.location) ? a.location.join(', ') : (a.location || '')
+        const locB = Array.isArray(b.location) ? b.location.join(', ') : (b.location || '')
+        return locA.localeCompare(locB)
+      })
+    } else if (sort === 'views') {
+      list.sort((a, b) => (b.views || 0) - (a.views || 0))
+    } else {
+      // latest/date
+      list.sort((a, b) => {
+        const tA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+        const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+        return tB - tA
+      })
+    }
+    return list
+  }, [items, sort])
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / PAGE_SIZE))
   const clampedPageIndex = Math.min(pageIndex, totalPages - 1)
   const pagedItems = useMemo(() => {
     const start = clampedPageIndex * PAGE_SIZE
-    return videoItems.slice(start, start + PAGE_SIZE)
-  }, [videoItems, clampedPageIndex])
+    return sortedItems.slice(start, start + PAGE_SIZE)
+  }, [sortedItems, clampedPageIndex])
 
-  const currentItems = variant === 'overview' ? videoItems.slice(0, 4) : pagedItems
+  const currentItems = variant === 'overview' ? sortedItems.slice(0, 4) : pagedItems
   const canGoBack = clampedPageIndex > 0
   const canGoForward = clampedPageIndex < totalPages - 1
 
+  const formatTime = (isoString?: string) => {
+    if (!isoString) return ''
+    return new Date(isoString).toLocaleDateString()
+  }
+
   return (
     <div className="space-y-8">
+      {variant === 'full' && (
+        <div className="mb-6 flex flex-wrap items-center justify-end gap-3 text-sm">
+          <span className="text-slate-500 mr-2">排序:</span>
+          <button
+            onClick={() => setSort('latest')}
+            className={`rounded-full px-3 py-1 transition ${sort === 'latest' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+          >
+            更新时间
+          </button>
+          <button
+            onClick={() => setSort('location')}
+            className={`rounded-full px-3 py-1 transition ${sort === 'location' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+          >
+            位置
+          </button>
+          <button
+            onClick={() => setSort('views')}
+            className={`rounded-full px-3 py-1 transition ${sort === 'views' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+          >
+            访问量
+          </button>
+        </div>
+      )}
+
       <div className={`grid gap-6 ${columns === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'}`}>
         {currentItems.map((item) => (
           <div
@@ -99,7 +156,15 @@ export default function VideoGrid({
               <Link href="/videos" className="text-sm font-medium text-[#1f1f1f] hover:text-[#1f1f1f]">
                 {item.title ?? item.slug}
               </Link>
-              {item.location && <p className="text-xs text-[#747775]">{item.location}</p>}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#747775]">
+                {item.updatedAt && (
+                  <span title="Update time">{formatTime(item.updatedAt)}</span>
+                )}
+                {item.location && <span title="Location">{item.location}</span>}
+                {item.views && (
+                  <span title="Views">👁️ {item.views}</span>
+                )}
+              </div>
               {item.src && item.src.startsWith('/') && !item.src.startsWith('//') && (
                 <p className="mt-2 rounded bg-red-100 p-2 text-xs text-red-600">
                   ⚠️ Relative URL detected: {item.src}. <br />

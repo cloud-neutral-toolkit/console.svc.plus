@@ -11,6 +11,9 @@ interface MediaIndexItem {
   path: string
   ext: string
   type: 'image' | 'video'
+  updatedAt?: string
+  location?: string
+  views?: number
 }
 
 async function readMediaIndex(kind: MediaKind): Promise<MediaIndexItem[]> {
@@ -55,6 +58,9 @@ export async function listMediaItems(
     return {
       slug: item.path,
       title,
+      updatedAt: item.updatedAt,
+      location: item.location,
+      views: item.views,
       content: '', // No content for media items
       ...(kind === 'images' ? { cover: url } : { src: url }),
     }
@@ -66,14 +72,15 @@ export async function listMediaItems(
   if (sort === 'name') {
     items.sort((a, b) => a.slug.localeCompare(b.slug, 'en'))
   } else {
-    // For 'latest' in the context of static files without mtime in JSON,
-    // we can reverse sort by path as a proxy if files are named chronologically,
-    // or just fallback to alpha. The index generation script sorts by path.
-    // If we really need 'latest', we'd need date info in the JSON index.
-    // For now, reverse alpha or just 'name' is the best we can do without metadata.
-    // Reverting to alpha sort (or reverse alpha) based on legacy behavior approximation.
-    // Legacy used mtime. We don't have it. Let's use reverse path for 'latest'.
-    items.sort((a, b) => b.slug.localeCompare(a.slug, 'en'))
+    // 'latest' sort
+    items.sort((a, b) => {
+      // Use updatedAt if available
+      if (a.updatedAt && b.updatedAt) {
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      }
+      // Fallback to path reverse for robustness
+      return b.slug.localeCompare(a.slug, 'en')
+    })
   }
 
   if (options?.limit) {

@@ -17,6 +17,8 @@ export type ContentItem = {
   location?: string | string[]
   duration?: string
   category?: string
+  updatedAt?: string
+  views?: number
   content: string
 }
 

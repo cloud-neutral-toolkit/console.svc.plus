@@ -2,6 +2,7 @@
 import os
 import json
 import io
+import datetime
 
 # Configuration
 PUBLIC_DIR = "public"
@@ -44,10 +45,44 @@ def generate_index(category, config):
                 # Remove leading slash if present (os.path.relpath usually doesn't add one, but for safety)
                 rel_path = rel_path.lstrip("/")
                 
+                # Get file modification time in ISO format
+                mtime = os.path.getmtime(full_path)
+                updated_at = datetime.datetime.fromtimestamp(mtime).isoformat()
+
+                # Parse location from path (heuristic: use parent folders)
+                # e.g. china/shanghai/pudong/landscape/xxx.jpg -> "Pudong, Shanghai"
+                # Simplified: take the last two directory segments if available, reverse them, and capitalize
+                path_parts = rel_path.split('/')[:-1] # Exclude filename
+                location = None
+                if path_parts:
+                    # Filter out purely structural folders if known? For now just take decent parts
+                    # Let's try to take up to 2 meaningful parts.
+                    # e.g. china/shanghai/huangpu/citywalk -> Huangpu, Shanghai
+                    
+                    # Remove common prefix words if any, or just take last 2
+                    meaningful_parts = [p for p in path_parts if p not in ['drone', 'landscape', 'citywalk', 'architecture']]
+                    if meaningful_parts:
+                        # Take last 2
+                        loc_parts = meaningful_parts[-2:]
+                        # Capitalize and reverse
+                        loc_parts = [p.title() for p in loc_parts]
+                        location = ", ".join(reversed(loc_parts))
+
+
+                # Generate random views for demo purposes (100 - 5000)
+                # make it deterministic based on filename hash so it doesn't change on every run
+                import hashlib
+                hash_obj = hashlib.md5(rel_path.encode())
+                hash_int = int(hash_obj.hexdigest(), 16)
+                views = 100 + (hash_int % 4900)
+
                 items.append({
                     "path": rel_path,
                     "ext": ext.lstrip("."),
-                    "type": media_type
+                    "type": media_type,
+                    "updatedAt": updated_at,
+                    "location": location,
+                    "views": views
                 })
     
     if not has_files:
