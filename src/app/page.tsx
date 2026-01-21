@@ -33,34 +33,34 @@ export default async function HomePage() {
   const latestBlogs = filterPostsByLanguage(blogPosts, language).slice(0, 3)
 
   return (
-    <div className="relative min-h-screen bg-[#f9f9f9] text-[#1f1f1f]">
+    <div className="relative min-h-screen bg-background text-text transition-colors duration-300">
       <SiteHeader />
-      <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-24">
+      <main className="relative mx-auto flex w-full max-w-7xl flex-col gap-16 px-6 pb-24">
         <HomeHero />
 
         <section className="space-y-6">
           <HomeSectionHeader section="blog" />
-          <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
+          <div className="rounded-large border border-border bg-surface p-6 shadow-sm">
             <MasonryGrid posts={latestBlogs} />
           </div>
         </section>
 
         <section className="space-y-6">
           <HomeSectionHeader section="image" />
-          <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
+          <div className="rounded-large border border-border bg-surface p-6 shadow-sm">
             <ImageCarousel items={latestImages} />
           </div>
         </section>
 
         <section className="space-y-6">
           <HomeSectionHeader section="video" />
-          <div className="rounded-3xl border border-[#efefef] bg-white p-6 shadow-[0_4px_8px_rgba(0,0,0,0.04)]">
+          <div className="rounded-large border border-border bg-surface p-6 shadow-sm">
             <VideoGrid items={latestVideos} columns={3} />
           </div>
           <div className="flex">
             <Link
               href="/videos"
-              className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-[#1f1f1f] transition hover:border-gray-400"
+              className="rounded-full border border-border px-4 py-2 text-sm font-medium text-text transition hover:border-text-secondary"
             >
               更多
             </Link>

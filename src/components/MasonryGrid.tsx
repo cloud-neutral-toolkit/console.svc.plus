@@ -19,13 +19,13 @@ export default function MasonryGrid({ posts }: { posts: ContentItem[] }) {
         <Link
           key={post.slug}
           href={`/blogs/${post.slug}`}
-          className="block rounded-xl border border-gray-100 bg-white p-4 transition hover:bg-[#f2f2f2]"
+          className="group block rounded-xl border border-border bg-surface p-6 transition-colors duration-300 hover:bg-surface-elevated"
         >
-          <div className="space-y-2">
-            <span className="text-xs text-[#747775]">{post.date ?? '2024-06-01'}</span>
-            <h3 className="text-base font-medium text-[#1f1f1f]">{post.title}</h3>
+          <div className="space-y-3">
+            <span className="text-sm font-medium text-primary mb-2 block">{post.date ?? '2024-06-01'}</span>
+            <h3 className="text-2xl font-bold text-heading group-hover:text-primary transition-colors">{post.title}</h3>
             {post.content && (
-              <p className="line-clamp-2 text-sm leading-relaxed text-[#747775]">
+              <p className="line-clamp-2 text-base leading-relaxed text-text-secondary">
                 {buildExcerpt(post.content)}...
               </p>
             )}
@@ -34,7 +34,7 @@ export default function MasonryGrid({ posts }: { posts: ContentItem[] }) {
       ))}
       <Link
         href="/blogs"
-        className="flex w-full items-center justify-center rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-[#1f1f1f] transition hover:border-gray-400"
+        className="flex w-full items-center justify-center rounded-full border border-border bg-surface px-8 py-3 text-sm font-medium text-text transition hover:bg-surface-elevated"
       >
         Read More
       </Link>

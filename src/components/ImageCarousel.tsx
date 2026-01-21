@@ -16,7 +16,7 @@ export default function ImageCarousel({ items }: { items: ContentItem[] }) {
         {galleryItems.map((item) => (
           <article
             key={item.slug}
-            className="group relative flex h-[300px] flex-shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-[#efefef] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.04)] cursor-pointer"
+            className="group relative flex h-[300px] flex-shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm cursor-pointer"
             style={{ aspectRatio: '3 / 4' }}
             onClick={() => setSelectedItem(item)}
           >
@@ -34,7 +34,7 @@ export default function ImageCarousel({ items }: { items: ContentItem[] }) {
               <div className={`h-full w-full bg-gradient-to-br ${item.tone ?? 'from-slate-200 via-slate-100 to-slate-50'}`} />
             )}
             <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
-              <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[#1f1f1f] backdrop-blur">
+              <span className="inline-flex rounded-full bg-surface-translucent px-3 py-1 text-xs font-medium text-text backdrop-blur">
                 {item.title}
               </span>
             </div>
@@ -42,7 +42,7 @@ export default function ImageCarousel({ items }: { items: ContentItem[] }) {
         ))}
         <Link
           href="/images"
-          className="group flex h-[300px] flex-shrink-0 snap-start items-center justify-center rounded-2xl border border-dashed border-[#e4e4e4] bg-[#f5f5f5] px-6 text-center text-sm font-medium text-[#1f1f1f] transition hover:bg-[#f2f2f2]"
+          className="group flex h-[300px] flex-shrink-0 snap-start items-center justify-center rounded-2xl border border-dashed border-border bg-surface-muted px-6 text-center text-sm font-medium text-text transition hover:bg-surface-elevated"
           style={{ aspectRatio: '3 / 4' }}
         >
           <span className="leading-relaxed">查看全部</span>
