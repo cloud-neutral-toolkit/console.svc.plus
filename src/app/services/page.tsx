@@ -52,6 +52,16 @@ export default function ServicesPage() {
       external: true,
     },
     {
+      key: 'page-reading',
+      name: isChinese ? 'Page Reading Agent' : 'Page Reading Agent',
+      description: isChinese
+        ? '智能网页阅读与分析服务。'
+        : 'Intelligent web page reading and analysis service.',
+      href: 'https://page-reading.svc.plus',
+      icon: FileText,
+      external: true,
+    },
+    {
       key: 'artifact',
       name: isChinese ? '制品 / 镜像' : 'Artifact / Mirror',
       description: isChinese
