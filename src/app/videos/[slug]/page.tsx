@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             images: video.poster ? [{ url: video.poster }] : [],
         },
         alternates: {
-            canonical: `/videos/${video.slug}`,
+            canonical: `/videos/${encodeURIComponent(video.slug)}`,
         },
     }
 }
@@ -95,7 +95,7 @@ export default async function VideoPage({ params }: Props) {
                 <BreadcrumbJsonLd items={[
                     { name: 'Home', path: '/' },
                     { name: 'Videos', path: '/videos' },
-                    { name: videoData.title || 'Video', path: `/videos/${slug}` }
+                    { name: videoData.title || 'Video', path: `/videos/${encodeURIComponent(slug)}` }
                 ]} />
                 {/* JSON-LD for SEO */}
                 <script
