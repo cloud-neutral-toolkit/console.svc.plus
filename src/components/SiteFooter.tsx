@@ -27,13 +27,13 @@ export default function SiteFooter() {
   ]
 
   return (
-    <footer className="mx-auto w-full max-w-6xl px-6 pb-16 pt-16 text-sm text-slate-500">
-      <div className="flex flex-col gap-6 border-t border-slate-200 pt-6">
+    <footer className="mx-auto w-full max-w-7xl px-6 pb-16 pt-16 text-sm text-text-muted transition-colors duration-300">
+      <div className="flex flex-col gap-6 border-t border-border pt-6">
         <div className="flex flex-wrap items-center justify-center gap-4">
           {socials.map((item) => {
             const Icon = item.icon
             const sharedClasses =
-              'group relative flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800'
+              'group relative flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-text-secondary shadow-sm transition-all hover:border-primary hover:text-primary hover:bg-surface-elevated'
 
             const icon = <Icon className="h-5 w-5" aria-hidden />
 
@@ -56,13 +56,13 @@ export default function SiteFooter() {
               <span key={item.label} className={sharedClasses} aria-label={item.label}>
                 {icon}
                 {item.qrImage ? (
-                  <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-3 hidden -translate-x-1/2 flex-col items-center gap-1 rounded-lg border border-slate-200 bg-white p-2 text-[10px] text-slate-500 shadow-lg group-hover:flex">
+                  <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-3 hidden -translate-x-1/2 flex-col items-center gap-1 rounded-lg border border-border bg-surface-elevated p-2 text-[10px] text-text-muted shadow-lg group-hover:flex">
                     <img
                       src={item.qrImage}
                       alt={item.qrAlt ?? item.label}
                       width={112}
                       height={112}
-                      className="h-28 w-28"
+                      className="h-28 w-28 rounded"
                       loading="lazy"
                       decoding="async"
                     />
@@ -73,7 +73,7 @@ export default function SiteFooter() {
             )
           })}
         </div>
-        <div className="flex flex-col gap-2 text-center text-sm text-slate-500">
+        <div className="flex flex-col gap-2 text-center text-sm text-text-muted">
           <p>{copy.footer.tagline}</p>
           {copy.footer.description ? <p>{copy.footer.description}</p> : null}
         </div>

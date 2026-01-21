@@ -1,6 +1,7 @@
 import './globals.css'
 import { Suspense } from 'react'
 import { AppProviders } from './AppProviders'
+import { ThemeToggle } from '@/components/theme'
 import Script from 'next/script'
 import { Analytics as GoogleAnalytics } from './Analytics'
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
@@ -27,6 +28,12 @@ export default function RootLayout({
   return (
     <html {...htmlAttributes}>
       <head>
+        {/* Google Fonts & Icons */}
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
         {/* Google Analytics 4 */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
@@ -52,6 +59,7 @@ export default function RootLayout({
         <Suspense fallback={<div />}>
           <AppProviders>
             {children}
+            <ThemeToggle />
           </AppProviders>
         </Suspense>
 

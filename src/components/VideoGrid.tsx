@@ -111,19 +111,19 @@ export default function VideoGrid({
           <span className="text-slate-500 mr-2">排序:</span>
           <button
             onClick={() => handleSort('latest')}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'latest' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'latest' ? 'bg-primary text-primary-foreground' : 'bg-surface text-text-muted hover:bg-surface-hover'}`}
           >
             更新时间 {sort === 'latest' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
           <button
             onClick={() => handleSort('location')}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'location' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'location' ? 'bg-primary text-primary-foreground' : 'bg-surface text-text-muted hover:bg-surface-hover'}`}
           >
             位置 {sort === 'location' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
           <button
             onClick={() => handleSort('views')}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'views' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            className={`flex items-center gap-1 rounded-full px-3 py-1 transition ${sort === 'views' ? 'bg-primary text-primary-foreground' : 'bg-surface text-text-muted hover:bg-surface-hover'}`}
           >
             访问量 {sort === 'views' && (sortDirection === 'asc' ? '↑' : '↓')}
           </button>
@@ -134,7 +134,7 @@ export default function VideoGrid({
         {currentItems.map((item) => (
           <div
             key={item.slug}
-            className="group relative overflow-hidden rounded-2xl border border-[#efefef] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.04)]"
+            className="group relative overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-300 hover:bg-surface-elevated"
           >
             <button
               onClick={(e) => handleCopyMarkdown(e, item)}
@@ -209,7 +209,7 @@ export default function VideoGrid({
                   />
                 )
               ) : (
-                <div className="flex h-48 items-center justify-center text-sm text-[#747775]">{copy.video.empty}</div>
+                <div className="flex h-48 items-center justify-center text-sm text-text-muted">{copy.video.empty}</div>
               )}
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/30 text-white shadow-sm backdrop-blur-md">
@@ -223,10 +223,10 @@ export default function VideoGrid({
               </span>
             </div>
             <div className="space-y-1 p-4">
-              <Link href="/videos" className="text-sm font-medium text-[#1f1f1f] hover:text-[#1f1f1f]">
+              <Link href="/videos" className="text-lg font-bold text-heading hover:text-primary transition-colors">
                 {item.title ?? item.slug}
               </Link>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#747775]">
+              <div className="flex flex-wrap items-center justify-between text-sm text-text-secondary w-full">
                 {item.updatedAt && (
                   <span title="Update time">{formatTime(item.updatedAt)}</span>
                 )}
@@ -253,7 +253,7 @@ export default function VideoGrid({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full border border-border px-4 py-2 text-text transition hover:border-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => setPageIndex(Math.max(0, clampedPageIndex - 1))}
               disabled={!canGoBack}
             >
@@ -261,7 +261,7 @@ export default function VideoGrid({
             </button>
             <button
               type="button"
-              className="rounded-full border border-[#e4e4e4] px-4 py-2 text-[#1f1f1f] transition hover:border-[#d8d8d8] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full border border-border px-4 py-2 text-text transition hover:border-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => setPageIndex(Math.min(totalPages - 1, clampedPageIndex + 1))}
               disabled={!canGoForward}
             >

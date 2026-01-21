@@ -24,40 +24,48 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-10">
-      <Link href="/" className="text-lg font-semibold tracking-[0.18em] text-slate-900">
-        {copy.header.title}
-      </Link>
-      <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
-        <nav className="flex flex-wrap items-center gap-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch={item.prefetch}
-              className="transition hover:text-slate-900"
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md transition-colors duration-300">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-heading">
+          <span className="material-symbols-outlined text-primary">photo_camera</span>
+          <span className="logo-text">{copy.header.title}</span>
+        </Link>
+        <div className="hidden md:flex items-center gap-8">
+          <nav className="flex items-center gap-6 text-sm font-medium">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={item.prefetch}
+                className="text-text-secondary transition-colors hover:text-primary"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="h-4 w-[1px] bg-border"></div>
+          <div className="flex items-center rounded-full border border-border bg-surface-elevated p-1">
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en')}
+              className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${language === 'en'
+                  ? 'bg-surface text-heading shadow-sm ring-1 ring-border'
+                  : 'text-text-secondary hover:text-text'
+                }`}
             >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center rounded-full border border-slate-200 bg-white/80 p-0.5 text-xs font-semibold text-slate-500">
-          <button
-            type="button"
-            onClick={() => handleLanguageChange('zh')}
-            className={`rounded-full px-3 py-1 transition ${language === 'zh' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'}`}
-            aria-pressed={language === 'zh'}
-          >
-            中文
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLanguageChange('en')}
-            className={`rounded-full px-3 py-1 transition ${language === 'en' ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'}`}
-            aria-pressed={language === 'en'}
-          >
-            EN
-          </button>
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('zh')}
+              className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${language === 'zh'
+                  ? 'bg-surface text-heading shadow-sm ring-1 ring-border'
+                  : 'text-text-secondary hover:text-text'
+                }`}
+            >
+              中文
+            </button>
+          </div>
         </div>
       </div>
     </header>
