@@ -27,9 +27,9 @@ type NavSubItem = {
 export default function Navbar() {
   const pathname = usePathname()
   const isHiddenRoute = pathname
-    ? ['/login', '/register', '/xstream', '/xcloudflow', '/xscopehub', '/blog'].some((prefix) =>
-        pathname.startsWith(prefix),
-      )
+    ? ['/login', '/register', '/xstream', '/xcloudflow', '/xscopehub', '/blogs'].some((prefix) =>
+      pathname.startsWith(prefix),
+    )
     : false
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedChannels, setSelectedChannels] = useState<ReleaseChannel[]>(['stable'])
@@ -98,48 +98,48 @@ export default function Navbar() {
 
   const accountChildren: NavSubItem[] = user
     ? [
-        {
-          key: 'userCenter',
-          label: accountCopy.userCenter,
-          href: '/panel',
-          togglePath: '/panel',
-        },
-        ...(user?.isAdmin || user?.isOperator
-          ? [
-              {
-                key: 'management',
-                label: accountCopy.management,
-                href: '/panel/management',
-                togglePath: '/panel/management',
-              } satisfies NavSubItem,
-            ]
-          : []),
-        {
-          key: 'logout',
-          label: accountCopy.logout,
-          href: '/logout',
-        },
-      ]
+      {
+        key: 'userCenter',
+        label: accountCopy.userCenter,
+        href: '/panel',
+        togglePath: '/panel',
+      },
+      ...(user?.isAdmin || user?.isOperator
+        ? [
+          {
+            key: 'management',
+            label: accountCopy.management,
+            href: '/panel/management',
+            togglePath: '/panel/management',
+          } satisfies NavSubItem,
+        ]
+        : []),
+      {
+        key: 'logout',
+        label: accountCopy.logout,
+        href: '/logout',
+      },
+    ]
     : [
-        {
-          key: 'register',
-          label: nav.account.register,
-          href: '/register',
-          togglePath: '/register',
-        },
-        {
-          key: 'login',
-          label: nav.account.login,
-          href: '/login',
-          togglePath: '/login',
-        },
-        {
-          key: 'demo',
-          label: nav.account.demo,
-          href: '/demo',
-          togglePath: '/demo',
-        },
-      ]
+      {
+        key: 'register',
+        label: nav.account.register,
+        href: '/register',
+        togglePath: '/register',
+      },
+      {
+        key: 'login',
+        label: nav.account.login,
+        href: '/login',
+        togglePath: '/login',
+      },
+      {
+        key: 'demo',
+        label: nav.account.demo,
+        href: '/demo',
+        togglePath: '/demo',
+      },
+    ]
 
   const accountLabel = nav.account.title
 
@@ -194,7 +194,7 @@ export default function Navbar() {
     { key: 'docs', label: labels.docs, href: '/docs' },
   ]
 
-  const downloadLink = { key: 'blog', label: labels.download, href: '/blog' }
+  const downloadLink = { key: 'blog', label: labels.download, href: '/blogs' }
 
   const servicesLink = {
     key: 'services',

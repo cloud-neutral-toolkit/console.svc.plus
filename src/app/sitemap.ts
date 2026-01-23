@@ -13,7 +13,7 @@ const staticEntries: MetadataRoute.Sitemap = [
     priority: 1,
   },
   {
-    url: `${baseUrl}/blog`,
+    url: `${baseUrl}/blogs`,
     changeFrequency: 'weekly',
     priority: 0.8,
   },
@@ -43,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, collections] = await Promise.all([getBlogPosts(), getDocCollections()])
 
   const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
+    url: `${baseUrl}/blogs/${post.slug}`,
     lastModified: post.date ? new Date(post.date) : undefined,
     changeFrequency: 'weekly',
     priority: 0.7,
