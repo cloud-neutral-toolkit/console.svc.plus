@@ -26,11 +26,11 @@
 
 *   **console.svc.plus**: (本项目) 主前端仪表盘。
 *   **accounts.svc.plus**: 身份与账户管理服务。
-*   **postgresql.svc.plus**: 带有专用扩展的 PostgreSQL 数据库服务。
 *   **rag-server.svc.plus**: 检索增强生成 (RAG) 后端。
+*   **postgresql.svc.plus**: 带有专用扩展的 PostgreSQL 数据库服务。
 *   **page-reading-agent-backend**: 页面阅读智能体后端逻辑。
 *   **page-reading-agent-dashboard**: 页面阅读智能体专用仪表盘。
-*   **wechat-to-markdown.svc.plus**: 微信内容转 Markdown 工具服务。
+*   **wechat-to-markdown.svc.plus**: 微信内容转 Markdown 工具服务 (开源引用项目)
 
 ## 技术栈 (Tech Stack)
 
