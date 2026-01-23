@@ -189,8 +189,7 @@ const CONTACT_PANEL: ContactPanelContent = {
   ],
 }
 
-const BLOG_CONTENT_ROOT = path.join(process.cwd(), 'src', 'content', 'blog')
-const KNOWLEDGE_CONTENT_ROOT = path.join(process.cwd(), 'content')
+const BLOG_CONTENT_ROOT = path.join(process.cwd(), 'src', 'content', 'blogs', 'content')
 
 const CATEGORY_MAP: { key: string; label: string; match: (segments: string[]) => boolean }[] = [
   { key: 'infra-cloud', label: 'Infra & Cloud', match: (segments) => segments[0] === '04-infra-platform' },
@@ -198,6 +197,7 @@ const CATEGORY_MAP: { key: string; label: string; match: (segments: string[]) =>
   { key: 'identity', label: 'ID & Security', match: (segments) => segments[0] === '01-id-security' },
   { key: 'iac-devops', label: 'IaC & DevOps', match: (segments) => segments[0] === '02-iac-devops' },
   { key: 'data-ai', label: 'Data & AI', match: (segments) => segments[0] === '05-data-ai' },
+  { key: 'workshops', label: 'Workshops', match: (segments) => segments[0] === '06-workshops' },
   {
     key: 'insight',
     label: '资讯',
@@ -211,9 +211,6 @@ const CATEGORY_MAP: { key: string; label: string; match: (segments: string[]) =>
 ]
 
 export function resolveBlogContentRoot(): string {
-  if (fs.existsSync(KNOWLEDGE_CONTENT_ROOT)) {
-    return KNOWLEDGE_CONTENT_ROOT
-  }
   return BLOG_CONTENT_ROOT
 }
 
