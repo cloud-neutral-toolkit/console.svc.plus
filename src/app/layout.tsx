@@ -2,7 +2,7 @@ export const dynamic = 'error'
 
 import './globals.css'
 import Script from 'next/script'
-import { Analytics } from '@vercel/analytics/next'
+import { Analytics } from '@vercel/analytics/react'
 import { AppProviders } from './AppProviders'
 
 export const metadata = {
