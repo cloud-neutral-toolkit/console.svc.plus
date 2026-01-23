@@ -61,7 +61,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     <main className="flex min-h-screen flex-col bg-slate-50">
       <div className="mx-auto w-full max-w-4xl px-4 py-16">
         <Link
-          href="/blog"
+          href="/blogs"
           className="mb-8 inline-flex items-center text-sm font-semibold text-brand transition hover:text-brand-dark"
         >
           ← {post.date ? 'Back to Blog' : '返回博客'}
@@ -98,7 +98,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         <footer className="mt-16 border-t border-slate-200 pt-8">
           <Link
-            href="/blog"
+            href="/blogs"
             className="inline-flex items-center text-sm font-semibold text-brand transition hover:text-brand-dark"
           >
             ← Back to Blog

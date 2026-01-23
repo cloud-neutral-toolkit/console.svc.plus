@@ -118,20 +118,18 @@ export default function BlogList({ posts, categories }: BlogListProps) {
               return (
                 <Link
                   key={tab.key}
-                  href={`/blog${isActive ? '' : `?category=${tab.key}`}`}
-                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                    isActive
+                  href={`/blogs${isActive ? '' : `?category=${tab.key}`}`}
+                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${isActive
                       ? 'border-brand bg-brand text-white shadow-sm'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-brand/60 hover:text-brand'
-                  }`}
+                    }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <span>{tab.label}</span>
                   {labelWithCount ? (
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
-                      }`}
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                        }`}
                     >
                       {labelWithCount}
                     </span>
@@ -140,18 +138,16 @@ export default function BlogList({ posts, categories }: BlogListProps) {
               )
             })}
             <Link
-              href="/blog"
-              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                !selectedCategory
+              href="/blogs"
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${!selectedCategory
                   ? 'border-brand bg-brand text-white shadow-sm'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-brand/60 hover:text-brand'
-              }`}
+                }`}
             >
               全部
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                  !selectedCategory ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
-                }`}
+                className={`rounded-full px-2 py-0.5 text-xs font-bold ${!selectedCategory ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                  }`}
               >
                 {posts.length}
               </span>
@@ -191,7 +187,7 @@ export default function BlogList({ posts, categories }: BlogListProps) {
                         </div>
                       )}
                       <Link
-                        href={`/blog/${post.slug}`}
+                        href={`/blogs/${post.slug}`}
                         className="ml-auto text-sm font-semibold text-brand transition hover:text-brand-dark"
                       >
                         Read more →
@@ -204,12 +200,11 @@ export default function BlogList({ posts, categories }: BlogListProps) {
               {totalPages > 1 && (
                 <nav className="mt-12 flex items-center justify-center gap-2">
                   <Link
-                    href={`/blog?page=${Math.max(1, currentPage - 1)}${selectedCategory ? `&category=${selectedCategory}` : ''}`}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
-                      currentPage === 1
+                    href={`/blogs?page=${Math.max(1, currentPage - 1)}${selectedCategory ? `&category=${selectedCategory}` : ''}`}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${currentPage === 1
                         ? 'cursor-not-allowed text-slate-400'
                         : 'text-brand hover:bg-slate-100'
-                    }`}
+                      }`}
                     aria-disabled={currentPage === 1}
                   >
                     Previous
@@ -218,26 +213,23 @@ export default function BlogList({ posts, categories }: BlogListProps) {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
                     <Link
                       key={pageNumber}
-                      href={`/blog?page=${pageNumber}${selectedCategory ? `&category=${selectedCategory}` : ''}`}
-                      className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
-                        pageNumber === currentPage
+                      href={`/blogs?page=${pageNumber}${selectedCategory ? `&category=${selectedCategory}` : ''}`}
+                      className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${pageNumber === currentPage
                           ? 'bg-brand text-white'
                           : 'text-slate-700 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       {pageNumber}
                     </Link>
                   ))}
 
                   <Link
-                    href={`/blog?page=${Math.min(totalPages, currentPage + 1)}${
-                      selectedCategory ? `&category=${selectedCategory}` : ''
-                    }`}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
-                      currentPage === totalPages
+                    href={`/blogs?page=${Math.min(totalPages, currentPage + 1)}${selectedCategory ? `&category=${selectedCategory}` : ''
+                      }`}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${currentPage === totalPages
                         ? 'cursor-not-allowed text-slate-400'
                         : 'text-brand hover:bg-slate-100'
-                    }`}
+                      }`}
                     aria-disabled={currentPage === totalPages}
                   >
                     Next

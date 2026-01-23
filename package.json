@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "bash scripts/Dev-MCP-Server.sh && next dev --turbo",
-    "prebuild": "tsx scripts/generate-content.ts && node scripts/build-contentlayer.mjs",
+    "prebuild": "bash scripts/sync-blog-content.sh && tsx scripts/generate-content.ts && node scripts/build-contentlayer.mjs",
     "build": "next build",
     "build:static": "npm run prebuild && next build",
     "start": "node ./scripts/start.js",
