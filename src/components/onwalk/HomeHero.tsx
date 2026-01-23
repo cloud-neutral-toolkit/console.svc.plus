@@ -18,20 +18,6 @@ export default function HomeHero({ language }: { language: string }) {
       <p className="max-w-2xl text-lg leading-relaxed text-text-secondary">
         {copy.home.hero.description}
       </p>
-      <div className="flex flex-wrap gap-3 text-xs font-medium">
-        <span className="rounded-full bg-primary px-4 py-2 text-primary-foreground shadow-md transition hover:brightness-110">
-          {copy.home.hero.chips.featured}
-        </span>
-        <span className="rounded-full border border-border bg-surface-elevated px-4 py-2 text-text transition hover:bg-border cursor-pointer">
-          {copy.home.hero.chips.moments}
-        </span>
-        <span className="rounded-full border border-border bg-surface-elevated px-4 py-2 text-text transition hover:bg-border cursor-pointer">
-          {copy.home.hero.chips.theater}
-        </span>
-        <span className="rounded-full border border-border bg-surface-elevated px-4 py-2 text-text transition hover:bg-border cursor-pointer">
-          {copy.home.hero.chips.journal}
-        </span>
-      </div>
     </section>
   );
 }
