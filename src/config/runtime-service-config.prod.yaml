@@ -2,10 +2,10 @@
 logLevel: warn
 regions:
   cn:
-    apiBaseUrl: https://cn-api.svc.plus
-    authUrl: https://accounts.svc.plus
+    apiBaseUrl: https://rag-server-svc-plus-266500572462.asia-northeast1.run.app
+    authUrl: https://accounts-svc-plus-266500572462.asia-northeast1.run.app
     dashboardUrl: https://console.svc.plus
   global:
-    apiBaseUrl: https://global-api.svc.plus
-    authUrl: https://accounts.svc.plus
+    apiBaseUrl: https://rag-server-svc-plus-266500572462.asia-northeast1.run.app
+    authUrl: https://accounts-svc-plus-266500572462.asia-northeast1.run.app
     dashboardUrl: https://console.svc.plus
