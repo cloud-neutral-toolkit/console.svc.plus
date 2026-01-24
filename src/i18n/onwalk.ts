@@ -133,8 +133,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       hero: {
         badge: 'Index',
         tagline: '影像为入口 · 文字为结构',
-        title: '分享自然之美与旅程笔记',
-        description: '捕捉光影的永恒之舞，通过镜头让转瞬即逝的时刻成为不朽。',
+        title: '观 · 界',
+        description: '万物皆是时间的过客，唯有镜头前的这一瞬，让流动的光影成为了永恒的标本。',
         chips: {
           featured: '影像聚合',
           moments: 'Moments',
@@ -242,8 +242,8 @@ export const onwalkCopy: Record<Language, OnwalkCopy> = {
       hero: {
         badge: 'Index',
         tagline: 'Images as the entry · Words as the structure',
-        title: 'Sharing the Beauty of Nature & Journeys',
-        description: 'Capturing the eternal dance of light and shadow, immortalizing the fleeting moment.',
+        title: 'View & World',
+        description: 'Capturing the eternal dance of shadow and light, making the transient moment truly immortal.',
         chips: {
           featured: 'Image Collection',
           moments: 'Moments',

@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { onwalkSeoDescription, onwalkSeoTitle } from '@/lib/seo'
 
 export const metadata = {
-  title: 'Onwalk — Walking with a Camera',
+  title: 'Onwalk — View & World',
   description:
-    '一个关于行走与摄影的个人长期项目。记录城市、户外与被忽略的空间细节。 A long-term personal project on walking and photography. Cities, outdoors, and overlooked details.',
+    '万物皆是时间的过客，唯有镜头前的这一瞬，让流动的光影成为了永恒的标本。 Capturing the eternal dance of shadow and light, making the transient moment truly immortal.',
 }
 
 import ImageCarousel from '@/components/ImageCarousel'
