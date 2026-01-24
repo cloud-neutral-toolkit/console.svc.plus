@@ -55,7 +55,7 @@ export default async function Image() {
                             textAlign: 'center',
                         }}
                     >
-                        Walking with a Camera
+                        View & World
                     </div>
 
                     {/* Tagline */}
