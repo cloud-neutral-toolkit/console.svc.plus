@@ -156,6 +156,7 @@ export default function Navbar() {
     docs: isChinese ? '文档' : 'Docs',
     download: isChinese ? '博客' : 'blog',
     openSource: isChinese ? '开源项目' : 'Open source',
+    about: isChinese ? '关于' : 'About',
     moreServices: isChinese ? '更多服务' : 'More services',
   }
 
@@ -216,12 +217,12 @@ export default function Navbar() {
     <>
       <nav
         ref={navRef}
-        className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/95 text-slate-100 backdrop-blur"
+        className="sticky top-0 z-50 w-full border-b border-surface-border bg-background/95 text-text backdrop-blur transition-colors duration-150"
       >
         <div className="mx-auto w-full max-w-7xl px-6 sm:px-8">
           <div className="flex items-center gap-5 py-3">
             <div className="flex flex-1 items-center gap-5">
-              <Link href="/" className="flex items-center gap-2 rounded-md border border-white/5 bg-slate-900/60 px-2.5 py-1.5 text-sm font-medium text-white/90 transition hover:bg-slate-800/60">
+              <Link href="/" className="flex items-center gap-2 rounded-md border border-surface-border bg-surface-muted/60 px-2.5 py-1.5 text-sm font-medium text-text/90 transition hover:bg-surface-hover/60">
                 <Image
                   src="/icons/cloudnative_32.png"
                   alt="logo"
@@ -230,14 +231,14 @@ export default function Navbar() {
                   className="h-[20px] w-[20px] opacity-90"
                   unoptimized
                 />
-                <span className="text-sm font-medium opacity-90">Cloud-Neutral</span>
+                <span className="text-sm font-medium opacity-90 text-text">Cloud-Neutral</span>
               </Link>
-              <div className="hidden items-center gap-5 text-sm font-medium text-slate-200 lg:flex">
+              <div className="hidden items-center gap-5 text-sm font-medium text-text-muted lg:flex">
                 {mainLinks.map((link) => (
                   <Link
                     key={link.key}
                     href={link.href}
-                    className="text-sm opacity-80 transition hover:text-white hover:opacity-100"
+                    className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                   >
                     {link.label}
                   </Link>
@@ -245,15 +246,15 @@ export default function Navbar() {
                 <Link
                   key={downloadLink.key}
                   href={downloadLink.href}
-                  className="text-sm opacity-80 transition hover:text-white hover:opacity-100"
+                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                 >
                   {downloadLink.label}
                 </Link>
                 <div className="group relative">
-                  <button className="flex items-center gap-1 text-sm opacity-80 transition hover:text-white hover:opacity-100">
+                  <button className="flex items-center gap-1 text-sm opacity-80 transition hover:text-primary hover:opacity-100">
                     <span>{labels.openSource}</span>
                     <svg
-                      className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-200"
+                      className="h-4 w-4 text-text-subtle transition group-hover:text-primary"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth={2}
@@ -263,12 +264,12 @@ export default function Navbar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <div className="absolute left-0 top-full hidden min-w-[200px] translate-y-1 rounded-lg border border-white/10 bg-slate-900/95 py-2 text-sm text-slate-100 opacity-0 shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-all duration-200 group-hover:block group-hover:translate-y-2 group-hover:opacity-100 group-focus-within:block group-focus-within:translate-y-2 group-focus-within:opacity-100">
+                  <div className="absolute left-0 top-full hidden min-w-[200px] translate-y-1 rounded-lg border border-surface-border bg-surface/95 py-2 text-sm text-text opacity-0 shadow-shadow-md transition-all duration-200 group-hover:block group-hover:translate-y-2 group-hover:opacity-100 group-focus-within:block group-focus-within:translate-y-2 group-focus-within:opacity-100">
                     {openSourceProjects.map((project) => (
                       <Link
                         key={project.key}
                         href={project.href}
-                        className="block px-4 py-2 text-sm opacity-80 transition hover:bg-indigo-500/10 hover:text-white hover:opacity-100"
+                        className="block px-4 py-2 text-sm opacity-80 transition hover:bg-primary/10 hover:text-primary hover:opacity-100"
                       >
                         {project.label}
                       </Link>
@@ -276,9 +277,15 @@ export default function Navbar() {
                   </div>
                 </div>
                 <Link
+                  href="/about"
+                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                >
+                  {labels.about}
+                </Link>
+                <Link
                   key={servicesLink.key}
                   href={servicesLink.href}
-                  className="text-sm opacity-80 transition hover:text-white hover:opacity-100"
+                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                 >
                   {servicesLink.label}
                 </Link>
@@ -292,29 +299,29 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setAccountMenuOpen((prev) => !prev)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.28)] transition hover:from-indigo-400 hover:to-sky-400 focus:outline-none focus:ring-2 focus:ring-indigo-300/60 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white shadow-shadow-sm transition hover:from-primary-hover hover:to-accent focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background"
                     aria-haspopup="menu"
                     aria-expanded={accountMenuOpen}
                   >
                     {accountInitial}
                   </button>
                   {accountMenuOpen ? (
-                    <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
-                      <div className="border-b border-white/10 bg-white/5 px-4 py-3">
-                        <p className="text-sm font-semibold text-white">{user.username}</p>
-                        <p className="text-xs text-slate-300">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-surface-border bg-surface/95 shadow-shadow-md">
+                      <div className="border-b border-surface-border bg-surface-muted px-4 py-3">
+                        <p className="text-sm font-semibold text-text">{user.username}</p>
+                        <p className="text-xs text-text-muted">{user.email}</p>
                       </div>
-                      <div className="py-1 text-sm text-slate-100">
+                      <div className="py-1 text-sm text-text">
                         <Link
                           href="/panel"
-                          className="block px-4 py-2 text-sm opacity-80 transition hover:bg-indigo-500/10 hover:opacity-100"
+                          className="block px-4 py-2 text-sm opacity-80 transition hover:bg-primary/10 hover:opacity-100"
                           onClick={() => setAccountMenuOpen(false)}
                         >
                           {accountCopy.userCenter}
                         </Link>
                         <Link
                           href="/logout"
-                          className="flex w-full items-center px-4 py-2 text-left text-sm text-rose-300 opacity-80 transition hover:bg-rose-500/10 hover:opacity-100"
+                          className="flex w-full items-center px-4 py-2 text-left text-sm text-danger-foreground opacity-80 transition hover:bg-danger/10 hover:opacity-100"
                           onClick={() => setAccountMenuOpen(false)}
                         >
                           {accountCopy.logout}
@@ -324,17 +331,17 @@ export default function Navbar() {
                   ) : null}
                 </div>
               ) : (
-                <div className="flex items-center gap-3 text-sm font-medium text-slate-200">
+                <div className="flex items-center gap-3 text-sm font-medium text-text-muted">
                   <Link
                     href="/login"
-                    className="text-sm opacity-80 transition hover:text-white hover:opacity-100"
+                    className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                   >
                     {nav.account.login}
                   </Link>
-                  <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+                  <span className="h-3 w-px bg-surface-border" aria-hidden="true" />
                   <Link
                     href="/register"
-                    className="rounded-md border border-white/10 px-3 py-1 text-indigo-100 transition hover:border-indigo-300/40 hover:bg-white/5"
+                    className="rounded-md border border-surface-border px-3 py-1 text-primary transition hover:border-primary/40 hover:bg-surface-muted"
                   >
                     {nav.account.register}
                   </Link>
@@ -350,7 +357,7 @@ export default function Navbar() {
             </div>
 
             <button
-              className="flex items-center text-slate-100 focus:outline-none lg:hidden"
+              className="flex items-center text-text focus:outline-none lg:hidden"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-label="Toggle menu"
             >
@@ -391,6 +398,13 @@ export default function Navbar() {
                       {link.label}
                     </Link>
                   ))}
+                  <Link
+                    href="/about"
+                    className="py-2 text-sm opacity-80 transition hover:opacity-100"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {labels.about}
+                  </Link>
                   <Link
                     key={servicesLink.key}
                     href={servicesLink.href}

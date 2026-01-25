@@ -20,24 +20,43 @@ import {
 } from 'lucide-react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
+import { useUserStore } from '../lib/userStore'
+import { useLanguage } from '../i18n/LanguageProvider'
+import { translations } from '../i18n/translations'
 
-const heroCards = [
-  {
-    title: 'Create your app',
-    description: 'Add your application and configure the client details to start integrating quickly.',
-    icon: PlusCircle,
-  },
-  {
-    title: 'Register your app',
-    description: 'Register your application to manage access and configure redirect URIs.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Deploy your app',
-    description: 'Manage your application and users within Cloud-Neutral Toolkit for secure access.',
-    icon: Users,
-  },
-]
+const iconMap: Record<string, any> = {
+  // English keys
+  'Create your app': PlusCircle,
+  'Register your app': ShieldCheck,
+  'Deploy your app': Users,
+  'Add a new user to your project': Users,
+  'Register a new application': AppWindow,
+  'Deploy your application': Command,
+  'Invite a user': MousePointerClick,
+  'Get started': Sparkles,
+  'Creating your application': AppWindow,
+  'More about Authentication': ShieldCheck,
+  'Understanding Authorization': Lock,
+  'Machine-to-Machine': Layers,
+  'Connect via CLI': Terminal,
+  'REST & Admin APIs': Link,
+  // Chinese keys
+  '创建您的应用': PlusCircle,
+  '注册您的应用': ShieldCheck,
+  '部署您的应用': Users,
+  '向项目添加新用户': Users,
+  '注册新应用程序': AppWindow,
+  '部署您的应用程序': Command,
+  '邀请用户': MousePointerClick,
+  '开始使用': Sparkles,
+  '创建您的应用程序': AppWindow,
+  '关于身份验证': ShieldCheck,
+  '了解授权': Lock,
+  '机器对机器': Layers,
+  '通过 CLI 连接': Terminal,
+}
+
+const getIcon = (key: string, fallback: any) => iconMap[key] || fallback
 
 const nextSteps = [
   { title: 'Add a new user to your project', status: 'NEW', icon: Users },
@@ -76,8 +95,8 @@ const shortcuts = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.18),transparent_35%),radial-gradient(circle_at_80%_0,rgba(168,85,247,0.15),transparent_30%),radial-gradient(circle_at_50%_60%,rgba(52,211,153,0.08),transparent_35%)]" aria-hidden />
+    <div className="min-h-screen bg-background text-text transition-colors duration-150">
+      <div className="absolute inset-0 bg-gradient-app-from opacity-20" aria-hidden />
       <div className="relative mx-auto max-w-7xl px-6 pb-20">
         <Navbar />
         <main className="space-y-12 pt-10">
@@ -93,117 +112,120 @@ export default function HomePage() {
 }
 
 function HeroSection() {
+  const { user } = useUserStore()
+  const { language } = useLanguage()
+  const t = translations[language].marketing.home
+
   return (
     <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="space-y-8">
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-300">
-          <span className="inline-flex rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-indigo-100">Signed in</span>
-          <span>example.tenant.zitadel.cloud</span>
-        </div>
+      <div className="flex flex-col justify-center space-y-8">
         <div className="space-y-4">
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Create, authenticate, deploy</p>
-          <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">Get started with Cloud-Neutral Toolkit</h1>
-          <p className="max-w-2xl text-lg text-slate-300">
-            Integrate Cloud-Neutral Toolkit into your application or use one of our samples to get started quickly.
-          </p>
+          <p className="font-semibold uppercase tracking-wider text-text-subtle">{t.hero.eyebrow}</p>
+          <h1 className="text-4xl font-bold tracking-tight text-heading sm:text-6xl">{t.hero.title}</h1>
+          <p className="text-lg text-text-muted">{t.hero.subtitle}</p>
         </div>
-        <div className="flex flex-wrap gap-3 text-sm font-semibold">
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-4 py-2 text-white shadow-lg shadow-indigo-500/25 transition hover:translate-y-[-1px] hover:bg-indigo-400"
-          >
-            <PlusCircle className="h-4 w-4" aria-hidden />
-            Create Application
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-white transition hover:bg-white/10"
-          >
-            <Play className="h-4 w-4" aria-hidden />
-            Try Samples in Playground
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-white transition hover:border-white/40"
-          >
-            <BookOpen className="h-4 w-4" aria-hidden />
-            View Tutorials
-          </a>
+        <div className="flex flex-wrap items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-1.5 text-sm font-medium text-success">
+              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+              {t.signedIn} as {user.username}
+            </div>
+          ) : (
+            <button className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover">
+              <PlusCircle className="h-4 w-4" />
+              {t.heroButtons.create}
+            </button>
+          )}
+          <button className="flex items-center gap-2 rounded-full border border-surface-border bg-surface px-6 py-2.5 text-sm font-semibold text-text transition hover:bg-surface-hover">
+            <Play className="h-4 w-4" />
+            {t.heroButtons.playground}
+          </button>
+          <button className="flex items-center gap-2 rounded-full border border-surface-border bg-surface px-6 py-2.5 text-sm font-semibold text-text transition hover:bg-surface-hover">
+            <BookOpen className="h-4 w-4" />
+            {t.heroButtons.tutorials}
+          </button>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
-          <span className="font-semibold text-white">Trusted by your dev team</span>
-          <LogoPill label="Vue" />
-          <LogoPill label="Svelte" />
-          <LogoPill label="Node" />
-          <LogoPill label="Django" />
-          <LogoPill label="Laravel" />
+        <div className="flex items-center gap-4 text-sm text-text-muted">
+          <p>{t.trustedBy}</p>
+          <div className="flex gap-2">
+            <LogoPill label="Vue" />
+            <LogoPill label="Svelte" />
+            <LogoPill label="Node" />
+            <LogoPill label="Django" />
+            <LogoPill label="Laravel" />
+          </div>
         </div>
       </div>
-      <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5 shadow-xl shadow-slate-900/40 backdrop-blur">
-        {heroCards.map((card) => (
-          <div key={card.title} className="group relative overflow-hidden rounded-xl border border-white/10 bg-slate-900/70 p-4 transition hover:border-indigo-400/50 hover:bg-slate-900">
-            <div className="absolute inset-0 opacity-0 transition group-hover:opacity-100" aria-hidden>
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-sky-400/10" />
-            </div>
-            <div className="relative flex gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-indigo-200">
-                <card.icon className="h-5 w-5" aria-hidden />
+      <div className="flex flex-col gap-4">
+        {t.heroCards.map((card, index: number) => {
+          const Icon = getIcon(card.title, PlusCircle)
+          return (
+            <div key={card.title} className="group flex items-start gap-4 rounded-2xl border border-surface-border bg-surface p-6 transition hover:border-primary/50 hover:bg-surface-hover">
+              <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2 group-hover:border-primary/50 group-hover:text-primary">
+                <Icon className="h-5 w-5" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-white">{card.title}</h3>
-                <p className="text-sm text-slate-300">{card.description}</p>
-                <button className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-indigo-200 transition hover:text-white">
-                  Go to action
-                  <ArrowRight className="h-4 w-4" aria-hidden />
+                <h3 className="font-semibold text-heading">{card.title}</h3>
+                <p className="text-sm text-text-muted">{card.description}</p>
+                <button className="mt-2 flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:text-primary-hover">
+                  Go to action <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </section>
   )
 }
 
 function NextStepsSection() {
+  const { language } = useLanguage()
+  const t = translations[language].marketing.home
+
   return (
     <section className="space-y-4">
-      <header className="flex items-center gap-3 text-sm text-slate-300">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Your Next Steps</p>
-        <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-indigo-200">Data detected</span>
+      <header className="flex items-center gap-3 text-sm text-text-muted">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">{t.nextSteps.title}</p>
+        <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold text-primary">{t.nextSteps.badge}</span>
       </header>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-        {nextSteps.map((item) => (
-          <div key={item.title} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-slate-900/30">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-200">
-              <item.icon className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-indigo-100">
-                <span className="rounded-full bg-indigo-500/20 px-2 py-0.5">{item.status}</span>
+        {t.nextSteps.items.map((item, index: number) => {
+          const Icon = getIcon(item.title, Users)
+          return (
+            <div key={index} className="flex items-start gap-3 rounded-xl border border-surface-border bg-surface p-4 shadow-lg shadow-shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <Icon className="h-5 w-5" aria-hidden />
               </div>
-              <p className="text-sm font-semibold text-white">{item.title}</p>
-              <button className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-200 transition hover:text-white">
-                Learn more
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </button>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-primary-muted">
+                  <span className="rounded-full bg-primary/20 px-2 py-0.5">{item.status}</span>
+                </div>
+                <p className="text-sm font-semibold text-heading">{item.title}</p>
+                <button className="inline-flex items-center gap-1 text-xs font-semibold text-primary transition hover:text-primary-hover">
+                  Learn more
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </section>
   )
 }
 
 function StatsSection() {
+  const { language } = useLanguage()
+  const t = translations[language].marketing.home
+
   return (
-    <section className="rounded-2xl border border-white/10 bg-gradient-to-r from-white/5 via-white/0 to-white/5 p-6 shadow-inner shadow-slate-900/50">
+    <section className="rounded-2xl border border-surface-border bg-gradient-to-r from-surface-muted via-surface/0 to-surface-muted p-6 shadow-inner shadow-shadow-sm">
       <div className="grid gap-6 md:grid-cols-3">
-        {stats.map((stat) => (
-          <div key={stat.label} className="space-y-1 text-center md:text-left">
-            <div className="text-3xl font-semibold text-white">{stat.value}</div>
-            <p className="text-sm text-slate-300">{stat.label}</p>
+        {t.stats.map((stat, index: number) => (
+          <div key={index} className="space-y-1 text-center md:text-left">
+            <div className="text-3xl font-semibold text-heading">{stat.value}</div>
+            <p className="text-sm text-text-muted">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -212,36 +234,42 @@ function StatsSection() {
 }
 
 function ShortcutsSection() {
+  const { language } = useLanguage()
+  const t = translations[language].marketing.home
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">More shortcuts</p>
-          <p className="text-sm text-slate-300">Save time when integrating Cloud-Neutral Toolkit</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">{t.shortcuts.title}</p>
+          <p className="text-sm text-text-muted">{t.shortcuts.subtitle}</p>
         </div>
-        <div className="flex gap-2 text-xs font-semibold text-indigo-200">
-          <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">Get Started</button>
-          <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">Docs</button>
-          <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">Guides</button>
+        <div className="flex gap-2 text-xs font-semibold text-primary">
+          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-1 transition hover:bg-surface-hover">{t.shortcuts.buttons.start}</button>
+          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-1 transition hover:bg-surface-hover">{t.shortcuts.buttons.docs}</button>
+          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-1 transition hover:bg-surface-hover">{t.shortcuts.buttons.guides}</button>
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {shortcuts.map((item) => (
-          <a
-            key={item.title}
-            href="#"
-            className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 transition hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
-          >
-            <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-200">
-              <item.icon className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-semibold text-white">{item.title}</div>
-              <p className="text-sm text-slate-300">{item.description}</p>
-            </div>
-            <ArrowRight className="ml-auto h-4 w-4 text-slate-400 transition group-hover:text-indigo-200" aria-hidden />
-          </a>
-        ))}
+        {t.shortcuts.items.map((item, index: number) => {
+          const Icon = getIcon(item.title, Sparkles)
+          return (
+            <a
+              key={index}
+              href="#"
+              className="group flex items-start gap-3 rounded-xl border border-surface-border bg-surface p-4 transition hover:-translate-y-[1px] hover:border-primary/50 hover:bg-surface-hover"
+            >
+              <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <Icon className="h-5 w-5" aria-hidden />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-semibold text-heading">{item.title}</div>
+                <p className="text-sm text-text-muted">{item.description}</p>
+              </div>
+              <ArrowRight className="ml-auto h-4 w-4 text-text-subtle transition group-hover:text-primary" aria-hidden />
+            </a>
+          )
+        })}
       </div>
     </section>
   )
@@ -249,8 +277,8 @@ function ShortcutsSection() {
 
 function LogoPill({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white">
-      <div className="h-2 w-2 rounded-full bg-emerald-400" />
+    <span className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface-muted px-3 py-1 text-xs font-semibold text-text">
+      <div className="h-2 w-2 rounded-full bg-success" />
       {label}
     </span>
   )
