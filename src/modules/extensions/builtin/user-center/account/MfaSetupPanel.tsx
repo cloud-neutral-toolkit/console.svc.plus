@@ -96,7 +96,11 @@ function formatTimestamp(value?: string) {
   return date.toLocaleString()
 }
 
-export default function MfaSetupPanel() {
+type MfaSetupPanelProps = {
+  showSummary?: boolean
+}
+
+export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps) {
   const { language } = useLanguage()
   const copy = translations[language].userCenter.mfa
   const router = useRouter()
@@ -435,6 +439,9 @@ export default function MfaSetupPanel() {
   }, [])
 
   if (!user) {
+    if (!showSummary) {
+      return null
+    }
     return (
       <Card>
         <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
@@ -451,42 +458,44 @@ export default function MfaSetupPanel() {
 
   return (
     <>
-      <Card>
-        <div className="space-y-6">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
-              <p className="mt-1 text-sm text-[var(--color-text-subtle)]">{copy.summary.description}</p>
-              <dl className="mt-4 grid gap-4 text-xs text-[var(--color-text-subtle)] sm:grid-cols-2">
-                <div>
-                  <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.summary.statusLabel}</dt>
-                  <dd className="mt-1 text-sm text-[var(--color-text)]">{statusLabel}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.status.issuedAt}</dt>
-                  <dd className="mt-1 text-sm text-[var(--color-text)]">{formatTimestamp(displayStatus?.totpSecretIssuedAt)}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.status.confirmedAt}</dt>
-                  <dd className="mt-1 text-sm text-[var(--color-text)]">{formatTimestamp(displayStatus?.totpConfirmedAt)}</dd>
-                </div>
-              </dl>
-            </div>
-            <div className="flex flex-col items-start gap-3 sm:items-end">
-              <button
-                type="button"
-                onClick={openDialog}
-                className="inline-flex items-center justify-center rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition hover:bg-[var(--color-primary-hover)]"
-              >
-                {displayStatus?.totpEnabled ? copy.summary.manage : copy.summary.bind}
-              </button>
-              {requiresSetup ? (
-                <p className="text-xs text-[var(--color-warning-foreground)]">{copy.lockedMessage}</p>
-              ) : null}
+      {showSummary ? (
+        <Card>
+          <div className="space-y-6">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
+                <p className="mt-1 text-sm text-[var(--color-text-subtle)]">{copy.summary.description}</p>
+                <dl className="mt-4 grid gap-4 text-xs text-[var(--color-text-subtle)] sm:grid-cols-2">
+                  <div>
+                    <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.summary.statusLabel}</dt>
+                    <dd className="mt-1 text-sm text-[var(--color-text)]">{statusLabel}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.status.issuedAt}</dt>
+                    <dd className="mt-1 text-sm text-[var(--color-text)]">{formatTimestamp(displayStatus?.totpSecretIssuedAt)}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.status.confirmedAt}</dt>
+                    <dd className="mt-1 text-sm text-[var(--color-text)]">{formatTimestamp(displayStatus?.totpConfirmedAt)}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="flex flex-col items-start gap-3 sm:items-end">
+                <button
+                  type="button"
+                  onClick={openDialog}
+                  className="inline-flex items-center justify-center rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition hover:bg-[var(--color-primary-hover)]"
+                >
+                  {displayStatus?.totpEnabled ? copy.summary.manage : copy.summary.bind}
+                </button>
+                {requiresSetup ? (
+                  <p className="text-xs text-[var(--color-warning-foreground)]">{copy.lockedMessage}</p>
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      ) : null}
 
       {isDialogOpen ? (
         <div

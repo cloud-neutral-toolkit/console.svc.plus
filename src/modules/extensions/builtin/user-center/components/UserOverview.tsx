@@ -34,7 +34,11 @@ function resolveDisplayName(
   return user.email
 }
 
-export default function UserOverview() {
+type UserOverviewProps = {
+  hideMfaMainPrompt?: boolean
+}
+
+export default function UserOverview({ hideMfaMainPrompt = false }: UserOverviewProps) {
   const router = useRouter()
   const { language } = useLanguage()
   const copy = translations[language].userCenter.overview
@@ -114,7 +118,7 @@ export default function UserOverview() {
         <p className="mt-1 text-xs text-[var(--color-text-subtle)] opacity-80">{copy.uuidNote}</p>
       </div>
 
-      {requiresSetup ? (
+      {!hideMfaMainPrompt && requiresSetup ? (
         <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning-foreground)] transition-colors">
           <p className="text-base font-semibold">{copy.lockBanner.title}</p>
           <p className="mt-1 text-sm">{copy.lockBanner.body}</p>
@@ -180,21 +184,24 @@ export default function UserOverview() {
           <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.email.description}</p>
         </Card>
 
-        <Card>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.cards.mfa.label}</p>
-              <p className="mt-1 text-base font-medium text-[var(--color-text)]">{mfaStatusLabel}</p>
-              <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.mfa.description}</p>
+        {!hideMfaMainPrompt ? (
+          <Card>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.cards.mfa.label}</p>
+                <p className="mt-1 text-base font-medium text-[var(--color-text)]">{mfaStatusLabel}</p>
+                <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.mfa.description}</p>
+              </div>
+              <Link
+                href="/panel/account?setupMfa=1"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-primary-border)] px-3 py-1 text-xs font-medium text-[var(--color-primary)] transition-colors hover:border-[color:var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
+              >
+                {copy.cards.mfa.action}
+              </Link>
             </div>
-            <Link
-              href="/panel/account?setupMfa=1"
-              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-primary-border)] px-3 py-1 text-xs font-medium text-[var(--color-primary)] transition-colors hover:border-[color:var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
-            >
-              {copy.cards.mfa.action}
-            </Link>
-          </div>
-        </Card>
+          </Card>
+        ) : null}
+
       </div>
     </div>
   )
