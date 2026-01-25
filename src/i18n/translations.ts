@@ -485,7 +485,7 @@ type AboutTranslation = {
   acknowledgments: string
   toolsTitle: string
   toolsNote: string
-  tools: string[]
+  tools: { label: string; url: string }[]
   opensource: string
 }
 
@@ -555,7 +555,31 @@ export type Translation = {
   auth: AuthTranslation
   userCenter: UserCenterTranslation
   marketing: {
-    home: MarketingHomeTranslation
+    home: MarketingHomeTranslation & {
+      heroCards: { title: string; description: string }[]
+      nextSteps: {
+        title: string
+        badge: string
+        items: { title: string; status: string }[]
+      }
+      stats: { value: string; label: string }[]
+      shortcuts: {
+        title: string
+        subtitle: string
+        buttons: { start: string; docs: string; guides: string }
+        items: { title: string; description: string }[]
+      }
+      trustedBy: string
+      heroButtons: {
+        create: string
+        playground: string
+        tutorials: string
+      }
+      signedIn: string
+      hero: {
+        eyebrow: string
+      }
+    }
   }
   about: AboutTranslation
 }
@@ -1043,20 +1067,63 @@ export const translations: Record<'en' | 'zh', Translation> = {
     marketing: {
       home: {
         hero: {
-          eyebrow: 'Cloud-Native Suite',
-          title: 'A Unified Toolkit for Cloud-Native Environments',
-          subtitle:
-            'Unify asset management, access control, observability, and automated runbooks in a responsive workspace.',
-          highlights: [
-            'Unified governance across clusters and clouds',
-            'Policy-driven security and compliance automation',
-            'Template-driven workflows accelerate delivery',
-            'Modular capabilities you can enable on demand',
+          eyebrow: 'Create, authenticate, deploy',
+          title: 'Get started with Cloud-Neutral Toolkit',
+          subtitle: 'Integrate Cloud-Neutral Toolkit into your application or use one of our samples to get started quickly.',
+        },
+        heroButtons: {
+          create: 'Create Application',
+          playground: 'Try Samples in Playground',
+          tutorials: 'View Tutorials',
+        },
+        signedIn: 'Signed in',
+        trustedBy: 'Trusted by your dev team',
+        heroCards: [
+          {
+            title: 'Create your app',
+            description: 'Add your application and configure the client details to start integrating quickly.',
+          },
+          {
+            title: 'Register your app',
+            description: 'Register your application to manage access and configure redirect URIs.',
+          },
+          {
+            title: 'Deploy your app',
+            description: 'Manage your application and users within Cloud-Neutral Toolkit for secure access.',
+          },
+        ],
+        nextSteps: {
+          title: 'Your Next Steps',
+          badge: 'Data detected',
+          items: [
+            { title: 'Add a new user to your project', status: 'NEW' },
+            { title: 'Register a new application', status: 'NEW' },
+            { title: 'Deploy your application', status: 'READY' },
+            { title: 'Invite a user', status: 'READY' },
           ],
-          bodyHtml:
-            '<p>XControl uses a modular architecture so you can add observability, identity, and orchestration packages without disrupting the core platform. Open APIs and event streams connect seamlessly with the DevOps toolchain you already rely on.</p>',
-          primaryCtaLabel: 'Try it now',
-          secondaryCtaLabel: 'Product docs',
+        },
+        stats: [
+          { value: '~150k', label: 'Applications integrated with Cloud-Neutral Toolkit' },
+          { value: '~330k', label: 'Daily active users' },
+          { value: '7', label: 'Go check out our examples & guides' },
+        ],
+        shortcuts: {
+          title: 'More shortcuts',
+          subtitle: 'Save time when integrating Cloud-Neutral Toolkit',
+          buttons: {
+            start: 'Get Started',
+            docs: 'Docs',
+            guides: 'Guides',
+          },
+          items: [
+            { title: 'Get started', description: 'An overview of using Cloud-Neutral Toolkit' },
+            { title: 'Creating your application', description: 'Integrate Cloud-Neutral Toolkit into your application' },
+            { title: 'More about Authentication', description: 'Understand all about authenticating with Cloud-Neutral Toolkit' },
+            { title: 'Understanding Authorization', description: 'Scope out all about authorization using Cloud-Neutral Toolkit' },
+            { title: 'Machine-to-Machine', description: 'Integrate Cloud-Neutral Toolkit into your services' },
+            { title: 'Connect via CLI', description: 'Connect Cloud-Neutral Toolkit with your application via CLI' },
+            { title: 'REST & Admin APIs', description: 'Programmatically integrate Cloud-Neutral Toolkit into your application' },
+          ],
         },
         tabsLabel: 'Product Matrix',
         tabsAriaLabel: 'XControl product suite',
@@ -1234,13 +1301,13 @@ export const translations: Record<'en' | 'zh', Translation> = {
       toolsTitle: 'Acknowledged tools and platforms used (in no particular order):',
       toolsNote: '(The platform names above are listed for technical acknowledgment only and do not imply any official partnership or endorsement.)',
       tools: [
-        'GitHub — https://github.com',
-        'Cloudflare — https://www.cloudflare.com',
-        'ChatGPT (OpenAI)',
-        'Google AI Suite',
-        'NVIDIA AI Platform',
-        'Vercel — https://vercel.com',
-        'Google Cloud Run',
+        { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+        { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
+        { label: 'ChatGPT (OpenAI)', url: 'https://chatgpt.com/codex' },
+        { label: 'Google AI Suite', url: 'https://google.com' },
+        { label: 'NVIDIA AI Platform', url: 'https://build.nvidia.com/' },
+        { label: 'Vercel', url: 'https://vercel.com/svc-designs-projects' },
+        { label: 'Google Cloud Run', url: 'https://cloud.google.com/' },
       ],
       opensource: 'We embrace open source. Human progress is made possible through continuous sharing and collaboration.',
     },
@@ -1706,7 +1773,65 @@ export const translations: Record<'en' | 'zh', Translation> = {
     },
     marketing: {
       home: {
-        hero: {},
+        hero: {
+          eyebrow: '构建、认证、部署',
+          title: '开始使用 Cloud-Neutral Toolkit',
+          subtitle: '将 Cloud-Neutral Toolkit 集成到您的应用中，或使用我们的示例快速入门。',
+        },
+        heroButtons: {
+          create: '创建应用',
+          playground: '在 Playground 中试用',
+          tutorials: '查看教程',
+        },
+        signedIn: '已登录',
+        trustedBy: '被您的开发团队信赖',
+        heroCards: [
+          {
+            title: '创建您的应用',
+            description: '添加您的应用程序并配置客户端详细信息，以便快速开始集成。',
+          },
+          {
+            title: '注册您的应用',
+            description: '注册您的应用程序以管理访问权限并配置重定向 URI。',
+          },
+          {
+            title: '部署您的应用',
+            description: '在 Cloud-Neutral Toolkit 中管理您的应用程序和用户，以确保访问安全。',
+          },
+        ],
+        nextSteps: {
+          title: '后续步骤',
+          badge: '检测到数据',
+          items: [
+            { title: '向项目添加新用户', status: 'NEW' },
+            { title: '注册新应用程序', status: 'NEW' },
+            { title: '部署您的应用程序', status: 'READY' },
+            { title: '邀请用户', status: 'READY' },
+          ],
+        },
+        stats: [
+          { value: '~150k', label: '集成 Cloud-Neutral Toolkit 的应用程序' },
+          { value: '~330k', label: '日活跃用户' },
+          { value: '7', label: '查看我们的示例和指南' },
+        ],
+        shortcuts: {
+          title: '更多快捷方式',
+          subtitle: '在集成 Cloud-Neutral Toolkit 时节省时间',
+          buttons: {
+            start: '开始使用',
+            docs: '文档',
+            guides: '指南',
+          },
+          items: [
+            { title: '开始使用', description: 'Cloud-Neutral Toolkit 使用概览' },
+            { title: '创建您的应用程序', description: '将 Cloud-Neutral Toolkit 集成到您的应用程序中' },
+            { title: '关于身份验证', description: '了解有关使用 Cloud-Neutral Toolkit 进行身份验证的所有信息' },
+            { title: '了解授权', description: '了解有关使用 Cloud-Neutral Toolkit 进行授权的所有信息' },
+            { title: '机器对机器', description: '将 Cloud-Neutral Toolkit 集成到您的服务中' },
+            { title: '通过 CLI 连接', description: '通过 CLI 将 Cloud-Neutral Toolkit 连接到您的应用程序' },
+            { title: 'REST & Admin APIs', description: '通过编程将 Cloud-Neutral Toolkit 集成到您的应用程序中' },
+          ],
+        },
         tabsLabel: '产品矩阵',
         tabsAriaLabel: 'XControl 产品套件',
         productMatrix: {
@@ -1751,13 +1876,13 @@ export const translations: Record<'en' | 'zh', Translation> = {
       toolsTitle: '致谢与使用的工具与平台（不分先后）：',
       toolsNote: '以上平台名称仅用于技术致谢，不代表任何官方合作或背书！',
       tools: [
-        'ChatGPT (OpenAI)',
-        'Google AI Suite',
-        'NVIDIA AI Platform',
-        'GitHub — https://github.com',
-        'Cloudflare — https://www.cloudflare.com',
-        'Vercel — https://vercel.com',
-        'Google Cloud Run',
+        { label: 'ChatGPT (OpenAI)', url: 'https://chatgpt.com/codex' },
+        { label: 'Google AI Suite', url: 'https://google.com' },
+        { label: 'NVIDIA AI Platform', url: 'https://build.nvidia.com/' },
+        { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+        { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
+        { label: 'Vercel', url: 'https://vercel.com/svc-designs-projects' },
+        { label: 'Google Cloud Run', url: 'https://cloud.google.com/' },
       ],
       opensource: '我们拥抱开源。人类正是因为持续的共享与协作，才得以彼此成就。',
     },
