@@ -478,6 +478,17 @@ type UserCenterTranslation = {
   mfa: UserCenterMfaTranslation
 }
 
+type AboutTranslation = {
+  title: string
+  subtitle: string
+  disclaimer: string
+  acknowledgments: string
+  toolsTitle: string
+  toolsNote: string
+  tools: string[]
+  opensource: string
+}
+
 export type Translation = {
   hero: {
     title: string
@@ -546,6 +557,7 @@ export type Translation = {
   marketing: {
     home: MarketingHomeTranslation
   }
+  about: AboutTranslation
 }
 
 export const translations: Record<'en' | 'zh', Translation> = {
@@ -1214,6 +1226,24 @@ export const translations: Record<'en' | 'zh', Translation> = {
         },
       },
     },
+    about: {
+      title: 'About This Demo',
+      subtitle: 'This website is a personal demonstration (Demo) project maintained by an individual.',
+      disclaimer: 'Some AI capabilities on this site are powered by third-party AI services, including NVIDIA APIs and Alibaba Cloud Qwen. Only selected features are currently available for technical exploration and demonstration, and the site is not intended for production use or as a commercial system. Please do not enter any personal data, sensitive information, or confidential content in this Demo. All user inputs and generated outputs may be processed by third-party AI platforms.',
+      acknowledgments: 'Special thanks to GitHub, ChatGPT, Google AI, NVIDIA AI, and other tools and platforms, which enable individual developers to build AI application prototypes approaching professional SaaS standards at a relatively low cost.',
+      toolsTitle: 'Acknowledged tools and platforms used (in no particular order):',
+      toolsNote: '(The platform names above are listed for technical acknowledgment only and do not imply any official partnership or endorsement.)',
+      tools: [
+        'GitHub — https://github.com',
+        'Cloudflare — https://www.cloudflare.com',
+        'ChatGPT (OpenAI)',
+        'Google AI Suite',
+        'NVIDIA AI Platform',
+        'Vercel — https://vercel.com',
+        'Google Cloud Run',
+      ],
+      opensource: 'We embrace open source. Human progress is made possible through continuous sharing and collaboration.',
+    },
   },
   zh: {
     hero: {
@@ -1712,6 +1742,24 @@ export const translations: Record<'en' | 'zh', Translation> = {
           subtitle: '扫码关注或加入社区，获取最新产品动态与支持。',
         },
       },
+    },
+    about: {
+      title: '关于本项目',
+      subtitle: '本网站是一个由个人维护的 Demo 项目。',
+      disclaimer: '站点中的部分 AI 能力来自 NVIDIA API、阿里云通义千问等第三方 AI 服务，目前仅开放部分功能用于技术探索与展示，不作为生产环境或商业系统使用。请勿在本 Demo 中输入任何个人信息、敏感数据或机密内容。所有用户输入及生成结果均可能经过第三方 AI 平台处理。',
+      acknowledgments: '感谢 GitHub、ChatGPT、Google AI、NVIDIA AI 等工具与服务平台，让个人开发者也能够以相对较低的成本，构建出接近专业 SaaS 水准的 AI 应用原型。',
+      toolsTitle: '致谢与使用的工具与平台（不分先后）：',
+      toolsNote: '以上平台名称仅用于技术致谢，不代表任何官方合作或背书！',
+      tools: [
+        'ChatGPT (OpenAI)',
+        'Google AI Suite',
+        'NVIDIA AI Platform',
+        'GitHub — https://github.com',
+        'Cloudflare — https://www.cloudflare.com',
+        'Vercel — https://vercel.com',
+        'Google Cloud Run',
+      ],
+      opensource: '我们拥抱开源。人类正是因为持续的共享与协作，才得以彼此成就。',
     },
   },
 }
