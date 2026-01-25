@@ -1,5 +1,4 @@
-# Base runtime configuration shared by all environments.
-apiBaseUrl: https://rag-server-svc-plus-266500572462.asia-northeast1.run.app
+apiBaseUrl: http://127.0.0.1:8090
 authUrl: https://accounts-svc-plus-266500572462.asia-northeast1.run.app
-dashboardUrl: https://console.svc.plus
+dashboardUrl: http://localhost:3000
 logLevel: debug
