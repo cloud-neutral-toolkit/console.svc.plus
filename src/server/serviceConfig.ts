@@ -4,7 +4,6 @@ import { loadRuntimeConfig } from './runtime-loader'
 
 const FALLBACK_ACCOUNT_SERVICE_URL = 'https://accounts.svc.plus'
 const FALLBACK_SERVER_SERVICE_URL = 'https://api.svc.plus'
-const FALLBACK_SERVER_SERVICE_INTERNAL_URL = 'http://127.0.0.1:8090'
 
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
 
@@ -20,12 +19,7 @@ function getRuntimeDefaultServerServiceUrl(): string {
   return candidate ?? FALLBACK_SERVER_SERVICE_URL
 }
 
-function getRuntimeDefaultInternalServerServiceUrl(): string {
-  const runtime = loadRuntimeConfig()
-  const candidate =
-    typeof runtime.internalApiBaseUrl === 'string' ? runtime.internalApiBaseUrl : undefined
-  return candidate ?? FALLBACK_SERVER_SERVICE_INTERNAL_URL
-}
+
 
 function readEnvValue(...keys: string[]): string | undefined {
   for (const key of keys) {
@@ -120,27 +114,8 @@ export function getInternalServerServiceBaseUrl(): string {
     return normalizeBaseUrl(configured)
   }
 
-  const external = getServerServiceBaseUrl()
-  const runtimeInternalDefault = normalizeBaseUrl(getRuntimeDefaultInternalServerServiceUrl())
-
-  try {
-    const parsed = new URL(external)
-    if (LOCAL_HOSTNAMES.has(parsed.hostname)) {
-      if (parsed.hostname !== '127.0.0.1') {
-        parsed.hostname = '127.0.0.1'
-      }
-
-      if (parsed.protocol === 'https:') {
-        parsed.protocol = 'http:'
-      }
-
-      return normalizeBaseUrl(parsed.toString())
-    }
-  } catch {
-    // Ignore parsing errors and fall back to the internal default below.
-  }
-
-  return runtimeInternalDefault
+  // For distributed architecture, internal and external URLs are the same
+  return getServerServiceBaseUrl()
 }
 
 export const serviceConfig = {
