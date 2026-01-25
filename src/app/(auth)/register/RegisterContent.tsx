@@ -312,8 +312,8 @@ export default function RegisterContent() {
         setIsSubmitting(true)
         showStatus(
           t.form.validation?.submitting ??
-            t.form.submitting ??
-            'Submitting registration request…',
+          t.form.submitting ??
+          'Submitting registration request…',
         )
 
         try {
@@ -383,9 +383,9 @@ export default function RegisterContent() {
         setIsSubmitting(true)
         showStatus(
           t.form.validation?.verifying ??
-            t.form.verifying ??
-            t.form.verifySubmit ??
-            t.form.submit,
+          t.form.verifying ??
+          t.form.verifySubmit ??
+          t.form.submit,
         )
 
         try {
@@ -447,9 +447,9 @@ export default function RegisterContent() {
       setIsSubmitting(true)
       showStatus(
         t.form.validation?.completing ??
-          t.form.completing ??
-          t.form.completeSubmit ??
-          t.form.submit,
+        t.form.completing ??
+        t.form.completeSubmit ??
+        t.form.submit,
       )
 
       try {
@@ -687,16 +687,16 @@ export default function RegisterContent() {
       if (isVerified) {
         messages.push(
           validationHints?.completing ??
-            t.form.completing ??
-            t.form.completeSubmit ??
-            t.form.submit,
+          t.form.completing ??
+          t.form.completeSubmit ??
+          t.form.submit,
         )
       } else if (isVerificationStep) {
         messages.push(
           validationHints?.verifying ??
-            t.form.verifying ??
-            t.form.verifySubmit ??
-            t.form.submit,
+          t.form.verifying ??
+          t.form.verifySubmit ??
+          t.form.submit,
         )
       } else {
         messages.push(validationHints?.submitting ?? t.form.submitting ?? t.form.submit)
@@ -748,9 +748,9 @@ export default function RegisterContent() {
       if (codeDigits.some((digit) => !digit)) {
         messages.push(
           validationHints?.codeIncomplete ??
-            alerts.codeRequired ??
-            alerts.invalidCode ??
-            alerts.missingFields,
+          alerts.codeRequired ??
+          alerts.invalidCode ??
+          alerts.missingFields,
         )
       }
 
@@ -761,9 +761,9 @@ export default function RegisterContent() {
     if (codeDigits.some((digit) => !digit)) {
       messages.push(
         validationHints?.codeIncomplete ??
-          alerts.codeRequired ??
-          alerts.invalidCode ??
-          alerts.missingFields,
+        alerts.codeRequired ??
+        alerts.invalidCode ??
+        alerts.missingFields,
       )
     }
 
@@ -880,11 +880,47 @@ export default function RegisterContent() {
             </p>
           ) : null}
           {hasRequestedCode && !isVerified ? (
-            <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
-              我们已向你的邮箱发送一封验证邮件，点击邮件中的链接即可完成注册。
-              验证链接有效期 <strong>10 分钟</strong>。
-              <br />
-              若未收到邮件，请检查垃圾箱或稍后重试。
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
+                我们已向你的邮箱发送一封验证邮件，点击邮件中的链接即可完成注册。
+                验证链接有效期 <strong>10 分钟</strong>。
+                <br />
+                若未收到邮件，请检查垃圾箱或稍后重试。
+              </div>
+
+              <div className="flex justify-between gap-2">
+                {codeDigits.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => {
+                      codeInputRefs.current[index] = el
+                    }}
+                    id={`verification-code-${index}`}
+                    name={`verification-code-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="\d{1}"
+                    maxLength={1}
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white/90 text-center text-lg font-semibold text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                    value={digit}
+                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                    onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                    onPaste={(e) => index === 0 && handleCodePaste(0, e)}
+                  />
+                ))}
+              </div>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={isResending || resendCooldown > 0}
+                  className="text-sm font-medium text-sky-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {resendLabel}
+                </button>
+              </div>
             </div>
           ) : null}
         </div>
