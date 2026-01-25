@@ -14,10 +14,11 @@ import {
 import Footer from '../../components/Footer'
 import Navbar from '../../components/Navbar'
 import { useLanguage } from '../../i18n/LanguageProvider'
+import { useViewStore } from '../../components/theme/viewStore'
+import Material3Layout from './Material3Layout'
 
 const placeholderCount = 3
-
-type ServiceCard = {
+type ServiceCardData = {
   key: string
   name: string
   description: string
@@ -26,83 +27,122 @@ type ServiceCard = {
   external?: boolean
 }
 
+const ServiceCard = ({ service, view, isChinese }: { service: ServiceCardData, view: 'classic' | 'material', isChinese: boolean }) => {
+  const isMaterial = view === 'material'
+
+  const cardContent = (
+    <div className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${
+      isMaterial
+        ? 'border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted'
+        : 'border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60'
+    }`}>
+      <div className="flex items-start gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
+          isMaterial ? 'bg-primary/15 text-primary' : 'bg-indigo-500/15 text-indigo-200'
+        }`}>
+          <service.icon className="h-5 w-5" aria-hidden />
+        </div>
+        <div className="space-y-1">
+          <div className={`text-sm font-semibold ${isMaterial ? 'text-heading' : 'text-white'}`}>{service.name}</div>
+          <p className={`text-sm ${isMaterial ? 'text-text-muted' : 'text-slate-300'}`}>{service.description}</p>
+        </div>
+      </div>
+      <span className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${
+        isMaterial ? 'text-primary group-hover:text-primary-hover' : 'text-indigo-200 group-hover:text-white'
+      }`}>
+        {isChinese ? '打开' : 'Open'}
+        <ArrowRight className="h-4 w-4" aria-hidden />
+      </span>
+    </div>
+  )
+
+  if (service.external) {
+    return (
+      <a href={service.href} target="_blank" rel="noopener noreferrer" className="block">
+        {cardContent}
+      </a>
+    )
+  }
+
+  return (
+    <Link href={service.href} className="block">
+      {cardContent}
+    </Link>
+  )
+}
+
+const PlaceholderCard = ({ view, isChinese }: { view: 'classic' | 'material', isChinese: boolean }) => {
+    const isMaterial = view === 'material'
+    const placeholderLabel = isChinese ? '更多服务即将上线' : 'More services coming soon'
+    const placeholderDescription = isChinese
+        ? '预留卡片位置，持续扩充入口。'
+        : 'Reserved slots for new service entries.'
+
+    return (
+        <div className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${
+            isMaterial ? 'border-surface-border-strong bg-surface text-text-muted' : 'border-white/15 bg-white/5 text-slate-300'
+        }`}>
+            <div className="space-y-2">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${
+                    isMaterial ? 'border-surface-border-strong text-text-subtle' : 'border-white/20 text-slate-400'
+                }`}>
+                    <FileText className="h-4 w-4" aria-hidden />
+                </div>
+                <div className={`text-sm font-semibold ${isMaterial ? 'text-heading' : 'text-white/80'}`}>{placeholderLabel}</div>
+                <p className={`text-sm ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>{placeholderDescription}</p>
+            </div>
+            <span className={`mt-4 text-xs font-semibold ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>
+                {isChinese ? '敬请期待' : 'Stay tuned'}
+            </span>
+        </div>
+    )
+}
+
+const ServiceGrid = ({ view, services, isChinese }: { view: 'classic' | 'material', services: ServiceCardData[], isChinese: boolean }) => {
+  return (
+    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {services.map((service) => (
+        <ServiceCard key={service.key} service={service} view={view} isChinese={isChinese} />
+      ))}
+      {Array.from({ length: placeholderCount }).map((_, index) => (
+        <PlaceholderCard key={`placeholder-${index}`} view={view} isChinese={isChinese} />
+      ))}
+    </section>
+  )
+}
+
 export default function ServicesPage() {
+  const { view, isHydrated } = useViewStore()
   const { language } = useLanguage()
   const isChinese = language === 'zh'
 
-  const services: ServiceCard[] = [
-    {
-      key: 'editor',
-      name: isChinese ? '编辑器' : 'Editor',
-      description: isChinese
-        ? 'Markdown 发布与排版的在线编辑器。'
-        : 'Markdown publishing and layout editor.',
-      href: 'https://markdown-publisher.svc.plus',
-      icon: PenSquare,
-      external: true,
-    },
-    {
-      key: 'wechat-to-markdown',
-      name: isChinese ? '微信转 Markdown' : 'WeChat to Markdown',
-      description: isChinese
-        ? '一键将公众号内容转换为 Markdown。'
-        : 'Convert WeChat articles into Markdown.',
-      href: 'https://wechat-to-markdown.svc.plus',
-      icon: MessageSquare,
-      external: true,
-    },
-    {
-      key: 'page-reading',
-      name: isChinese ? 'Page Reading Agent' : 'Page Reading Agent',
-      description: isChinese
-        ? '智能网页阅读与分析服务。'
-        : 'Intelligent web page reading and analysis service.',
-      href: 'https://page-reading.svc.plus',
-      icon: FileText,
-      external: true,
-    },
-    {
-      key: 'artifact',
-      name: isChinese ? '制品 / 镜像' : 'Artifact / Mirror',
-      description: isChinese
-        ? '获取核心制品、镜像与下载资源。'
-        : 'Get core artifacts, mirrors, and downloads.',
-      href: '/download',
-      icon: Package,
-    },
-    {
-      key: 'cloudIac',
-      name: isChinese ? '云 IaC 目录' : 'Cloud IaC Catalog',
-      description: isChinese
-        ? '浏览云基础设施目录与自动化蓝图。'
-        : 'Browse cloud IaC catalog and automation blueprints.',
-      href: '/cloud_iac',
-      icon: Layers,
-    },
-    {
-      key: 'insight',
-      name: isChinese ? 'Insight 工作台' : 'Insight Workbench',
-      description: isChinese
-        ? '进入观测、告警与智能协作控制面。'
-        : 'Observability, alerts, and AI-assisted operations.',
-      href: '/insight',
-      icon: Activity,
-    },
-    {
-      key: 'docs',
-      name: isChinese ? '文档 / 解决方案' : 'Docs / Solutions',
-      description: isChinese
-        ? '阅读文档、方案与产品指南。'
-        : 'Read documentation, solutions, and guides.',
-      href: '/docs',
-      icon: BookOpen,
-    },
+  const services: ServiceCardData[] = [
+    { key: 'editor', name: isChinese ? '编辑器' : 'Editor', description: isChinese ? 'Markdown 发布与排版的在线编辑器。' : 'Markdown publishing and layout editor.', href: 'https://markdown-publisher.svc.plus', icon: PenSquare, external: true, },
+    { key: 'wechat-to-markdown', name: isChinese ? '微信转 Markdown' : 'WeChat to Markdown', description: isChinese ? '一键将公众号内容转换为 Markdown。' : 'Convert WeChat articles into Markdown.', href: 'https://wechat-to-markdown.svc.plus', icon: MessageSquare, external: true, },
+    { key: 'page-reading', name: isChinese ? 'Page Reading Agent' : 'Page Reading Agent', description: isChinese ? '智能网页阅读与分析服务。' : 'Intelligent web page reading and analysis service.', href: 'https://page-reading.svc.plus', icon: FileText, external: true, },
+    { key: 'artifact', name: isChinese ? '制品 / 镜像' : 'Artifact / Mirror', description: isChinese ? '获取核心制品、镜像与下载资源。' : 'Get core artifacts, mirrors, and downloads.', href: '/download', icon: Package, },
+    { key: 'cloudIac', name: isChinese ? '云 IaC 目录' : 'Cloud IaC Catalog', description: isChinese ? '浏览云基础设施目录与自动化蓝图。' : 'Browse cloud IaC catalog and automation blueprints.', href: '/cloud_iac', icon: Layers, },
+    { key: 'insight', name: isChinese ? 'Insight 工作台' : 'Insight Workbench', description: isChinese ? '进入观测、告警与智能协作控制面。' : 'Observability, alerts, and AI-assisted operations.', href: '/insight', icon: Activity, },
+    { key: 'docs', name: isChinese ? '文档 / 解决方案' : 'Docs / Solutions', description: isChinese ? '阅读文档、方案与产品指南。' : 'Read documentation, solutions, and guides.', href: '/docs', icon: BookOpen, },
   ]
 
-  const placeholderLabel = isChinese ? '更多服务即将上线' : 'More services coming soon'
-  const placeholderDescription = isChinese
-    ? '预留卡片位置，持续扩充入口。'
-    : 'Reserved slots for new service entries.'
+  if (!isHydrated) {
+    return null
+  }
+
+  if (view === 'material') {
+    return (
+      <Material3Layout>
+        <div className="mb-10">
+          <h2 className="text-heading text-4xl font-black tracking-tight mb-2">Service Overview</h2>
+          <p className="text-text-muted text-lg max-w-2xl">
+            Real-time metrics and system health for your current production environment.
+          </p>
+        </div>
+        <ServiceGrid view="material" services={services} isChinese={isChinese} />
+      </Material3Layout>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -126,64 +166,7 @@ export default function ServicesPage() {
                 : 'A card grid aligned with the current homepage layout for all services.'}
             </p>
           </header>
-
-          <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {services.map((service) => {
-              const card = (
-                <div className="group flex h-full flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-200">
-                      <service.icon className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-sm font-semibold text-white">{service.name}</div>
-                      <p className="text-sm text-slate-300">{service.description}</p>
-                    </div>
-                  </div>
-                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-indigo-200 transition group-hover:text-white">
-                    {isChinese ? '打开' : 'Open'}
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </span>
-                </div>
-              )
-
-              if (service.external) {
-                return (
-                  <a
-                    key={service.key}
-                    href={service.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    {card}
-                  </a>
-                )
-              }
-
-              return (
-                <Link key={service.key} href={service.href} className="block">
-                  {card}
-                </Link>
-              )
-            })}
-
-            {Array.from({ length: placeholderCount }).map((_, index) => (
-              <div
-                key={`placeholder-${index}`}
-                className="flex h-full flex-col justify-between rounded-xl border border-dashed border-white/15 bg-white/5 p-5 text-slate-300"
-              >
-                <div className="space-y-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-white/20 text-sm text-slate-400">
-                    <FileText className="h-4 w-4" aria-hidden />
-                  </div>
-                  <div className="text-sm font-semibold text-white/80">{placeholderLabel}</div>
-                  <p className="text-sm text-slate-400">{placeholderDescription}</p>
-                </div>
-                <span className="mt-4 text-xs font-semibold text-slate-400">{isChinese ? '敬请期待' : 'Stay tuned'}</span>
-              </div>
-            ))}
-          </section>
+          <ServiceGrid view="classic" services={services} isChinese={isChinese} />
         </main>
         <Footer />
       </div>
