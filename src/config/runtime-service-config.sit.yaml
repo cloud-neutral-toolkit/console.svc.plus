@@ -1,4 +1,4 @@
-apiBaseUrl: http://127.0.0.1:8090
+apiBaseUrl: http://127.0.0.1:8080
 authUrl: https://accounts-svc-plus-266500572462.asia-northeast1.run.app
 dashboardUrl: http://localhost:3000
 logLevel: debug
