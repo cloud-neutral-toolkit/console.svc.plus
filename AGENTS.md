@@ -28,7 +28,8 @@ yarn preview          # Build and start production server
 ### Code Quality
 
 ```bash
-yarn lint             # Run ESLint
+yarn lint             # Run ESLint (currently fails under Next 16 CLI; use eslint command below)
+./node_modules/.bin/eslint . --no-eslintrc --config .eslintrc.json --resolve-plugins-relative-to .  # Run ESLint directly (ignore parent configs)
 yarn typecheck        # TypeScript type checking
 yarn format           # Format code with Prettier
 ```
@@ -246,6 +247,7 @@ MUST NOT:
 - No @/ imports inside packages
 - Never "fix" libraries by polluting the app
 - Always run `yarn lint` and `yarn typecheck` before completing tasks
+- If `yarn lint` fails with "Invalid project directory .../lint" (Next 16 CLI), use `./node_modules/.bin/eslint .` instead
 
 ---
 

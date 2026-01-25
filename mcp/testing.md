@@ -4,7 +4,8 @@
 
 Required:
 
-- yarn lint
+- yarn lint (currently fails under Next 16 CLI; use eslint command below)
+- ./node_modules/.bin/eslint . --no-eslintrc --config .eslintrc.json --resolve-plugins-relative-to .
 - yarn typecheck
 - yarn build
 

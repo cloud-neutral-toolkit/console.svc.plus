@@ -5,8 +5,8 @@ import UserOverview from '../components/UserOverview'
 export default function UserCenterAccountRoute() {
   return (
     <div className="space-y-6">
-      <UserOverview />
-      <MfaSetupPanel />
+      <UserOverview hideMfaMainPrompt />
+      <MfaSetupPanel showSummary={false} />
       <SubscriptionPanel />
     </div>
   )
