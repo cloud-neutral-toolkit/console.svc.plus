@@ -222,6 +222,8 @@ type AuthRegisterTranslation = {
   form: {
     title: string
     subtitle: string
+    name: string
+    namePlaceholder: string
     email: string
     emailPlaceholder: string
     password: string
@@ -723,6 +725,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
         form: {
           title: 'Create your account',
           subtitle: 'Submit your email and password, request the code, and enter it to activate your account.',
+          name: 'Username',
+          namePlaceholder: '4-16 chars, starts with letter',
           email: 'Work email',
           emailPlaceholder: 'name@example.com',
           password: 'Password',
@@ -1384,6 +1388,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
         form: {
           title: '创建账号',
           subtitle: '先提交邮箱和密码获取验证码，再输入邮箱收到的验证码完成注册。',
+          name: '用户名',
+          namePlaceholder: '4-16位字母或数字，字母开头',
           email: '邮箱',
           emailPlaceholder: 'name@example.com',
           password: '密码',

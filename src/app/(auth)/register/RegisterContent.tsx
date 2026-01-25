@@ -28,6 +28,7 @@ const VERIFICATION_CODE_LENGTH = 6
 const RESEND_COOLDOWN_SECONDS = 60
 const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
 const PASSWORD_STRENGTH_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9]{3,15}$/
 
 export default function RegisterContent() {
   const { language } = useLanguage()
@@ -118,19 +119,22 @@ export default function RegisterContent() {
 
   const [alert, setAlert] = useState<AlertState | null>(initialAlert)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Wizard Step State: 0 = Info, 1 = Verification, 2 = Success (Processing/Redirecting)
+  const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0)
+
   const [codeDigits, setCodeDigits] = useState<string[]>(() => Array(VERIFICATION_CODE_LENGTH).fill(''))
-  const [hasRequestedCode, setHasRequestedCode] = useState(false)
-  const [pendingEmail, setPendingEmail] = useState('')
-  const [pendingPassword, setPendingPassword] = useState('')
-  const [isResending, setIsResending] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
-  const [isVerified, setIsVerified] = useState(false)
+  const [isResending, setIsResending] = useState(false)
+
   const [formValues, setFormValues] = useState({
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
     agreement: false,
   })
+
   const [isFormReady, setIsFormReady] = useState(false)
   const formRef = useRef<HTMLFormElement | null>(null)
   const codeInputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -168,7 +172,7 @@ export default function RegisterContent() {
   }, [])
 
   const handleInputChange = useCallback(
-    (field: 'email' | 'password' | 'confirmPassword') =>
+    (field: 'username' | 'email' | 'password' | 'confirmPassword') =>
       (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         setFormValues((previous) => ({ ...previous, [field]: value }))
@@ -191,6 +195,13 @@ export default function RegisterContent() {
 
       if (sanitized && index < VERIFICATION_CODE_LENGTH - 1) {
         focusCodeInput(index + 1)
+      } else if (sanitized && index === VERIFICATION_CODE_LENGTH - 1) {
+        // Auto-submit when the last digit is entered
+        // We use a timeout to let the state update first
+        setTimeout(() => {
+          const form = formRef.current
+          if (form) form.requestSubmit()
+        }, 100)
       }
     },
     [focusCodeInput],
@@ -249,340 +260,239 @@ export default function RegisterContent() {
     [focusCodeInput],
   )
 
-  const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+  const showError = (message: string) => {
+    setAlert({ type: 'error', message })
+  }
 
-      if (isSubmitting) {
-        return
-      }
+  const showStatus = (message: string) => {
+    setAlert({ type: 'info', message })
+  }
 
-      formRef.current = event.currentTarget
+  // Step 1: Request Verification Code
+  const handleRequestVerification = async () => {
+    const { username, email, password, confirmPassword, agreement } = formValues
 
-      const formData = new FormData(event.currentTarget)
-      const emailInput = String(formData.get('email') ?? '').trim()
-      const normalizedEmail = emailInput.toLowerCase()
-      const password = String(formData.get('password') ?? '')
-      const confirmPassword = String(formData.get('confirmPassword') ?? '')
-      const agreementAccepted = formData.get('agreement') === 'on'
-      const verificationCode = codeDigits.join('')
+    if (!username.trim() || !USERNAME_PATTERN.test(username.trim())) {
+      showError(alerts.invalidName ?? alerts.missingFields)
+      return
+    }
 
-      setFormValues((previous) => ({
-        ...previous,
-        email: emailInput,
-        password,
-        confirmPassword,
-        agreement: agreementAccepted,
-      }))
+    if (!email || !EMAIL_PATTERN.test(email)) {
+      showError(alerts.invalidEmail)
+      return
+    }
 
-      const showError = (message: string) => {
-        setAlert({ type: 'error', message })
-      }
+    if (!password || !confirmPassword) {
+      showError(alerts.missingFields)
+      return
+    }
 
-      const showStatus = (message: string) => {
-        setAlert({ type: 'info', message })
-      }
+    if (!PASSWORD_STRENGTH_PATTERN.test(password)) {
+      showError(alerts.weakPassword ?? alerts.genericError)
+      return
+    }
 
-      if (!hasRequestedCode) {
-        if (!emailInput || !EMAIL_PATTERN.test(emailInput)) {
-          showError(alerts.invalidEmail)
-          return
-        }
+    if (password !== confirmPassword) {
+      showError(alerts.passwordMismatch)
+      return
+    }
 
-        if (!password || !confirmPassword) {
-          showError(alerts.missingFields)
-          return
-        }
+    if (!agreement) {
+      showError(alerts.agreementRequired ?? alerts.missingFields)
+      return
+    }
 
-        if (!PASSWORD_STRENGTH_PATTERN.test(password)) {
-          showError(alerts.weakPassword ?? alerts.genericError)
-          return
-        }
+    setIsSubmitting(true)
+    showStatus(
+      t.form.validation?.submitting ??
+      t.form.submitting ??
+      'Submitting registration request…',
+    )
 
-        if (password !== confirmPassword) {
-          showError(alerts.passwordMismatch)
-          return
-        }
+    try {
+      const response = await fetch('/api/auth/register/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      })
 
-        if (!agreementAccepted) {
-          showError(alerts.agreementRequired ?? alerts.missingFields)
-          return
-        }
-
-        setIsSubmitting(true)
-        showStatus(
-          t.form.validation?.submitting ??
-          t.form.submitting ??
-          'Submitting registration request…',
-        )
-
+      if (!response.ok) {
+        // ... (error handling)
+        let errorCode = 'generic_error'
         try {
-          const response = await fetch('/api/auth/register/send', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: emailInput }),
-          })
-
-          if (!response.ok) {
-            let errorCode = 'generic_error'
-            try {
-              const data = await response.json()
-              if (typeof data?.error === 'string') {
-                errorCode = data.error
-              }
-            } catch (error) {
-              console.error('Failed to parse verification send response', error)
-            }
-
-            const errorMap: Record<string, string> = {
-              invalid_request: alerts.genericError,
-              invalid_email: alerts.invalidEmail,
-              verification_failed: alerts.verificationFailed ?? alerts.genericError,
-              email_already_exists: alerts.userExists,
-              account_service_unreachable: alerts.genericError,
-            }
-
-            showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-            setIsSubmitting(false)
-            return
+          const data = await response.json()
+          if (typeof data?.error === 'string') {
+            errorCode = data.error
           }
-
-          setPendingEmail(normalizedEmail)
-          setPendingPassword(password)
-          setHasRequestedCode(true)
-          setIsVerified(false)
-          resetCodeDigits()
-          focusCodeInput(0)
-          setResendCooldown(RESEND_COOLDOWN_SECONDS)
-
-          const successMessage = alerts.verificationSent ?? alerts.genericError
-          setAlert({ type: 'success', message: successMessage })
         } catch (error) {
-          console.error('Failed to request verification code', error)
-          showError(alerts.genericError)
-        } finally {
-          setIsSubmitting(false)
-        }
-        return
-      }
-
-      const emailForVerification = pendingEmail || normalizedEmail
-      if (!emailForVerification) {
-        showError(alerts.invalidEmail)
-        return
-      }
-
-      if (!isVerified) {
-        if (verificationCode.length !== VERIFICATION_CODE_LENGTH) {
-          showError(alerts.codeRequired ?? alerts.invalidCode ?? alerts.missingFields)
-          return
+          console.error('Failed to parse verification send response', error)
         }
 
-        setIsSubmitting(true)
-        showStatus(
-          t.form.validation?.verifying ??
-          t.form.verifying ??
-          t.form.verifySubmit ??
-          t.form.submit,
-        )
-
-        try {
-          const response = await fetch('/api/auth/register/verify', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: emailForVerification, code: verificationCode }),
-          })
-
-          if (!response.ok) {
-            let errorCode = 'generic_error'
-            try {
-              const data = await response.json()
-              if (typeof data?.error === 'string') {
-                errorCode = data.error
-              }
-            } catch (error) {
-              console.error('Failed to parse verification response', error)
-            }
-
-            const errorMap: Record<string, string> = {
-              invalid_request: alerts.genericError,
-              missing_verification: alerts.codeRequired ?? alerts.missingFields,
-              invalid_code:
-                alerts.verificationFailed ?? alerts.invalidCode ?? alerts.genericError,
-              verification_failed: alerts.verificationFailed ?? alerts.genericError,
-              account_service_unreachable: alerts.genericError,
-            }
-
-            showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-            setIsSubmitting(false)
-            return
-          }
-
-          setIsVerified(true)
-          const successMessage = alerts.verificationReady ?? alerts.success
-          setAlert({ type: 'success', message: successMessage })
-        } catch (error) {
-          console.error('Failed to verify email', error)
-          showError(alerts.genericError)
-        } finally {
-          setIsSubmitting(false)
+        const errorMap: Record<string, string> = {
+          invalid_request: alerts.genericError,
+          invalid_email: alerts.invalidEmail,
+          verification_failed: alerts.verificationFailed ?? alerts.genericError,
+          email_already_exists: alerts.userExists,
+          account_service_unreachable: alerts.genericError,
         }
+
+        showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
         return
       }
 
-      if (!pendingPassword) {
-        showError(alerts.genericError)
-        return
-      }
+      // Success: Move to Step 2
+      setCurrentStep(1)
+      setResendCooldown(RESEND_COOLDOWN_SECONDS)
+      resetCodeDigits()
 
-      if (verificationCode.length !== VERIFICATION_CODE_LENGTH) {
-        showError(alerts.codeRequired ?? alerts.invalidCode ?? alerts.genericError)
-        return
-      }
+      const successMessage = alerts.verificationSent ?? alerts.genericError
+      setAlert({ type: 'success', message: successMessage })
 
-      setIsSubmitting(true)
-      showStatus(
-        t.form.validation?.completing ??
-        t.form.completing ??
-        t.form.completeSubmit ??
-        t.form.submit,
-      )
+      // Focus code input after a short delay for state transition
+      setTimeout(() => focusCodeInput(0), 100)
 
+    } catch (error) {
+      console.error('Failed to request verification code', error)
+      showError(alerts.genericError)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Step 2: Verify Code & Register
+  const handleCompleteRegistration = async () => {
+    const verificationCode = codeDigits.join('')
+    if (verificationCode.length !== VERIFICATION_CODE_LENGTH) {
+      showError(alerts.codeRequired ?? alerts.invalidCode ?? alerts.missingFields)
+      return
+    }
+
+    setIsSubmitting(true)
+    showStatus(
+      t.form.validation?.completing ??
+      t.form.completing ??
+      t.form.completeSubmit ??
+      t.form.submit,
+    )
+
+    try {
+      const { username, email, password } = formValues
+
+      const registerResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: username.trim(),
+          email: email.trim(),
+          password,
+          code: verificationCode,
+        }),
+      })
+
+      let registerData: { success?: boolean; error?: string } | null = null
       try {
-        const registerResponse = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: emailForVerification,
-            password: pendingPassword,
-            confirmPassword: pendingPassword,
-            code: verificationCode,
-          }),
-        })
+        registerData = await registerResponse.json()
+      } catch (error) {
+        registerData = null
+      }
 
-        let registerData: { success?: boolean; error?: string } | null = null
-        try {
-          registerData = await registerResponse.json()
-        } catch (error) {
-          registerData = null
+      if (!registerResponse.ok || registerData?.success === false) {
+        // ... (error handling)
+        const errorCode =
+          typeof registerData?.error === 'string' ? registerData.error : 'registration_failed'
+        const errorMap: Record<string, string> = {
+          invalid_request: alerts.genericError,
+          missing_credentials: alerts.missingFields,
+          invalid_email: alerts.invalidEmail,
+          password_too_short: alerts.weakPassword,
+          email_already_exists: alerts.userExists,
+          name_already_exists: alerts.usernameExists ?? alerts.userExists,
+          invalid_name: alerts.invalidName ?? alerts.genericError,
+          name_required: alerts.invalidName ?? alerts.genericError,
+          hash_failure: alerts.genericError,
+          user_creation_failed: alerts.genericError,
+          credentials_in_query: alerts.genericError,
+          verification_required: alerts.codeRequired ?? alerts.genericError,
+          invalid_code:
+            alerts.verificationFailed ?? alerts.invalidCode ?? alerts.genericError,
+          account_service_unreachable: alerts.genericError,
         }
 
-        if (!registerResponse.ok || registerData?.success === false) {
-          const errorCode =
-            typeof registerData?.error === 'string' ? registerData.error : 'registration_failed'
-          const errorMap: Record<string, string> = {
-            invalid_request: alerts.genericError,
-            missing_credentials: alerts.missingFields,
-            invalid_email: alerts.invalidEmail,
-            password_too_short: alerts.weakPassword,
-            email_already_exists: alerts.userExists,
-            name_already_exists: alerts.usernameExists ?? alerts.userExists,
-            invalid_name: alerts.invalidName ?? alerts.genericError,
-            name_required: alerts.invalidName ?? alerts.genericError,
-            hash_failure: alerts.genericError,
-            user_creation_failed: alerts.genericError,
-            credentials_in_query: alerts.genericError,
-            verification_required: alerts.codeRequired ?? alerts.genericError,
-            invalid_code:
-              alerts.verificationFailed ?? alerts.invalidCode ?? alerts.genericError,
-            account_service_unreachable: alerts.genericError,
-          }
+        showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
+        return
+      }
 
-          showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-          setIsSubmitting(false)
-          return
-        }
+      // 2. Login
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      })
 
-        const loginResponse = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: emailForVerification,
-            password: pendingPassword,
-          }),
-        })
+      let loginData:
+        | { success?: boolean; needMfa?: boolean; error?: string; redirectTo?: string }
+        | null = null
+      try {
+        loginData = await loginResponse.json()
+      } catch (error) {
+        loginData = null
+      }
 
-        let loginData:
-          | { success?: boolean; needMfa?: boolean; error?: string; redirectTo?: string }
-          | null = null
-        try {
-          loginData = await loginResponse.json()
-        } catch (error) {
-          loginData = null
-        }
-
-        if (!loginResponse.ok || !loginData?.success) {
-          const errorCode = typeof loginData?.error === 'string' ? loginData.error : 'generic_error'
-          const errorMap: Record<string, string> = {
-            invalid_credentials: alerts.genericError,
-            missing_credentials: alerts.missingFields,
-            account_service_unreachable: alerts.genericError,
-            authentication_failed: alerts.genericError,
-          }
-
-          if (loginData?.needMfa) {
-            router.push('/login?needMfa=1')
-            router.refresh()
-            setIsSubmitting(false)
-            return
-          }
-
-          showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-          setIsSubmitting(false)
-          return
-        }
-
+      if (!loginResponse.ok || !loginData?.success) {
+        // Login failed but registration succeeded
         const successMessage = alerts.registrationComplete ?? alerts.success
         setAlert({ type: 'success', message: successMessage })
-
-        router.push(loginData?.redirectTo || '/')
-        router.refresh()
-      } catch (error) {
-        console.error('Failed to complete registration', error)
-        showError(alerts.genericError)
-      } finally {
-        setIsSubmitting(false)
+        router.push('/login')
+        return
       }
-    },
-    [
-      alerts,
-      codeDigits,
-      focusCodeInput,
-      hasRequestedCode,
-      isSubmitting,
-      isVerified,
-      normalize,
-      pendingEmail,
-      pendingPassword,
-      resetCodeDigits,
-      router,
-      t.form,
-    ],
-  )
+
+      if (loginData?.needMfa) {
+        router.push('/login?needMfa=1')
+        router.refresh()
+        return
+      }
+
+      // Success
+      setCurrentStep(2)
+      const successMessage = alerts.registrationComplete ?? alerts.success
+      setAlert({ type: 'success', message: successMessage })
+
+      router.push(loginData?.redirectTo || '/')
+      router.refresh()
+
+    } catch (error) {
+      console.error('Failed to complete registration', error)
+      showError(alerts.genericError)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isSubmitting) return
+
+    if (currentStep === 0) {
+      handleRequestVerification()
+    } else if (currentStep === 1) {
+      handleCompleteRegistration()
+    }
+  }
 
   const handleResend = useCallback(async () => {
-    if (isResending || resendCooldown > 0 || isVerified) {
-      return
-    }
+    if (isResending || resendCooldown > 0) return
 
-    const emailFromFormRaw =
-      pendingEmail ||
-      (formRef.current ? String(new FormData(formRef.current).get('email') ?? '').trim() : '')
-
-    if (!emailFromFormRaw) {
-      setAlert({ type: 'error', message: alerts.invalidEmail })
-      return
-    }
-
-    const emailFromForm = emailFromFormRaw.trim()
+    const { email } = formValues
+    if (!email) return
 
     setIsResending(true)
     const resendStatusMessage =
@@ -593,206 +503,47 @@ export default function RegisterContent() {
     try {
       const response = await fetch('/api/auth/register/send', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: emailFromForm }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
       })
 
       if (!response.ok) {
-        let errorCode = 'generic_error'
-        try {
-          const data = await response.json()
-          if (typeof data?.error === 'string') {
-            errorCode = data.error
-          }
-        } catch (error) {
-          console.error('Failed to parse resend response', error)
-        }
-
-        const errorMap: Record<string, string> = {
-          invalid_request: alerts.genericError,
-          invalid_email: alerts.invalidEmail,
-          verification_failed: alerts.verificationFailed ?? alerts.genericError,
-          already_verified: alerts.verificationFailed ?? alerts.genericError,
-          account_service_unreachable: alerts.genericError,
-          email_already_exists: alerts.userExists,
-        }
-
-        setAlert({ type: 'error', message: errorMap[normalize(errorCode)] ?? alerts.genericError })
-        setIsResending(false)
+        setAlert({ type: 'error', message: alerts.genericError })
         return
       }
 
-      setPendingEmail(emailFromForm.toLowerCase())
-      setHasRequestedCode(true)
-      setIsVerified(false)
-      resetCodeDigits()
-      focusCodeInput(0)
       setResendCooldown(RESEND_COOLDOWN_SECONDS)
       const message = alerts.verificationResent ?? alerts.verificationSent ?? 'Verification code resent.'
       setAlert({ type: 'success', message })
-      setIsResending(false)
     } catch (error) {
-      console.error('Failed to resend verification code', error)
       setAlert({ type: 'error', message: alerts.genericError })
+    } finally {
       setIsResending(false)
     }
-  }, [
-    alerts,
-    focusCodeInput,
-    isResending,
-    isVerified,
-    normalize,
-    pendingEmail,
-    resetCodeDigits,
-    resendCooldown,
-    t.form.verificationCodeResend,
-    t.form.verificationCodeResending,
-  ])
+  }, [alerts, formValues, isResending, resendCooldown, t.form])
 
+
+  // Render Helpers
   const aboveForm = t.uuidNote ? (
     <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
       {t.uuidNote}
     </div>
   ) : null
 
-  const isVerificationStep = hasRequestedCode && !isVerified
-  const submitLabel = isVerified
-    ? isSubmitting
-      ? t.form.completing ?? t.form.completeSubmit ?? t.form.submit
-      : t.form.completeSubmit ?? t.form.submit
-    : isVerificationStep
-      ? isSubmitting
-        ? t.form.verifying ?? t.form.verifySubmit ?? t.form.submit
-        : t.form.verifySubmit ?? t.form.submit
-      : isSubmitting
-        ? t.form.submitting ?? t.form.submit
-        : t.form.submit
+  const submitLabel = useMemo(() => {
+    if (isSubmitting) {
+      if (currentStep === 0) return t.form.submitting ?? t.form.submit
+      return t.form.completing ?? t.form.submit
+    }
+    if (currentStep === 0) return '下一步 (获取验证码)'
+    return t.form.completeSubmit ?? '完成注册'
+  }, [isSubmitting, currentStep, t.form])
+
   const resendLabel = isResending
     ? t.form.verificationCodeResending ?? t.form.verificationCodeResend
     : resendCooldown > 0
       ? `${t.form.verificationCodeResend} (${resendCooldown}s)`
       : t.form.verificationCodeResend
-  const verificationDescriptionId = useId()
-  const validationHints = t.form.validation
-  const validationState = useMemo(() => {
-    const messages: string[] = []
-
-    if (!isFormReady && validationHints?.initializing) {
-      return { disabled: true, messages: [validationHints.initializing] }
-    }
-
-    if (isSubmitting) {
-      if (isVerified) {
-        messages.push(
-          validationHints?.completing ??
-          t.form.completing ??
-          t.form.completeSubmit ??
-          t.form.submit,
-        )
-      } else if (isVerificationStep) {
-        messages.push(
-          validationHints?.verifying ??
-          t.form.verifying ??
-          t.form.verifySubmit ??
-          t.form.submit,
-        )
-      } else {
-        messages.push(validationHints?.submitting ?? t.form.submitting ?? t.form.submit)
-      }
-
-      return { disabled: true, messages }
-    }
-
-    if (!hasRequestedCode) {
-      const emailValue = formValues.email.trim()
-
-      if (!emailValue) {
-        messages.push(validationHints?.emailMissing ?? alerts.invalidEmail)
-      } else if (!EMAIL_PATTERN.test(emailValue)) {
-        messages.push(validationHints?.emailInvalid ?? alerts.invalidEmail)
-      }
-
-      if (!formValues.password) {
-        messages.push(validationHints?.passwordMissing ?? alerts.missingFields)
-      }
-
-      if (!formValues.confirmPassword) {
-        messages.push(validationHints?.confirmPasswordMissing ?? alerts.missingFields)
-      }
-
-      if (formValues.password && !PASSWORD_STRENGTH_PATTERN.test(formValues.password)) {
-        messages.push(validationHints?.passwordWeak ?? alerts.weakPassword ?? alerts.genericError)
-      }
-
-      if (
-        formValues.password &&
-        formValues.confirmPassword &&
-        formValues.password !== formValues.confirmPassword
-      ) {
-        messages.push(validationHints?.passwordMismatch ?? alerts.passwordMismatch)
-      }
-
-      if (!formValues.agreement) {
-        messages.push(
-          validationHints?.agreementRequired ?? alerts.agreementRequired ?? alerts.missingFields,
-        )
-      }
-
-      const uniqueMessages = Array.from(new Set(messages.filter(Boolean)))
-      return { disabled: uniqueMessages.length > 0, messages: uniqueMessages }
-    }
-
-    if (!isVerified) {
-      if (codeDigits.some((digit) => !digit)) {
-        messages.push(
-          validationHints?.codeIncomplete ??
-          alerts.codeRequired ??
-          alerts.invalidCode ??
-          alerts.missingFields,
-        )
-      }
-
-      const uniqueMessages = Array.from(new Set(messages.filter(Boolean)))
-      return { disabled: uniqueMessages.length > 0, messages: uniqueMessages }
-    }
-
-    if (codeDigits.some((digit) => !digit)) {
-      messages.push(
-        validationHints?.codeIncomplete ??
-        alerts.codeRequired ??
-        alerts.invalidCode ??
-        alerts.missingFields,
-      )
-    }
-
-    if (!pendingPassword) {
-      messages.push(validationHints?.passwordUnavailable ?? alerts.genericError)
-    }
-
-    const uniqueMessages = Array.from(new Set(messages.filter(Boolean)))
-    return { disabled: uniqueMessages.length > 0, messages: uniqueMessages }
-  }, [
-    alerts,
-    codeDigits,
-    formValues,
-    hasRequestedCode,
-    isFormReady,
-    isSubmitting,
-    isVerificationStep,
-    isVerified,
-    pendingPassword,
-    t.form.completeSubmit,
-    t.form.completing,
-    t.form.submit,
-    t.form.submitting,
-    t.form.verifySubmit,
-    t.form.verifying,
-    validationHints,
-  ])
-  const isSubmitDisabled = validationState.disabled
-  const validationMessages = validationState.messages
 
   return (
     <AuthLayout
@@ -814,80 +565,108 @@ export default function RegisterContent() {
         onSubmit={handleSubmit}
         noValidate
       >
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-slate-600">
-            {t.form.email}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder={t.form.emailPlaceholder}
-            className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-            required
-            disabled={isVerificationStep}
-            value={formValues.email}
-            onChange={handleInputChange('email')}
-          />
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-slate-600">
-              {t.form.password}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder={t.form.passwordPlaceholder}
-              className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-              required={!isVerificationStep}
-              disabled={isVerificationStep}
-              value={formValues.password}
-              onChange={handleInputChange('password')}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="confirm-password" className="text-sm font-medium text-slate-600">
-              {t.form.confirmPassword}
-            </label>
-            <input
-              id="confirm-password"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              placeholder={t.form.confirmPasswordPlaceholder}
-              className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-              required={!isVerificationStep}
-              disabled={isVerificationStep}
-              value={formValues.confirmPassword}
-              onChange={handleInputChange('confirmPassword')}
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-600" htmlFor="verification-code-0">
-            {t.form.verificationCodeLabel}
-          </label>
-          {t.form.verificationCodeDescription ? (
-            <p
-              id={verificationDescriptionId}
-              className="text-xs text-slate-500"
-            >
-              {t.form.verificationCodeDescription}
-            </p>
-          ) : null}
-          {hasRequestedCode && !isVerified ? (
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
-                我们已向你的邮箱发送一封验证邮件，点击邮件中的链接即可完成注册。
-                验证链接有效期 <strong>10 分钟</strong>。
-                <br />
-                若未收到邮件，请检查垃圾箱或稍后重试。
-              </div>
+        {currentStep === 0 && (
+          <>
+            <div className="space-y-2">
+              <label htmlFor="username" className="text-sm font-medium text-slate-600">
+                {t.form.name || 'Username'}
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autoComplete="username"
+                placeholder={t.form.namePlaceholder || '4-16 chars, starts with letter'}
+                className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                required
+                value={formValues.username}
+                onChange={handleInputChange('username')}
+              />
+            </div>
 
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-slate-600">
+                {t.form.email}
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder={t.form.emailPlaceholder}
+                className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                required
+                value={formValues.email}
+                onChange={handleInputChange('email')}
+              />
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium text-slate-600">
+                  {t.form.password}
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder={t.form.passwordPlaceholder}
+                  className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  required
+                  value={formValues.password}
+                  onChange={handleInputChange('password')}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="confirm-password" className="text-sm font-medium text-slate-600">
+                  {t.form.confirmPassword}
+                </label>
+                <input
+                  id="confirm-password"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder={t.form.confirmPasswordPlaceholder}
+                  className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  required
+                  value={formValues.confirmPassword}
+                  onChange={handleInputChange('confirmPassword')}
+                />
+              </div>
+            </div>
+
+            <label className="flex items-start gap-3 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                name="agreement"
+                required
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                checked={formValues.agreement}
+                onChange={handleAgreementChange}
+              />
+              <span>
+                {t.form.agreement}{' '}
+                <Link href="/docs" className="font-semibold text-sky-600 hover:text-sky-500">
+                  {t.form.terms}
+                </Link>
+              </span>
+            </label>
+          </>
+        )}
+
+        {currentStep === 1 && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
+              我们已向你的邮箱 <strong>{formValues.email}</strong> 发送一封验证邮件。
+              <br />
+              验证链接有效期 10 分钟。
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-600">
+                {t.form.verificationCodeLabel}
+              </label>
               <div className="flex justify-between gap-2">
                 {codeDigits.map((digit, index) => (
                   <input
@@ -895,12 +674,9 @@ export default function RegisterContent() {
                     ref={(el) => {
                       codeInputRefs.current[index] = el
                     }}
-                    id={`verification-code-${index}`}
-                    name={`verification-code-${index}`}
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
-                    pattern="\d{1}"
                     maxLength={1}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-white/90 text-center text-lg font-semibold text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                     value={digit}
@@ -910,53 +686,33 @@ export default function RegisterContent() {
                   />
                 ))}
               </div>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={isResending || resendCooldown > 0}
-                  className="text-sm font-medium text-sky-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {resendLabel}
-                </button>
-              </div>
             </div>
-          ) : null}
-        </div>
-        <label className="flex items-start gap-3 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            name="agreement"
-            required={!isVerificationStep}
-            disabled={isVerificationStep}
-            className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
-            checked={formValues.agreement}
-            onChange={handleAgreementChange}
-          />
-          <span>
-            {t.form.agreement}{' '}
-            <Link href="/docs" className="font-semibold text-sky-600 hover:text-sky-500">
-              {t.form.terms}
-            </Link>
-          </span>
-        </label>
-        {validationMessages.length > 0 ? (
-          <div
-            className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600"
-            role="status"
-            aria-live="polite"
-          >
-            <ul className="list-disc space-y-1 pl-5">
-              {validationMessages.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
+
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setCurrentStep(0)}
+                className="text-sm text-slate-500 hover:text-slate-700"
+              >
+                ← 返回修改信息
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={isResending || resendCooldown > 0}
+                className="text-sm font-medium text-sky-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ zIndex: 10, position: 'relative' }}
+              >
+                {resendLabel}
+              </button>
+            </div>
           </div>
-        ) : null}
+        )}
+
         <button
           type="submit"
-          disabled={isSubmitDisabled}
+          disabled={isSubmitting || (currentStep === 1 && codeDigits.some(d => !d))}
           className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-500 hover:to-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitLabel}
