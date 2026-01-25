@@ -1,0 +1,31 @@
+
+> dashboard@1.0.0 dev
+> bash scripts/Dev-MCP-Server.sh && next dev --turbo
+
+[MCP] Cleaning stale Chrome processes...
+[MCP] Starting Chrome (remote debugging)...
+[MCP] Waiting for Chrome DevTools endpoint...
+[MCP] Chrome DevTools ready on port 9222
+[MCP] (Optional) Pre-warming chrome-devtools-mcp...
+[MCP] Done. You can now run: npm run dev
+▲ Next.js 16.1.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+✓ Ready in 2.5s
+○ Compiling /services ...
+ GET /services 200 in 6.8s (compile: 6.4s, render: 327ms)
+[runtime-config] Loaded env: PROD
+ GET /api/auth/session 200 in 1021ms (compile: 993ms, render: 29ms)
+ GET /services 200 in 87ms (compile: 5ms, render: 82ms)
+ GET /api/auth/session 200 in 11ms (compile: 3ms, render: 7ms)
+✓ Compiled in 310ms
+ GET /services 200 in 441ms (compile: 149ms, render: 293ms)
+ GET /api/auth/session 200 in 16ms (compile: 5ms, render: 10ms)
+ GET /services 200 in 252ms (compile: 100ms, render: 152ms)
+ GET /api/auth/session 200 in 14ms (compile: 5ms, render: 8ms)
+ GET /services 200 in 251ms (compile: 86ms, render: 165ms)
+ GET /api/auth/session 200 in 13ms (compile: 4ms, render: 8ms)
+ GET /services 200 in 281ms (compile: 94ms, render: 187ms)
+ GET /api/auth/session 200 in 12ms (compile: 4ms, render: 8ms)

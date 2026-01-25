@@ -2,10 +2,13 @@
 import { BookOpen, Github, Globe, Link, MessageCircle, Sparkles, Moon, Sun } from 'lucide-react'
 
 import { useThemeStore } from '@components/theme'
+import { useViewStore } from './theme/viewStore'
 
 export default function Footer() {
   const isDark = useThemeStore((state) => state.isDark)
   const toggleTheme = useThemeStore((state) => state.toggleTheme)
+  const { view, setView } = useViewStore()
+
   const socials = [
     { label: 'GitHub', icon: Github, href: 'https://github.com/cloud-neutral-toolkit' },
     { label: 'Repository', icon: Link, href: 'https://hub.docker.com/u/cloudneutral' },
@@ -16,6 +19,11 @@ export default function Footer() {
   ]
 
   const toggleLabel = isDark ? '切换为浅色主题' : '切换为深色主题'
+  const viewToggleLabel = view === 'classic' ? 'Switch to Material View' : 'Switch to Classic View'
+
+  const handleViewToggle = () => {
+    setView(view === 'classic' ? 'material' : 'classic')
+  }
 
   return (
     <footer className="mt-12 flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-slate-300">
@@ -32,29 +40,43 @@ export default function Footer() {
             </a>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-pressed={isDark}
-          aria-label={toggleLabel}
-          title={toggleLabel}
-          className="group relative flex h-10 w-20 items-center rounded-full border border-white/10 bg-white/5 px-2 text-white transition hover:border-indigo-400/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-        >
-          <span className="relative z-10 flex w-full items-center justify-between text-slate-300">
-            <Moon
-              className={`h-4 w-4 transition-colors ${isDark ? 'text-indigo-100' : 'text-slate-500'}`}
+        <div className="flex items-center gap-4">
+          <button
+            data-testid="view-switcher"
+            type="button"
+            onClick={handleViewToggle}
+            aria-label={viewToggleLabel}
+            title={viewToggleLabel}
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-indigo-400/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          >
+            <span className="material-symbols-outlined text-xl">
+              {view === 'classic' ? 'view_quilt' : 'view_cozy'}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-pressed={isDark}
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            className="group relative flex h-10 w-20 items-center rounded-full border border-white/10 bg-white/5 px-2 text-white transition hover:border-indigo-400/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          >
+            <span className="relative z-10 flex w-full items-center justify-between text-slate-300">
+              <Moon
+                className={`h-4 w-4 transition-colors ${isDark ? 'text-indigo-100' : 'text-slate-500'}`}
+                aria-hidden
+              />
+              <Sun
+                className={`h-4 w-4 transition-colors ${isDark ? 'text-slate-500' : 'text-amber-300'}`}
+                aria-hidden
+              />
+            </span>
+            <span
               aria-hidden
+              className={`absolute inset-y-1 left-1 h-8 w-8 rounded-full bg-white/90 shadow-sm transition-transform duration-300 ease-out ${isDark ? 'translate-x-0' : 'translate-x-10'}`}
             />
-            <Sun
-              className={`h-4 w-4 transition-colors ${isDark ? 'text-slate-500' : 'text-amber-300'}`}
-              aria-hidden
-            />
-          </span>
-          <span
-            aria-hidden
-            className={`absolute inset-y-1 left-1 h-8 w-8 rounded-full bg-white/90 shadow-sm transition-transform duration-300 ease-out ${isDark ? 'translate-x-0' : 'translate-x-10'}`}
-          />
-        </button>
+          </button>
+        </div>
       </div>
     </footer>
   )
