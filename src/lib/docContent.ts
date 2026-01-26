@@ -12,6 +12,8 @@ export interface DocVersion {
   tags: string[]
   content: string
   isMdx: boolean
+  category?: string
+  subcategory?: boolean
 }
 
 export interface DocCollection {
@@ -68,17 +70,43 @@ function buildExcerpt(markdown: string): string {
 function normalizeDoc(file: Awaited<ReturnType<typeof readDocFiles>>[number]): DocVersion & {
   collection: string
   collectionLabel: string
+  category?: string
+  subcategory?: boolean
 } {
   const segments = file.slug.split('/')
+
+  // collection is usually the first segment (e.g., '01-console')
   const collection = typeof file.metadata.collection === 'string' ? file.metadata.collection : segments[0] || 'docs'
   const collectionLabel =
     typeof file.metadata.collectionLabel === 'string'
       ? file.metadata.collectionLabel
       : humanize(collection)
 
-  const versionSlug = typeof file.metadata.versionSlug === 'string' ? file.metadata.versionSlug : segments.at(-1) ?? 'latest'
-  const label = typeof file.metadata.version === 'string' ? file.metadata.version : versionSlug
-  const title = typeof file.metadata.title === 'string' ? file.metadata.title : label
+  // category is usually the second segment (e.g., 'getting-started')
+  const category = typeof file.metadata.category === 'string'
+    ? file.metadata.category
+    : (segments.length > 2 ? segments[1] : undefined)
+
+  const subcategory = !!file.metadata.subcategory || (segments.length > 2 && segments.at(-1) !== 'index')
+
+  // Determine the slug within the collection
+  // segments[0] is the collection (e.g., '01-console')
+  // We want the rest of the path as the nested slug
+  const relativeSegments = segments.slice(1)
+  let innerSlug = relativeSegments.join('/')
+
+  // Handle 'index' or 'README' at any level
+  if (innerSlug.endsWith('/index') || innerSlug.endsWith('/README')) {
+    innerSlug = innerSlug.replace(/\/(index|README)$/, '')
+  } else if (innerSlug === 'index' || innerSlug === 'README') {
+    innerSlug = ''
+  }
+
+  // If empty (it was just the collection-level README or index), use 'overview'
+  const finalSlug = innerSlug || 'overview'
+
+  const label = typeof file.metadata.version === 'string' ? file.metadata.version : (segments.at(-1) ?? 'latest')
+  const title = typeof file.metadata.title === 'string' ? file.metadata.title : (finalSlug === 'overview' ? 'Overview' : humanize(segments.at(-1) || label))
   const description =
     typeof file.metadata.description === 'string' ? file.metadata.description : buildExcerpt(file.content)
   const updatedAt = typeof file.metadata.updatedAt === 'string' ? file.metadata.updatedAt : undefined
@@ -88,7 +116,7 @@ function normalizeDoc(file: Awaited<ReturnType<typeof readDocFiles>>[number]): D
   const isMdx = String(file.metadata.format || '').toLowerCase() === 'mdx'
 
   return {
-    slug: versionSlug,
+    slug: finalSlug,
     label,
     title,
     description,
@@ -98,6 +126,8 @@ function normalizeDoc(file: Awaited<ReturnType<typeof readDocFiles>>[number]): D
     isMdx,
     collection,
     collectionLabel,
+    category,
+    subcategory,
   }
 }
 
@@ -125,6 +155,8 @@ export const getDocCollections = cache(async (): Promise<DocCollection[]> => {
         tags: doc.tags,
         content: doc.content,
         isMdx: doc.isMdx,
+        category: doc.category,
+        subcategory: doc.subcategory,
       }
 
       if (existing) {
@@ -197,6 +229,9 @@ export async function getDocVersion(
 export async function getDocParams() {
   const collections = await getDocCollections()
   return collections.flatMap((collection) =>
-    collection.versions.map((version) => ({ collection: collection.slug, version: version.slug })),
+    collection.versions.map((version) => ({
+      collection: collection.slug,
+      slug: version.slug.split('/')
+    })),
   )
 }

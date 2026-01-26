@@ -19,38 +19,38 @@ const tailwindConfig = {
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: 'var(--color-surface-border)',
+        input: 'var(--color-surface-border)',
+        ring: 'var(--color-ring)',
+        background: 'var(--color-background)',
+        foreground: 'var(--color-text)',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: 'var(--color-primary)',
+          foreground: 'var(--color-primary-foreground)',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: 'var(--color-surface-muted)',
+          foreground: 'var(--color-text-muted)',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: 'var(--color-danger)',
+          foreground: 'var(--color-danger-foreground)',
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: 'var(--color-surface-muted)',
+          foreground: 'var(--color-text-muted)',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: 'var(--color-accent)',
+          foreground: 'var(--color-accent-foreground)',
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT: 'var(--color-surface-elevated)',
+          foreground: 'var(--color-text)',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: 'var(--color-surface)',
+          foreground: 'var(--color-text)',
         },
         brand: {
           DEFAULT: '#3366FF',      // 主色
@@ -61,6 +61,18 @@ const tailwindConfig = {
           navy: '#1E2E55',         // 海军蓝
           heading: '#2E3A59',      // 标题色
         },
+        surface: {
+          DEFAULT: 'var(--color-surface)',
+          muted: 'var(--color-surface-muted)',
+          border: 'var(--color-surface-border)',
+          hover: 'var(--color-surface-hover)',
+        },
+        text: {
+          DEFAULT: 'var(--color-text)',
+          muted: 'var(--color-text-muted)',
+          subtle: 'var(--color-text-subtle)',
+        },
+        heading: 'var(--color-heading)',
       },
 
       // 字体配置

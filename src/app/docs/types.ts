@@ -7,6 +7,8 @@ export interface DocVersionOption {
   tags?: string[]
   content: string
   isMdx: boolean
+  category?: string
+  subcategory?: boolean
 }
 
 export interface DocCollection {
@@ -17,4 +19,5 @@ export interface DocCollection {
   tags: string[]
   versions: DocVersionOption[]
   defaultVersionSlug: string
+  category?: string
 }
