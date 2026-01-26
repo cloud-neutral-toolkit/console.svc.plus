@@ -1077,7 +1077,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           tutorials: 'View Tutorials',
         },
         signedIn: 'Signed in',
-        trustedBy: 'Trusted by your dev team',
+        trustedBy: 'Cloud-native · Vendor-neutral · Freely portable',
         heroCards: [
           {
             title: 'Create your app',
@@ -1784,7 +1784,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           tutorials: '查看教程',
         },
         signedIn: '已登录',
-        trustedBy: '被您的开发团队信赖',
+        trustedBy: '云原生 · 去平台绑定 · 可自由迁移',
         heroCards: [
           {
             title: '创建您的应用',
