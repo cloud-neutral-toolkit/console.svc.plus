@@ -145,9 +145,9 @@ function HeroSection() {
             {t.heroButtons.tutorials}
           </button>
         </div>
-        <div className="flex items-center gap-4 text-sm text-text-muted">
-          <p>{t.trustedBy}</p>
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-3 text-sm">
+          <p className="text-text-muted">{t.trustedBy}</p>
+          <div className="flex gap-2 flex-wrap">
             <LogoPill label="Next.js" />
             <LogoPill label="Go" />
             <LogoPill label="Vercel" />
