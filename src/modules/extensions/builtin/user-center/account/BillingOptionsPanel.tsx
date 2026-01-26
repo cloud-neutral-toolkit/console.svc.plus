@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 
 import { PayPalPayGoButton, PayPalSubscriptionButton } from '@components/billing/PayPalButtons'
 import { resolveBillingClientId } from '@components/billing/utils'
@@ -111,10 +112,6 @@ export default function BillingOptionsPanel() {
     }
   }, [])
 
-  if (!products.length) {
-    return null
-  }
-
   const activeMethods = useMemo(() => {
     if (!selected?.plan.paymentMethods) return []
     const order: BillingPaymentMethod['type'][] = ['paypal', 'ethereum', 'usdt']
@@ -149,6 +146,10 @@ export default function BillingOptionsPanel() {
     [handleSync, selected],
   )
 
+  if (!products.length) {
+    return null
+  }
+
   const renderCryptoCard = (method: BillingPaymentMethod) => {
     const address = method.address?.trim()
     const network = method.network?.trim()
@@ -164,7 +165,14 @@ export default function BillingOptionsPanel() {
 
         {qrCode ? (
           <div className="rounded-xl bg-white p-4 text-center">
-            <img src={qrCode} alt={`${method.label || method.type} QR`} className={qrClassName} />
+            <Image
+              src={qrCode}
+              alt={`${method.label || method.type} QR`}
+              width={224}
+              height={224}
+              className={qrClassName}
+              unoptimized
+            />
           </div>
         ) : null}
 
@@ -219,7 +227,7 @@ export default function BillingOptionsPanel() {
 
         {method.qrCode ? (
           <div className="rounded-xl bg-white p-4 text-center">
-            <img src={method.qrCode} alt="PayPal QR" className={qrClassName} />
+            <Image src={method.qrCode} alt="PayPal QR" width={224} height={224} className={qrClassName} unoptimized />
           </div>
         ) : null}
 

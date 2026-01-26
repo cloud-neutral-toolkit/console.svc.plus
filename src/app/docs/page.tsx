@@ -37,7 +37,7 @@ export default async function DocsHome() {
       <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-surface-border bg-surface p-8 text-center">
         <h3 className="text-lg font-semibold text-heading">No Documentation Found</h3>
         <p className="max-w-md text-sm text-text-muted mt-2">
-          We couldn't find any documentation files. Please ensure content is synced to <code>src/content/doc</code>.
+          We could not find any documentation files. Please ensure content is synced to <code>src/content/doc</code>.
         </p>
       </div>
     )

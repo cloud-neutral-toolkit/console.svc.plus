@@ -118,7 +118,6 @@ function filesystemTemplateLoader(name: string): TemplateDefinition | null {
 
 function loadTemplateModule(modulePath: string): TemplateDefinition | null {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const mod = require(modulePath)
     const template = (mod?.default ?? mod) as TemplateDefinition | undefined
     if (!template || typeof template !== 'object') {

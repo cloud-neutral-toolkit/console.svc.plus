@@ -7,7 +7,7 @@
 
 import typography from '@tailwindcss/typography'
 
-export default {
+const tailwindConfig = {
   // 扫描的源文件路径
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
@@ -81,3 +81,5 @@ export default {
     typography,
   ],
 }
+
+export default tailwindConfig
