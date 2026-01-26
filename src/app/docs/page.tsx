@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { promises as fs } from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import { MDXRemote } from 'next-mdx-remote/rsc'
+import { marked } from 'marked'
 
 export default async function DocsHome() {
   try {
@@ -10,6 +10,9 @@ export default async function DocsHome() {
     const indexPath = path.join(process.cwd(), 'src', 'content', 'doc', 'index.md')
     const fileContent = await fs.readFile(indexPath, 'utf-8')
     const { data: frontmatter, content } = matter(fileContent)
+
+    // Convert markdown to HTML
+    const htmlContent = await marked(content)
 
     return (
       <div className="mx-auto max-w-4xl">
@@ -22,9 +25,10 @@ export default async function DocsHome() {
           )}
         </header>
 
-        <article className="prose prose-slate max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-          <MDXRemote source={content} />
-        </article>
+        <article
+          className="prose prose-slate max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
       </div>
     )
   } catch (error) {
