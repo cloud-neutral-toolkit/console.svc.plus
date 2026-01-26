@@ -148,11 +148,11 @@ function HeroSection() {
         <div className="flex items-center gap-4 text-sm text-text-muted">
           <p>{t.trustedBy}</p>
           <div className="flex gap-2">
-            <LogoPill label="Vue" />
-            <LogoPill label="Svelte" />
-            <LogoPill label="Node" />
-            <LogoPill label="Django" />
-            <LogoPill label="Laravel" />
+            <LogoPill label="Next.js" />
+            <LogoPill label="Go" />
+            <LogoPill label="Vercel" />
+            <LogoPill label="Cloud Run" />
+            <LogoPill label="PostgreSQL" />
           </div>
         </div>
       </div>
