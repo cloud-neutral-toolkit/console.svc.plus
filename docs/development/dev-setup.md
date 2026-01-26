@@ -1,3 +1,11 @@
+# Development Setup
+
+## Purpose
+
+- This document covers local development setup and tooling notes.
+
+## Module System Migration
+
 # 🔄 CommonJS → ES Module 迁移指南
 
 ## 📊 迁移概览
@@ -63,4 +71,3 @@ npm run build
 3. **静态分析**: IDE 支持更好
 4. **未来兼容**: ECMAScript 标准
 5. **性能提升**: 更好的模块加载
-
