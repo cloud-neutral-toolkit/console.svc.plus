@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import Image from 'next/image'
 import useSWR from 'swr'
 
 import Card from '../components/Card'
@@ -163,10 +164,13 @@ export default function SubscriptionPanel() {
               </dl>
               {record.paymentQr ? (
                 <div className="mt-3 rounded-lg bg-white p-3">
-                  <img
+                  <Image
                     src={record.paymentQr}
                     alt={`QR for ${record.externalId}`}
+                    width={112}
+                    height={112}
                     className="mx-auto h-28 w-28 object-contain"
+                    unoptimized
                   />
                 </div>
               ) : null}

@@ -114,8 +114,8 @@ function createRegistry(): ExtensionRegistry {
       if (!route.enabled) {
         throw new Error(`Extension route is disabled: ${path}`)
       }
-      const module = await route.loader()
-      return module.default
+      const loadedModule = await route.loader()
+      return loadedModule.default
     },
   }
 }
