@@ -4,27 +4,31 @@ export const revalidate = false
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
-import Breadcrumbs, { type Crumb } from '../../../../components/download/Breadcrumbs'
 import DocArticle from '@/components/doc/DocArticle'
 import DocMetaPanel from '@/components/doc/DocMetaPanel'
-import DocVersionSwitcher from '@/components/doc/DocVersionSwitcher'
+import Feedback from '../../Feedback'
 import { getDocVersionParams, getDocVersion } from '../../resources.server'
 import { isFeatureEnabled } from '@lib/featureToggles'
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 
-function buildBreadcrumbs(
-  slug: string,
-  docTitle: string,
-  version?: { label: string; slug: string },
-): Crumb[] {
-  const crumbs: Crumb[] = [
-    { label: 'Docs', href: '/docs' },
-    { label: docTitle, href: `/docs/${slug}` },
-  ]
-  if (version) {
-    const versionSlug = version.slug
-    crumbs.push({ label: version.label, href: `/docs/${slug}/${versionSlug}` })
-  }
-  return crumbs
+// Simple Breadcrumbs Component inline (or could be separate)
+function DocsBreadcrumbs({ items }: { items: { label: string; href: string }[] }) {
+  return (
+    <nav className="flex items-center gap-2 text-sm text-text-muted mb-6">
+      {items.map((item, index) => (
+        <div key={item.href} className="flex items-center gap-2">
+          {index > 0 && <ChevronRight className="h-4 w-4" />}
+          <Link
+            href={item.href}
+            className={`transition hover:text-primary ${index === items.length - 1 ? 'font-medium text-text' : ''}`}
+          >
+            {item.label}
+          </Link>
+        </div>
+      ))}
+    </nav>
+  )
 }
 
 export const generateStaticParams = async () => {
@@ -37,8 +41,13 @@ export const generateStaticParams = async () => {
 
 export const dynamicParams = false
 
-export const metadata: Metadata = {
-  title: 'Documentation',
+export async function generateMetadata({ params }: { params: { collection: string; version: string } }): Promise<Metadata> {
+  const doc = await getDocVersion(params.collection, params.version)
+  if (!doc) return {}
+  return {
+    title: `${doc.version.title} - ${doc.collection.title} | Documentation`,
+    description: doc.version.description,
+  }
 }
 
 export default async function DocVersionPage({
@@ -56,39 +65,52 @@ export default async function DocVersionPage({
   }
 
   const { collection, version } = doc
-  const breadcrumbs = buildBreadcrumbs(collection.slug, collection.title, version)
+
+  const breadcrumbs = [
+    { label: 'Documentation', href: '/docs' },
+    { label: collection.title, href: `/docs/${collection.slug}` },
+    { label: version.title, href: `/docs/${collection.slug}/${version.slug}` },
+  ]
 
   return (
-    <main className="px-4 py-8 md:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <Breadcrumbs items={breadcrumbs} />
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">{collection.title}</p>
-              <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">{version.title}</h1>
-              <p className="mt-2 text-sm text-gray-600">{collection.description}</p>
-            </div>
-            <div className="flex flex-col items-start gap-3 text-sm text-gray-500 md:items-end">
-              <DocVersionSwitcher
-                collectionSlug={collection.slug}
-                versions={collection.versions.map((item) => ({ slug: item.slug, label: item.label }))}
-                activeSlug={version.slug}
-              />
-              {version.updatedAt && <span suppressHydrationWarning>Updated {version.updatedAt}</span>}
-            </div>
-          </div>
-        </section>
+    <div className="flex gap-12 xl:gap-16">
+      {/* Center Content */}
+      <article className="min-w-0 flex-1">
+        <DocsBreadcrumbs items={breadcrumbs} />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_1fr]">
-          <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-            <DocMetaPanel description={version.description} updatedAt={version.updatedAt} tags={version.tags} />
-          </div>
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <DocArticle content={version.content} />
-          </div>
+        <header className="mb-10 border-b border-surface-border pb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-heading sm:text-4xl">{version.title}</h1>
+          {version.description && <p className="mt-4 text-lg text-text-muted">{version.description}</p>}
+        </header>
+
+        <div className="prose prose-slate max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+          <DocArticle content={version.content} />
         </div>
-      </div>
-    </main>
+
+        <Feedback />
+      </article>
+
+      {/* Right Sidebar */}
+      <aside className="hidden w-64 shrink-0 lg:block xl:w-72">
+        <div className="sticky top-[100px] space-y-8 border-l border-surface-border pl-6">
+          <div>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-subtle">Metadata</h3>
+            <DocMetaPanel
+              description={undefined} // Description already shown in header
+              updatedAt={version.updatedAt}
+              tags={version.tags}
+            />
+          </div>
+
+          {/* We could add TOC here later */}
+          {/* 
+          <div>
+             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-subtle">On This Page</h3>
+             <TOC content={version.content} />
+          </div> 
+          */}
+        </div>
+      </aside>
+    </div>
   )
 }

@@ -5,6 +5,7 @@ models/
 .DS_Store
 ui/.DS_Store
 ui/*/.DS_Store
+src/content/
 
 # Node.js dependencies
 node_modules/
