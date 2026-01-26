@@ -2,25 +2,68 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { ChevronRight, ChevronDown, FileText } from 'lucide-react'
-import type { DocCollection } from './types'
+import { useState, useEffect } from 'react'
+import {
+    ChevronRight,
+    ChevronDown,
+    Book,
+    Settings,
+    Zap,
+    Shield,
+    HelpCircle,
+    Code,
+    Terminal,
+    Activity,
+    GraduationCap,
+    Layout,
+    Layers,
+    Puzzle
+} from 'lucide-react'
+import type { DocCollection, DocVersionOption } from './types'
 
 interface DocsSidebarProps {
     collections: DocCollection[]
 }
 
+// Helper to humanize category names
+const humanize = (s: string) => {
+    if (!s) return ''
+    return s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+// Icon mapping for categories
+const ICON_MAP: Record<string, any> = {
+    'getting-started': Book,
+    'architecture': Zap,
+    'usage': Settings,
+    'advanced': GraduationCap,
+    'api': Code,
+    'development': Terminal,
+    'operations': Activity,
+    'governance': Shield,
+    'appendix': HelpCircle,
+    'integrations': Puzzle,
+    'overview': Layout,
+    'core-concepts': Layers,
+}
+
+const ADVANCED_GROUP = ['api', 'development', 'operations', 'governance', 'advanced']
+
 export default function DocsSidebar({ collections }: DocsSidebarProps) {
     const pathname = usePathname()
 
-    // Sort collections by title or defined order if any
-    const sortedCollections = [...collections].sort((a, b) => a.title.localeCompare(b.title))
+    // Sort collections: Console first, then others alphabetically
+    const sortedCollections = [...collections].sort((a, b) => {
+        if (a.slug.includes('console')) return -1
+        if (b.slug.includes('console')) return 1
+        return a.title.localeCompare(b.title)
+    })
 
     return (
-        <aside className="sticky top-[64px] hidden h-[calc(100vh-64px)] w-64 shrink-0 overflow-y-auto border-r border-surface-border bg-background py-6 pl-8 pr-4 lg:block">
-            <nav className="space-y-6">
+        <aside className="sticky top-[64px] hidden h-[calc(100vh-64px)] w-72 shrink-0 overflow-y-auto border-r border-surface-border bg-background/50 backdrop-blur-sm py-8 pl-8 pr-4 lg:block">
+            <nav className="space-y-10">
                 {sortedCollections.map((collection) => (
-                    <SidebarGroup
+                    <CollectionGroup
                         key={collection.slug}
                         collection={collection}
                         activePath={pathname}
@@ -31,44 +74,162 @@ export default function DocsSidebar({ collections }: DocsSidebarProps) {
     )
 }
 
-function SidebarGroup({ collection, activePath }: { collection: DocCollection; activePath: string }) {
+function CollectionGroup({ collection, activePath }: { collection: DocCollection; activePath: string }) {
     const [isOpen, setIsOpen] = useState(true)
 
-    // Check if any child is active to auto-expand (optional, defaulted to true for now)
-    const isActive = collection.versions.some(v => activePath === `/docs/${collection.slug}/${v.slug}`)
+    // Group versions by category
+    const grouped: Record<string, DocVersionOption[]> = {}
+    const topLevel: DocVersionOption[] = []
+
+    collection.versions.forEach(v => {
+        const category = v.category
+        if (!category || category === 'overview' || category === 'index') {
+            topLevel.push(v)
+        } else {
+            if (!grouped[category]) grouped[category] = []
+            grouped[category].push(v)
+        }
+    })
+
+    const hasAdvanced = ADVANCED_GROUP.some(k => grouped[k])
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex w-full items-center justify-between text-sm font-semibold text-heading transistion hover:text-primary"
+                className="group flex w-full items-center justify-between text-xs font-bold uppercase tracking-widest text-text-subtle transition-colors hover:text-primary"
             >
-                <span>{collection.title}</span>
-                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                <span className="flex items-center gap-2">
+                    <span className="h-1 w-1 rounded-full bg-primary/40 group-hover:bg-primary transition-colors"></span>
+                    {collection.title}
+                </span>
+                {isOpen ? <ChevronDown className="h-3.5 w-3.5 opacity-50" /> : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
             </button>
 
             {isOpen && (
-                <ul className="space-y-1 border-l border-surface-border pl-4">
-                    {collection.versions.map((version) => {
-                        const href = `/docs/${collection.slug}/${version.slug}`
-                        const isPageActive = activePath === href
+                <div className="space-y-6">
+                    {/* Uncategorized / Overview / README */}
+                    {topLevel.length > 0 && (
+                        <ul className="space-y-1">
+                            {topLevel.map(v => (
+                                <SidebarLink key={v.slug} version={v} collectionSlug={collection.slug} activePath={activePath} />
+                            ))}
+                        </ul>
+                    )}
 
-                        return (
-                            <li key={version.slug}>
-                                <Link
-                                    href={href}
-                                    className={`block rounded-md px-2 py-1.5 text-sm transition-colors ${isPageActive
-                                            ? 'bg-primary/10 text-primary font-medium'
-                                            : 'text-text-muted hover:text-heading hover:bg-surface-muted'
-                                        }`}
-                                >
-                                    {version.title}
-                                </Link>
-                            </li>
-                        )
-                    })}
-                </ul>
+                    {/* Main Categories (Getting Started, Architecture, etc.) */}
+                    <div className="space-y-4">
+                        {Object.entries(grouped)
+                            .filter(([k]) => !ADVANCED_GROUP.includes(k))
+                            .sort((a, b) => a[0].localeCompare(b[0]))
+                            .map(([category, versions]) => (
+                                <CategorySection
+                                    key={category}
+                                    title={category}
+                                    versions={versions}
+                                    collectionSlug={collection.slug}
+                                    activePath={activePath}
+                                />
+                            ))}
+                    </div>
+
+                    {/* Advanced Section Dropdown */}
+                    {hasAdvanced && (
+                        <AdvancedSection
+                            grouped={grouped}
+                            collectionSlug={collection.slug}
+                            activePath={activePath}
+                        />
+                    )}
+                </div>
             )}
         </div>
+    )
+}
+
+function CategorySection({ title, versions, collectionSlug, activePath }: { title: string; versions: DocVersionOption[]; collectionSlug: string; activePath: string }) {
+    const Icon = ICON_MAP[title] || Book
+
+    // Auto-expand if active
+    const isActive = versions.some(v => activePath === `/docs/${collectionSlug}/${v.slug}`)
+    const [isExpanded, setIsExpanded] = useState(true)
+
+    return (
+        <div className="space-y-1">
+            <div
+                className={`flex w-full items-center gap-2.5 px-2 py-1 text-[11px] font-bold uppercase tracking-tight ${isActive ? 'text-primary' : 'text-text-muted/80'}`}
+            >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-primary' : 'text-text-subtle'}`} />
+                <span>{humanize(title)}</span>
+            </div>
+            <ul className="ml-3.5 space-y-1 border-l border-surface-border pl-4">
+                {versions.map(v => (
+                    <SidebarLink key={v.slug} version={v} collectionSlug={collectionSlug} activePath={activePath} />
+                ))}
+            </ul>
+        </div>
+    )
+}
+
+function AdvancedSection({ grouped, collectionSlug, activePath }: { grouped: Record<string, DocVersionOption[]>; collectionSlug: string; activePath: string }) {
+    // Check if anything inside is active to auto-expand
+    const isInsideActive = ADVANCED_GROUP.some(k => grouped[k]?.some(v => activePath === `/docs/${collectionSlug}/${v.slug}`))
+
+    const [isExpanded, setIsExpanded] = useState(isInsideActive)
+
+    useEffect(() => {
+        if (isInsideActive) setIsExpanded(true)
+    }, [isInsideActive])
+
+    return (
+        <div className="space-y-2 rounded-lg bg-surface-muted/30 p-2">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className={`flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-xs font-bold transition-all ${isExpanded ? 'text-primary bg-primary/5' : 'text-text-muted hover:text-primary hover:bg-primary/5'}`}
+            >
+                <GraduationCap className={`h-4 w-4 ${isExpanded ? 'text-primary' : 'text-text-subtle'}`} />
+                <span className="uppercase tracking-wide">Advanced</span>
+                <ChevronDown className={`ml-auto h-3.5 w-3.5 transition-transform duration-300 ${isExpanded ? '' : '-rotate-90'}`} />
+            </button>
+
+            {isExpanded && (
+                <div className="space-y-5 animate-in fade-in slide-in-from-top-1 duration-300">
+                    {ADVANCED_GROUP.map(k => grouped[k] && (
+                        <div key={k} className="space-y-2 py-1">
+                            <div className="flex items-center gap-2 px-3 text-[10px] font-bold uppercase tracking-widest text-text-subtle/50">
+                                <span className="h-[1px] w-2 bg-surface-border"></span>
+                                {humanize(k)}
+                            </div>
+                            <ul className="ml-4 space-y-1 border-l border-surface-border/50 pl-4">
+                                {grouped[k].map(v => (
+                                    <SidebarLink key={v.slug} version={v} collectionSlug={collectionSlug} activePath={activePath} />
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+function SidebarLink({ version, collectionSlug, activePath }: { version: DocVersionOption; collectionSlug: string; activePath: string }) {
+    const href = `/docs/${collectionSlug}/${version.slug}`
+    const isPageActive = activePath === href
+
+    return (
+        <li>
+            <Link
+                href={href}
+                className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all duration-200 ${isPageActive
+                    ? 'bg-primary/10 text-primary font-medium shadow-sm'
+                    : 'text-text-muted hover:text-heading hover:bg-surface-muted'
+                    }`}
+            >
+                {isPageActive && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                <span className="truncate">{version.title}</span>
+                {!isPageActive && <ChevronRight className="ml-auto h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover:opacity-30 group-hover:translate-x-0" />}
+            </Link>
+        </li>
     )
 }

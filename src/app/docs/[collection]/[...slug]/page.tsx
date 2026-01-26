@@ -41,8 +41,9 @@ export const generateStaticParams = async () => {
 
 export const dynamicParams = false
 
-export async function generateMetadata({ params }: { params: { collection: string; version: string } }): Promise<Metadata> {
-  const doc = await getDocVersion(params.collection, params.version)
+export async function generateMetadata({ params }: { params: Promise<{ collection: string; slug: string[] }> }): Promise<Metadata> {
+  const resolvedParams = await params
+  const doc = await getDocVersion(resolvedParams.collection, resolvedParams.slug)
   if (!doc) return {}
   return {
     title: `${doc.version.title} - ${doc.collection.title} | Documentation`,
@@ -53,13 +54,14 @@ export async function generateMetadata({ params }: { params: { collection: strin
 export default async function DocVersionPage({
   params,
 }: {
-  params: { collection: string; version: string }
+  params: Promise<{ collection: string; slug: string[] }>
 }) {
   if (!isFeatureEnabled('appModules', '/docs')) {
     notFound()
   }
 
-  const doc = await getDocVersion(params.collection, params.version)
+  const resolvedParams = await params
+  const doc = await getDocVersion(resolvedParams.collection, resolvedParams.slug)
   if (!doc) {
     notFound()
   }
@@ -101,14 +103,6 @@ export default async function DocVersionPage({
               tags={version.tags}
             />
           </div>
-
-          {/* We could add TOC here later */}
-          {/* 
-          <div>
-             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-subtle">On This Page</h3>
-             <TOC content={version.content} />
-          </div> 
-          */}
         </div>
       </aside>
     </div>

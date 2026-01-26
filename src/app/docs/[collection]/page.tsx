@@ -20,13 +20,14 @@ export const generateStaticParams = async () => {
 export default async function CollectionPage({
   params,
 }: {
-  params: { collection: string }
+  params: Promise<{ collection: string }>
 }) {
   if (!isFeatureEnabled('appModules', '/docs')) {
     notFound()
   }
 
-  const doc = await getDocResource(params.collection)
+  const resolvedParams = await params
+  const doc = await getDocResource(resolvedParams.collection)
   if (!doc) {
     notFound()
   }

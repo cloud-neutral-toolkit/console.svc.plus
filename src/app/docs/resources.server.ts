@@ -37,13 +37,16 @@ export async function getDocVersionParams() {
   return getDocParams()
 }
 
-export async function getDocVersion(slug: string, version: string) {
+export async function getDocVersion(collectionSlug: string, slugSegments: string | string[]) {
   if (!isDocsModuleEnabled()) {
     return undefined
   }
-  const collection = await getDocCollection(slug)
+  const collection = await getDocCollection(collectionSlug)
   if (!collection) return undefined
-  const versionMatch = collection.versions.find((item) => item.slug === version)
+
+  const targetSlug = Array.isArray(slugSegments) ? slugSegments.join('/') : slugSegments
+  const versionMatch = collection.versions.find((item) => item.slug === targetSlug)
+
   if (!versionMatch) return undefined
   return { collection, version: versionMatch }
 }
