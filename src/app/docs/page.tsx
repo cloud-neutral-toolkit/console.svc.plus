@@ -1,10 +1,34 @@
-import { redirect, notFound } from 'next/navigation'
-import { getDocCollections } from './resources.server'
+import { notFound } from 'next/navigation'
+import { promises as fs } from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+import { MDXRemote } from 'next-mdx-remote/rsc'
 
 export default async function DocsHome() {
-  const collections = await getDocCollections()
+  try {
+    // Read the index.md file
+    const indexPath = path.join(process.cwd(), 'src', 'content', 'doc', 'index.md')
+    const fileContent = await fs.readFile(indexPath, 'utf-8')
+    const { data: frontmatter, content } = matter(fileContent)
 
-  if (collections.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <header className="mb-10 border-b border-surface-border pb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-heading sm:text-4xl">
+            {frontmatter.title || 'Documentation'}
+          </h1>
+          {frontmatter.description && (
+            <p className="mt-4 text-lg text-text-muted">{frontmatter.description}</p>
+          )}
+        </header>
+
+        <article className="prose prose-slate max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+          <MDXRemote source={content} />
+        </article>
+      </div>
+    )
+  } catch (error) {
+    console.error('Failed to load docs index:', error)
     return (
       <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-surface-border bg-surface p-8 text-center">
         <h3 className="text-lg font-semibold text-heading">No Documentation Found</h3>
@@ -14,24 +38,4 @@ export default async function DocsHome() {
       </div>
     )
   }
-
-  // Try to find a collection named 'index', 'intro', 'home', 'docs' or similar to prioritize
-  const priorityKeys = ['index', 'intro', 'introduction', 'home', 'docs', 'overview']
-  const sorted = [...collections].sort((a, b) => {
-    const aIndex = priorityKeys.indexOf(a.slug.toLowerCase())
-    const bIndex = priorityKeys.indexOf(b.slug.toLowerCase())
-    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-    if (aIndex !== -1) return -1
-    if (bIndex !== -1) return 1
-    return 0
-  })
-
-  const firstCollection = sorted[0]
-  const firstVersion = firstCollection.versions[0]
-
-  if (firstCollection && firstVersion) {
-    redirect(`/docs/${firstCollection.slug}/${firstVersion.slug}`)
-  }
-
-  notFound()
 }

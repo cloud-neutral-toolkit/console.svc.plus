@@ -96,8 +96,6 @@ cat > "${DOCS_DIR}/index.md" << 'EOF'
 ---
 title: Cloud-Neutral Toolkit Documentation
 description: Comprehensive documentation for all Cloud-Neutral Toolkit services
-collection: index
-collectionLabel: Documentation Home
 ---
 
 # Cloud-Neutral Toolkit Documentation
