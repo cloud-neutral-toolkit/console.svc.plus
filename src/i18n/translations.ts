@@ -1103,8 +1103,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
           ],
         },
         stats: [
-          { value: '~150k', label: 'Applications integrated with Cloud-Neutral Toolkit' },
-          { value: '~330k', label: 'Daily active users' },
+          { value: '0+', label: 'Applications integrated with Cloud-Neutral Toolkit' },
+          { value: '0+', label: 'Daily active users' },
           { value: '7', label: 'Go check out our examples & guides' },
         ],
         shortcuts: {
@@ -1810,8 +1810,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
           ],
         },
         stats: [
-          { value: '~150k', label: '集成 Cloud-Neutral Toolkit 的应用程序' },
-          { value: '~330k', label: '日活跃用户' },
+          { value: '0+', label: '集成 Cloud-Neutral Toolkit 的应用程序' },
+          { value: '0+', label: '日活跃用户' },
           { value: '7', label: '查看我们的示例和指南' },
         ],
         shortcuts: {
