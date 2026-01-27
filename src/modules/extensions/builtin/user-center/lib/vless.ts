@@ -17,16 +17,16 @@ export type VlessTemplate = {
 
 const DEFAULT_VLESS_TEMPLATE: VlessTemplate = {
   endpoint: {
-    host: 'tky-connector.onwalk.net',
+    host: 'ha-proxy-jp.svc.plus',
     port: 1443,
     type: 'tcp',
     security: 'tls',
     flow: 'xtls-rprx-vision',
     encryption: 'none',
-    serverName: 'tky-connector.onwalk.net',
+    serverName: 'ha-proxy-jp.svc.plus',
     fingerprint: 'chrome',
     allowInsecure: false,
-    label: 'Tokyo-Node',
+    label: 'TOKYO-NODE',
   },
 }
 
@@ -83,7 +83,7 @@ const DEFAULT_XRAY_CONFIG = {
       settings: {
         vnext: [
           {
-            address: 'tky-connector.onwalk.net',
+            address: 'ha-proxy-jp.svc.plus',
             port: 1443,
             users: [
               {
@@ -99,7 +99,7 @@ const DEFAULT_XRAY_CONFIG = {
         network: 'tcp',
         security: 'tls',
         tlsSettings: {
-          serverName: 'tky-connector.onwalk.net',
+          serverName: 'ha-proxy-jp.svc.plus',
           allowInsecure: false,
           fingerprint: 'chrome',
         },
@@ -119,37 +119,89 @@ const DEFAULT_XRAY_CONFIG = {
 
 export type XrayConfig = typeof DEFAULT_XRAY_CONFIG
 
-export function buildVlessUri(rawUuid: string | null | undefined): string | null {
+export type VlessTransport = 'tcp' | 'xhttp'
+
+export type VlessNode = {
+  name: string
+  address: string
+  port: number
+  server_name?: string
+  protocols?: string | string[]
+  transport?: VlessTransport
+  path?: string
+  mode?: string
+}
+
+export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNode): string | null {
   const uuid = (rawUuid ?? '').trim()
   if (!uuid) {
     return null
   }
 
-  const { endpoint } = DEFAULT_VLESS_TEMPLATE
+  const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
+
+  const host = node?.address ?? defaultEndpoint.host
+  const port = node?.port ?? defaultEndpoint.port
+  const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
+  const label = node?.name ?? defaultEndpoint.label
+  const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
 
   const params = new URLSearchParams({
-    type: endpoint.type,
-    security: endpoint.security,
-    flow: endpoint.flow,
-    encryption: endpoint.encryption,
-    sni: endpoint.serverName,
-    fp: endpoint.fingerprint,
-    allowInsecure: endpoint.allowInsecure ? '1' : '0',
+    type: transport,
+    security: defaultEndpoint.security,
+    flow: defaultEndpoint.flow,
+    encryption: defaultEndpoint.encryption,
+    sni: serverName,
+    fp: defaultEndpoint.fingerprint,
+    allowInsecure: defaultEndpoint.allowInsecure ? '1' : '0',
   })
 
-  return `vless://${uuid}@${endpoint.host}:${endpoint.port}?${params.toString()}#${encodeURIComponent(endpoint.label)}`
+  if (transport === 'xhttp') {
+    params.set('path', node?.path ?? '/split')
+    params.set('mode', node?.mode ?? 'auto')
+  }
+
+  return `vless://${uuid}@${host}:${port}?${params.toString()}#${encodeURIComponent(label)}`
 }
 
-export function buildVlessConfig(rawUuid: string | null | undefined): XrayConfig | null {
+export function buildVlessConfig(rawUuid: string | null | undefined, node?: VlessNode): XrayConfig | null {
   const uuid = (rawUuid ?? '').trim()
   if (!uuid) {
     return null
   }
 
   const config = JSON.parse(JSON.stringify(DEFAULT_XRAY_CONFIG)) as XrayConfig
-  const user = config.outbounds?.[0]?.settings?.vnext?.[0]?.users?.[0]
+  const outbound = config.outbounds?.[0]
+  const vnext = outbound?.settings?.vnext?.[0]
+  const user = vnext?.users?.[0]
+
+  const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
+  const address = node?.address ?? defaultEndpoint.host
+  const port = node?.port ?? defaultEndpoint.port
+  const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
+  const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
+
+  if (vnext) {
+    vnext.address = address
+    vnext.port = port
+  }
   if (user) {
     user.id = uuid
+  }
+
+  if (outbound && outbound.streamSettings) {
+    outbound.streamSettings.network = transport
+    if (outbound.streamSettings.tlsSettings) {
+      outbound.streamSettings.tlsSettings.serverName = serverName
+    }
+
+    if (transport === 'xhttp') {
+      // @ts-ignore - Adding xhttpSettings to outbounds[0].streamSettings
+      outbound.streamSettings.xhttpSettings = {
+        mode: node?.mode ?? 'auto',
+        path: node?.path ?? '/split'
+      }
+    }
   }
 
   return config

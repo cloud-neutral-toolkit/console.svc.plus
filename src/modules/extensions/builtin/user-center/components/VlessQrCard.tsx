@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { Copy, Download, QrCode } from 'lucide-react'
+import { Check, ChevronDown, Copy, Download, QrCode } from 'lucide-react'
 import { toDataURL } from 'qrcode'
+import useSWR from 'swr'
 
 import Card from './Card'
 import {
@@ -11,7 +12,11 @@ import {
   buildVlessUri,
   DEFAULT_VLESS_LABEL,
   serializeConfigForDownload,
+  VlessNode,
+  VlessTransport,
 } from '../lib/vless'
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export type VlessQrCopy = {
   label: string
@@ -35,12 +40,33 @@ interface VlessQrCardProps {
 }
 
 export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
+  const { data: nodes } = useSWR<VlessNode[]>('/api/agent/nodes', fetcher)
+  const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
+  const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false)
+
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationError, setGenerationError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const vlessUri = useMemo(() => buildVlessUri(uuid), [uuid])
+  const rawNode = useMemo(() => selectedNode || (nodes && nodes[0]) || undefined, [selectedNode, nodes])
+
+  const effectiveNode = useMemo((): VlessNode | undefined => {
+    if (!rawNode) return undefined
+
+    const isXhttp = preferredTransport === 'xhttp'
+    return {
+      ...rawNode,
+      transport: preferredTransport,
+      port: isXhttp ? 443 : 1443, // Japan node specific defaults if not provided by backend
+      server_name: rawNode.server_name || rawNode.address,
+      path: isXhttp ? (rawNode.path || '/split') : undefined,
+      mode: isXhttp ? (rawNode.mode || 'auto') : undefined
+    }
+  }, [rawNode, preferredTransport])
+
+  const vlessUri = useMemo(() => buildVlessUri(uuid, effectiveNode), [uuid, effectiveNode])
 
   useEffect(() => {
     let cancelled = false
@@ -116,14 +142,14 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
 
     const link = document.createElement('a')
     link.href = qrDataUrl
-    link.download = 'vless-qr.png'
+    link.download = `vless-${effectiveNode?.name || 'qr'}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }, [qrDataUrl])
+  }, [qrDataUrl, effectiveNode?.name])
 
   const handleDownloadConfig = useCallback(() => {
-    const config = buildVlessConfig(uuid)
+    const config = buildVlessConfig(uuid, effectiveNode)
     if (!config) {
       return
     }
@@ -134,13 +160,13 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
 
     const link = document.createElement('a')
     link.href = url
-    link.download = 'xray-client-config.json'
+    link.download = `xray-client-${effectiveNode?.name || 'config'}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
 
     URL.revokeObjectURL(url)
-  }, [uuid])
+  }, [uuid, effectiveNode])
 
   const isReady = Boolean(vlessUri && qrDataUrl && !generationError)
   const isDisabled = !vlessUri
@@ -148,14 +174,67 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
   return (
     <Card>
       <div className="flex flex-col gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.label}</p>
-            <span className="rounded-full bg-[var(--color-primary-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-primary)]">
-              {DEFAULT_VLESS_LABEL}
-            </span>
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.label}</p>
+              <span className="rounded-full bg-[var(--color-primary-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-primary)]">
+                {effectiveNode?.name || DEFAULT_VLESS_LABEL}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-[var(--color-text-subtle)]">{copy.description}</p>
           </div>
-          <p className="mt-2 text-xs text-[var(--color-text-subtle)]">{copy.description}</p>
+
+          {nodes && nodes.length > 1 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsSelectorOpen(!isSelectorOpen)}
+                className="inline-flex items-center gap-1 rounded-md border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-2 py-1 text-[10px] font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]"
+              >
+                切换节点
+                <ChevronDown className={`h-3 w-3 transition-transform ${isSelectorOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isSelectorOpen && (
+                <div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-lg border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] shadow-lg ring-1 ring-black ring-opacity-5">
+                  <div className="max-h-60 overflow-y-auto py-1">
+                    {nodes.map((node) => (
+                      <button
+                        key={node.address}
+                        type="button"
+                        onClick={() => {
+                          setSelectedNode(node)
+                          setIsSelectorOpen(false)
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-xs text-[var(--color-text)] hover:bg-[var(--color-primary-muted)]"
+                      >
+                        <span>{node.name}</span>
+                        {(selectedNode?.address === node.address || (!selectedNode && node === nodes[0])) && (
+                          <Check className="h-3 w-3 text-[var(--color-primary)]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          {(['tcp', 'xhttp'] as const).map((transport) => (
+            <button
+              key={transport}
+              type="button"
+              onClick={() => setPreferredTransport(transport)}
+              className={`rounded-md px-3 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors ${preferredTransport === transport
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                  : 'bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] hover:bg-[var(--color-surface-border)]'
+                }`}
+            >
+              {transport}
+            </button>
+          ))}
         </div>
 
         {vlessUri ? (
