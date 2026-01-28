@@ -23,7 +23,7 @@ type ServiceCardData = {
   name: string
   description: string
   href: string
-  icon: typeof Activity
+  icon: any
   external?: boolean
 }
 
@@ -31,15 +31,13 @@ const ServiceCard = ({ service, view, isChinese }: { service: ServiceCardData, v
   const isMaterial = view === 'material'
 
   const cardContent = (
-    <div className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${
-      isMaterial
-        ? 'border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted'
-        : 'border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60'
-    }`}>
+    <div className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${isMaterial
+      ? 'border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted'
+      : 'border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60'
+      }`}>
       <div className="flex items-start gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-          isMaterial ? 'bg-primary/15 text-primary' : 'bg-indigo-500/15 text-indigo-200'
-        }`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isMaterial ? 'bg-primary/15 text-primary' : 'bg-indigo-500/15 text-indigo-200'
+          }`}>
           <service.icon className="h-5 w-5" aria-hidden />
         </div>
         <div className="space-y-1">
@@ -47,9 +45,8 @@ const ServiceCard = ({ service, view, isChinese }: { service: ServiceCardData, v
           <p className={`text-sm ${isMaterial ? 'text-text-muted' : 'text-slate-300'}`}>{service.description}</p>
         </div>
       </div>
-      <span className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${
-        isMaterial ? 'text-primary group-hover:text-primary-hover' : 'text-indigo-200 group-hover:text-white'
-      }`}>
+      <span className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${isMaterial ? 'text-primary group-hover:text-primary-hover' : 'text-indigo-200 group-hover:text-white'
+        }`}>
         {isChinese ? '打开' : 'Open'}
         <ArrowRight className="h-4 w-4" aria-hidden />
       </span>
@@ -72,30 +69,28 @@ const ServiceCard = ({ service, view, isChinese }: { service: ServiceCardData, v
 }
 
 const PlaceholderCard = ({ view, isChinese }: { view: 'classic' | 'material', isChinese: boolean }) => {
-    const isMaterial = view === 'material'
-    const placeholderLabel = isChinese ? '更多服务即将上线' : 'More services coming soon'
-    const placeholderDescription = isChinese
-        ? '预留卡片位置，持续扩充入口。'
-        : 'Reserved slots for new service entries.'
+  const isMaterial = view === 'material'
+  const placeholderLabel = isChinese ? '更多服务即将上线' : 'More services coming soon'
+  const placeholderDescription = isChinese
+    ? '预留卡片位置，持续扩充入口。'
+    : 'Reserved slots for new service entries.'
 
-    return (
-        <div className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${
-            isMaterial ? 'border-surface-border-strong bg-surface text-text-muted' : 'border-white/15 bg-white/5 text-slate-300'
-        }`}>
-            <div className="space-y-2">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${
-                    isMaterial ? 'border-surface-border-strong text-text-subtle' : 'border-white/20 text-slate-400'
-                }`}>
-                    <FileText className="h-4 w-4" aria-hidden />
-                </div>
-                <div className={`text-sm font-semibold ${isMaterial ? 'text-heading' : 'text-white/80'}`}>{placeholderLabel}</div>
-                <p className={`text-sm ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>{placeholderDescription}</p>
-            </div>
-            <span className={`mt-4 text-xs font-semibold ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>
-                {isChinese ? '敬请期待' : 'Stay tuned'}
-            </span>
+  return (
+    <div className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${isMaterial ? 'border-surface-border-strong bg-surface text-text-muted' : 'border-white/15 bg-white/5 text-slate-300'
+      }`}>
+      <div className="space-y-2">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${isMaterial ? 'border-surface-border-strong text-text-subtle' : 'border-white/20 text-slate-400'
+          }`}>
+          <FileText className="h-4 w-4" aria-hidden />
         </div>
-    )
+        <div className={`text-sm font-semibold ${isMaterial ? 'text-heading' : 'text-white/80'}`}>{placeholderLabel}</div>
+        <p className={`text-sm ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>{placeholderDescription}</p>
+      </div>
+      <span className={`mt-4 text-xs font-semibold ${isMaterial ? 'text-text-subtle' : 'text-slate-400'}`}>
+        {isChinese ? '敬请期待' : 'Stay tuned'}
+      </span>
+    </div>
+  )
 }
 
 const ServiceGrid = ({ view, services, isChinese }: { view: 'classic' | 'material', services: ServiceCardData[], isChinese: boolean }) => {
@@ -111,6 +106,14 @@ const ServiceGrid = ({ view, services, isChinese }: { view: 'classic' | 'materia
   )
 }
 
+const ClawdbotLogo = (props: any) => (
+  <img
+    src="https://mintcdn.com/clawdhub/4rYvG-uuZrMK_URE/assets/pixel-lobster.svg?fit=max&auto=format&n=4rYvG-uuZrMK_URE&q=85&s=da2032e9eac3b5d9bfe7eb96ca6a8a26"
+    alt="Clawdbot"
+    {...props}
+  />
+)
+
 export default function ServicesPage() {
   const { view, isHydrated } = useViewStore()
   const { language } = useLanguage()
@@ -124,6 +127,7 @@ export default function ServicesPage() {
     { key: 'cloudIac', name: isChinese ? '云 IaC 目录' : 'Cloud IaC Catalog', description: isChinese ? '浏览云基础设施目录与自动化蓝图。' : 'Browse cloud IaC catalog and automation blueprints.', href: '/cloud_iac', icon: Layers, },
     { key: 'insight', name: isChinese ? 'Insight 工作台' : 'Insight Workbench', description: isChinese ? '进入观测、告警与智能协作控制面。' : 'Observability, alerts, and AI-assisted operations.', href: '/insight', icon: Activity, },
     { key: 'docs', name: isChinese ? '文档 / 解决方案' : 'Docs / Solutions', description: isChinese ? '阅读文档、方案与产品指南。' : 'Read documentation, solutions, and guides.', href: '/docs', icon: BookOpen, },
+    { key: 'moltbot', name: isChinese ? 'Moltbot 服务' : 'Moltbot Service', description: isChinese ? 'Moltbot 节点管理服务。' : 'Moltbot node management service.', href: 'https://clawdbot.svc.plus/', icon: ClawdbotLogo, external: true, },
   ]
 
   if (!isHydrated) {
