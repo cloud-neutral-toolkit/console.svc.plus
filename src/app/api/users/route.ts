@@ -18,6 +18,7 @@ type ErrorPayload = {
 type PermissionAwareHeaders = {
   'X-User-Role': string
   'X-User-Permissions'?: string
+  'X-Service-Token'?: string
 }
 
 function buildForwardHeaders(role: string, permissions: string[]): PermissionAwareHeaders {
@@ -27,6 +28,13 @@ function buildForwardHeaders(role: string, permissions: string[]): PermissionAwa
   if (permissions.length > 0) {
     headers['X-User-Permissions'] = permissions.join(',')
   }
+
+  // Add internal service token for service-to-service authentication
+  const serviceToken = process.env.INTERNAL_SERVICE_TOKEN
+  if (serviceToken && serviceToken.trim().length > 0) {
+    headers['X-Service-Token'] = serviceToken.trim()
+  }
+
   return headers
 }
 
