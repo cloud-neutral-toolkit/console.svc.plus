@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../i18n/LanguageProvider'
+import { Menu, MessageSquare, BarChart2, Link as LinkIcon, Server, Sun, Moon, Monitor } from 'lucide-react'
 import { translations } from '../i18n/translations'
 import LanguageToggle from './LanguageToggle'
 import { AskAIButton } from './AskAIButton'
@@ -213,16 +214,82 @@ export default function Navbar() {
     return null
   }
 
+  const mobileTabs = [
+    { key: 'chat', label: 'Chat', icon: MessageSquare, href: '/services/moltbot/chats', active: pathname?.startsWith('/services/moltbot') },
+    { key: 'overview', label: 'Overview', icon: BarChart2, href: '/panel', active: pathname === '/panel' },
+    { key: 'channels', label: 'Channels', icon: LinkIcon, href: '/services', active: pathname === '/services' },
+    { key: 'instances', label: 'Instances', icon: Server, href: '/panel/management', active: pathname === '/panel/management' },
+  ]
+
   return (
     <>
       <nav
         ref={navRef}
         className="sticky top-0 z-50 w-full border-b border-surface-border bg-background/95 text-text backdrop-blur transition-colors duration-150"
       >
-        <div className="mx-auto w-full max-w-7xl px-6 sm:px-8">
+        {/* Mobile Header Layout */}
+        <div className="lg:hidden flex flex-col bg-background">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border/50">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 -ml-2 rounded-xl bg-surface-muted hover:bg-surface-hover text-text transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/icons/cloudnative_32.png"
+                  alt="logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
+                  unoptimized
+                />
+                <span className="font-bold text-lg tracking-tight">Cloud-Neutral</span>
+              </Link>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-surface-muted">
+                <span className="absolute w-2 h-2 bg-emerald-500 rounded-full"></span>
+              </div>
+              <div className="flex items-center p-1 rounded-full bg-surface-muted border border-surface-border">
+                <div className="p-1 px-2 rounded-full bg-primary text-white">
+                  <Monitor className="w-3.5 h-3.5" />
+                </div>
+                <div className="p-1 px-2 text-text-muted">
+                  <Sun className="w-3.5 h-3.5" />
+                </div>
+                <div className="p-1 px-2 text-text-muted">
+                  <Moon className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Horizontal Scroll Menu */}
+          <div className="flex items-center gap-2 overflow-x-auto py-2 px-4 no-scrollbar border-b border-surface-border/50">
+            {mobileTabs.map(tab => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${tab.active
+                  ? 'bg-rose-100 text-rose-600 border border-rose-200/50'
+                  : 'text-text-muted hover:text-text hover:bg-surface-muted'
+                  }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="hidden lg:block mx-auto w-full max-w-7xl px-6 sm:px-8">
           <div className="flex items-center gap-5 py-3">
             <div className="flex flex-1 items-center gap-5">
-              <Link href="/" className="flex items-center gap-2 rounded-md border border-surface-border bg-surface-muted/60 px-2.5 py-1.5 text-sm font-medium text-text/90 transition hover:bg-surface-hover/60">
+              <Link href="/" className="hidden lg:flex items-center gap-2 rounded-md border border-surface-border bg-surface-muted/60 px-2.5 py-1.5 text-sm font-medium text-text/90 transition hover:bg-surface-hover/60">
                 <Image
                   src="/icons/cloudnative_32.png"
                   alt="logo"
@@ -355,118 +422,98 @@ export default function Navbar() {
                 variant="icon"
               />
             </div>
-
-            <button
-              className="flex items-center text-text focus:outline-none lg:hidden"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              aria-label="Toggle menu"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {menuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
+        </div>
 
-          {menuOpen ? (
-            <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:hidden">
-              <div className="flex flex-col gap-4 border-t border-surface-border py-3 text-text">
-                {/*
+        {menuOpen ? (
+          <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:hidden">
+            <div className="flex flex-col gap-4 border-t border-white/10 bg-slate-900/80 py-3 text-slate-100">
+              {/*
                 <SearchComponent
                   className="relative"
                   buttonClassName="h-8 w-8"
                   inputClassName="py-2 pr-12"
                 />
                 */}
-                <div className="flex flex-col gap-2 text-sm font-medium">
-                  {mainLinks.map((link) => (
-                    <Link
-                      key={link.key}
-                      href={link.href}
-                      className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+              <div className="flex flex-col gap-2 text-sm font-medium">
+                {mainLinks.map((link) => (
                   <Link
-                    href="/about"
+                    key={link.key}
+                    href={link.href}
                     className="py-2 text-sm opacity-80 transition hover:opacity-100"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {labels.about}
+                    {link.label}
                   </Link>
-                  <Link
-                    key={servicesLink.key}
-                    href={servicesLink.href}
-                    className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {servicesLink.label}
-                  </Link>
-                </div>
-                {user ? (
-                  <div className="rounded-xl border border-surface-border bg-surface-muted/80 p-4 text-text shadow-shadow-md">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white">
-                        {accountInitial}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold">{user.username}</p>
-                        <p className="text-xs text-text-muted">{user.email}</p>
-                      </div>
+                ))}
+                <Link
+                  href="/about"
+                  className="py-2 text-sm opacity-80 transition hover:opacity-100"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {labels.about}
+                </Link>
+                <Link
+                  key={servicesLink.key}
+                  href={servicesLink.href}
+                  className="py-2 text-sm opacity-80 transition hover:opacity-100"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {servicesLink.label}
+                </Link>
+              </div>
+              {user ? (
+                <div className="rounded-xl border border-white/10 bg-slate-800/80 p-4 text-slate-100 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-semibold text-white">
+                      {accountInitial}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">{user.username}</p>
+                      <p className="text-xs text-slate-300">{user.email}</p>
                     </div>
-                    <Link
-                      href="/panel"
-                      className="mt-3 inline-flex items-center justify-center rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs font-semibold text-primary transition hover:border-primary/50 hover:bg-primary/10"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {accountCopy.userCenter}
-                    </Link>
-                    <Link
-                      href="/logout"
-                      className="mt-3 inline-flex items-center justify-center rounded-md border border-surface-border px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/60 hover:bg-danger/10 focus:outline-none focus:ring-2 focus:ring-danger/30 focus:ring-offset-2 focus:ring-offset-background"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {accountCopy.logout}
-                    </Link>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-3 text-sm font-medium">
-                    <Link
-                      href="/login"
-                      className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {nav.account.login}
-                    </Link>
-                    <span className="h-3 w-px bg-surface-border" aria-hidden="true" />
-                    <Link
-                      href="/register"
-                      className="rounded-md border border-surface-border px-3 py-1.5 text-primary transition hover:border-primary/50 hover:bg-surface-muted"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {nav.account.register}
-                    </Link>
-                  </div>
-                )}
-                <div className="flex flex-col gap-2">
-                  <ReleaseChannelSelector selected={selectedChannels} onToggle={toggleChannel} />
-                  <LanguageToggle />
+                  <Link
+                    href="/panel"
+                    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300/50 hover:bg-indigo-500/10"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {accountCopy.userCenter}
+                  </Link>
+                  <Link
+                    href="/logout"
+                    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:border-rose-300/60 hover:bg-rose-500/10 focus:outline-none focus:ring-2 focus:ring-rose-400/30 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {accountCopy.logout}
+                  </Link>
                 </div>
+              ) : (
+                <div className="flex items-center gap-3 text-sm font-medium">
+                  <Link
+                    href="/login"
+                    className="py-2 text-sm opacity-80 transition hover:opacity-100"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {nav.account.login}
+                  </Link>
+                  <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+                  <Link
+                    href="/register"
+                    className="rounded-md border border-white/10 px-3 py-1.5 text-indigo-100 transition hover:border-indigo-300/50 hover:bg-white/10"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {nav.account.register}
+                  </Link>
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <ReleaseChannelSelector selected={selectedChannels} onToggle={toggleChannel} />
+                <LanguageToggle />
               </div>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </nav>
 
       <AskAIButton />
