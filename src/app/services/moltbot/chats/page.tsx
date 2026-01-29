@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function MoltbotPage() {
     return (
-        <div className="container mx-auto max-w-4xl py-8">
-            <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
+        <div className="w-full h-[calc(100vh-64px)] p-4">
+            <Suspense fallback={<div className="flex h-full items-center justify-center">Loading chat...</div>}>
                 <MoltbotChat />
             </Suspense>
         </div>
