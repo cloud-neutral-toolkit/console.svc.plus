@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const quickActions = [
     { id: 'hello', label: 'Say Hello', prompt: 'Hello, who are you?' },
@@ -8,11 +9,24 @@ const quickActions = [
 ]
 
 export function MoltbotChat() {
+    const searchParams = useSearchParams()
+    const initialQuery = searchParams.get('q')
+
+    // Use a ref to track if we've processed the initial query to avoid double-sending in strict mode
+    const hasProcessedInitialQuery = useRef(false)
+
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [conversation, setConversation] = useState<
         { author: 'user' | 'ai'; text: string; timestamp: number }[]
     >([])
+
+    useEffect(() => {
+        if (initialQuery && !hasProcessedInitialQuery.current) {
+            hasProcessedInitialQuery.current = true
+            appendMessage(initialQuery)
+        }
+    }, [initialQuery])
 
     async function appendMessage(prompt: string) {
         const timestamp = Date.now()
@@ -121,8 +135,8 @@ export function MoltbotChat() {
                             >
                                 <div
                                     className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] ${entry.author === 'user'
-                                            ? 'bg-emerald-500/10 text-emerald-100 rounded-tr-none'
-                                            : 'bg-slate-900/80 text-slate-200 rounded-tl-none border border-slate-800'
+                                        ? 'bg-emerald-500/10 text-emerald-100 rounded-tr-none'
+                                        : 'bg-slate-900/80 text-slate-200 rounded-tl-none border border-slate-800'
                                         }`}
                                 >
                                     <p className="leading-relaxed whitespace-pre-wrap">{entry.text}</p>

@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { Minus, X } from 'lucide-react'
+import { Minus, X, Maximize2 } from 'lucide-react'
 import { ChatBubble } from './ChatBubble'
 import { SourceHint } from './SourceHint'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
+import { useRouter } from 'next/navigation'
 
 const MAX_MESSAGES = 20
 const MAX_CACHE_SIZE = 50
@@ -55,6 +56,13 @@ export function AskAIDialog({
 
   const { language } = useLanguage()
   const t = translations[language].askAI
+  const router = useRouter()
+
+  function handleMaximize() {
+    onEnd() // Close the dialog
+    const url = `/services/moltbot${question ? `?q=${encodeURIComponent(question)}` : ''}`
+    router.push(url)
+  }
 
   useEffect(() => {
     return () => {
@@ -320,6 +328,14 @@ export function AskAIDialog({
               <h2 className="text-lg font-semibold text-gray-900">{t.subtitle}</h2>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
+              <button
+                onClick={handleMaximize}
+                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                title="Full Screen / Moltbot Workspace"
+                aria-label="Open in Moltbot Workspace"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
               <button
                 onClick={onMinimize}
                 className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300"
