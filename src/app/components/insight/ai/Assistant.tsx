@@ -55,7 +55,7 @@ export function AIAssistant({ state }: AssistantProps) {
       // For now, we prepend it to the prompt to ensure the bot knows the current view context
       const contextAwarePrompt = `Context: [${contextSummary}]\n\nQuestion: ${prompt}`
 
-      const response = await fetch('https://clawdbot.svc.plus/chat', {
+      const response = await fetch('/api/moltbot/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,8 +184,8 @@ export function AIAssistant({ state }: AssistantProps) {
                     <li
                       key={entry.timestamp}
                       className={`rounded-2xl px-3 py-2 text-sm ${entry.author === 'user'
-                          ? 'bg-emerald-500/10 text-emerald-100'
-                          : 'bg-slate-900/80 text-slate-200'
+                        ? 'bg-emerald-500/10 text-emerald-100'
+                        : 'bg-slate-900/80 text-slate-200'
                         }`}
                     >
                       <p className="text-xs uppercase tracking-wide text-slate-500">
