@@ -582,6 +582,12 @@ export type Translation = {
     }
   }
   about: AboutTranslation
+  askAI: {
+    title: string
+    subtitle: string
+    placeholder: string
+    ask: string
+  }
 }
 
 export const translations: Record<'en' | 'zh', Translation> = {
@@ -1311,6 +1317,12 @@ export const translations: Record<'en' | 'zh', Translation> = {
       ],
       opensource: 'We embrace open source. Human progress is made possible through continuous sharing and collaboration.',
     },
+    askAI: {
+      title: 'Ask AI',
+      subtitle: 'Do anything with Moltbot AI',
+      placeholder: 'Type your question...',
+      ask: 'Ask',
+    },
   },
   zh: {
     hero: {
@@ -1885,6 +1897,12 @@ export const translations: Record<'en' | 'zh', Translation> = {
         { label: 'Google Cloud Run', url: 'https://cloud.google.com/' },
       ],
       opensource: '我们拥抱开源。人类正是因为持续的共享与协作，才得以彼此成就。',
+    },
+    askAI: {
+      title: 'Ask AI',
+      subtitle: '使用 Moltbot AI 做任何事',
+      placeholder: '输入您的指令或问题...',
+      ask: '发送',
     },
   },
 }

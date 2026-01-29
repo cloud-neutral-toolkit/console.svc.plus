@@ -6,6 +6,8 @@ import DOMPurify from 'dompurify'
 import { Minus, X } from 'lucide-react'
 import { ChatBubble } from './ChatBubble'
 import { SourceHint } from './SourceHint'
+import { useLanguage } from '@i18n/LanguageProvider'
+import { translations } from '@i18n/translations'
 
 const MAX_MESSAGES = 20
 const MAX_CACHE_SIZE = 50
@@ -49,7 +51,11 @@ export function AskAIDialog({
     new Map<string, { answer: string; sources: any[]; timestamp: number }>()
   )
   const requestIdRef = useRef(0)
+  const requestIdRef = useRef(0)
   const processedInitialRef = useRef<number | null>(null)
+
+  const { language } = useLanguage()
+  const t = translations[language].askAI
 
   useEffect(() => {
     return () => {
@@ -311,8 +317,8 @@ export function AskAIDialog({
         <div className="relative flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl sm:max-w-[520px]">
           <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500">Ask AI</p>
-              <h2 className="text-lg font-semibold text-gray-900">Ask anything about your docs</h2>
+              <p className="text-xs uppercase tracking-wide text-gray-500">{t.title}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{t.subtitle}</h2>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <button
@@ -346,7 +352,7 @@ export function AskAIDialog({
               <textarea
                 className="w-full resize-none rounded-lg border border-gray-200 bg-white p-3 text-black shadow-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200"
                 rows={3}
-                placeholder="Type your question..."
+                placeholder={t.placeholder}
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 onKeyDown={e => {
@@ -361,7 +367,7 @@ export function AskAIDialog({
                   onClick={handleAsk}
                   className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 >
-                  Ask
+                  {t.ask}
                 </button>
               </div>
             </div>
