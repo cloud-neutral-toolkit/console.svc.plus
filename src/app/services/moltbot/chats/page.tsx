@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { MoltbotChat } from './MoltbotChat'
 
 export const metadata = {
@@ -8,7 +9,9 @@ export const metadata = {
 export default function MoltbotPage() {
     return (
         <div className="container mx-auto max-w-4xl py-8">
-            <MoltbotChat />
+            <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
+                <MoltbotChat />
+            </Suspense>
         </div>
     )
 }
