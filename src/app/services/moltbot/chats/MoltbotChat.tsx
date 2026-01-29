@@ -49,8 +49,8 @@ export function MoltbotChat() {
             // PROXY: request to /api/moltbot/chat which proxies to clawdbot.svc.plus?
             // Let's try to fetch directly first, or map to a structured request.
 
-            // For now, I will implement a fetch to the URL provided, treating it as an API endpoint.
-            const response = await fetch('https://clawdbot.svc.plus/chat', {
+            // Use internal proxy to handle CORS and auth
+            const response = await fetch('/api/moltbot/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -59,7 +59,8 @@ export function MoltbotChat() {
             })
 
             if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`)
+                const errText = await response.text().catch(() => response.statusText)
+                throw new Error(`Request failed: ${response.status} ${errText}`)
             }
 
             const data = await response.json()
@@ -93,7 +94,7 @@ export function MoltbotChat() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-120px)] rounded-3xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl">
+        <div className="flex flex-col h-full rounded-2xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between border-b border-emerald-500/20 px-6 py-4">
                 <div>
                     <p className="text-lg font-semibold text-slate-100">Moltbot AI</p>
