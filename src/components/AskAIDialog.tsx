@@ -51,7 +51,6 @@ export function AskAIDialog({
     new Map<string, { answer: string; sources: any[]; timestamp: number }>()
   )
   const requestIdRef = useRef(0)
-  const requestIdRef = useRef(0)
   const processedInitialRef = useRef<number | null>(null)
 
   const { language } = useLanguage()

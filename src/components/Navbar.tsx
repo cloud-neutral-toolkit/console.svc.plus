@@ -379,7 +379,7 @@ export default function Navbar() {
 
           {menuOpen ? (
             <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:hidden">
-              <div className="flex flex-col gap-4 border-t border-white/10 bg-slate-900/80 py-3 text-slate-100">
+              <div className="flex flex-col gap-4 border-t border-surface-border py-3 text-text">
                 {/*
                 <SearchComponent
                   className="relative"
@@ -415,26 +415,26 @@ export default function Navbar() {
                   </Link>
                 </div>
                 {user ? (
-                  <div className="rounded-xl border border-white/10 bg-slate-800/80 p-4 text-slate-100 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
+                  <div className="rounded-xl border border-surface-border bg-surface-muted/80 p-4 text-text shadow-shadow-md">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-semibold text-white">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white">
                         {accountInitial}
                       </span>
                       <div>
                         <p className="text-sm font-semibold">{user.username}</p>
-                        <p className="text-xs text-slate-300">{user.email}</p>
+                        <p className="text-xs text-text-muted">{user.email}</p>
                       </div>
                     </div>
                     <Link
                       href="/panel"
-                      className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300/50 hover:bg-indigo-500/10"
+                      className="mt-3 inline-flex items-center justify-center rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs font-semibold text-primary transition hover:border-primary/50 hover:bg-primary/10"
                       onClick={() => setMenuOpen(false)}
                     >
                       {accountCopy.userCenter}
                     </Link>
                     <Link
                       href="/logout"
-                      className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:border-rose-300/60 hover:bg-rose-500/10 focus:outline-none focus:ring-2 focus:ring-rose-400/30 focus:ring-offset-2 focus:ring-offset-slate-900"
+                      className="mt-3 inline-flex items-center justify-center rounded-md border border-surface-border px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/60 hover:bg-danger/10 focus:outline-none focus:ring-2 focus:ring-danger/30 focus:ring-offset-2 focus:ring-offset-background"
                       onClick={() => setMenuOpen(false)}
                     >
                       {accountCopy.logout}
@@ -449,10 +449,10 @@ export default function Navbar() {
                     >
                       {nav.account.login}
                     </Link>
-                    <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+                    <span className="h-3 w-px bg-surface-border" aria-hidden="true" />
                     <Link
                       href="/register"
-                      className="rounded-md border border-white/10 px-3 py-1.5 text-indigo-100 transition hover:border-indigo-300/50 hover:bg-white/10"
+                      className="rounded-md border border-surface-border px-3 py-1.5 text-primary transition hover:border-primary/50 hover:bg-surface-muted"
                       onClick={() => setMenuOpen(false)}
                     >
                       {nav.account.register}
