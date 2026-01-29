@@ -86,7 +86,7 @@ export function MoltbotChat() {
         <div className="flex flex-col h-full rounded-2xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between border-b border-emerald-500/20 px-6 py-4">
                 <div>
-                    <p className="text-lg font-semibold text-slate-100">Clawdbot AI</p>
+                    <p className="text-lg font-semibold text-slate-100">Moltbot AI</p>
                     <p className="text-xs text-slate-400">Your personal cloud assistant.</p>
                 </div>
             </div>
@@ -99,7 +99,7 @@ export function MoltbotChat() {
                             <div className="w-12 h-12 flex items-center justify-center text-3xl">🦞</div>
                         </div>
                         <div className="space-y-2">
-                            <h3 className="text-slate-200 font-medium">Welcome to Clawdbot</h3>
+                            <h3 className="text-slate-200 font-medium">Welcome to Moltbot</h3>
                             <p className="text-sm text-slate-500 max-w-xs mx-auto">
                                 Ask me anything about your infrastructure, logs, or just say hello.
                             </p>
