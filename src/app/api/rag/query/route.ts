@@ -12,6 +12,12 @@ function buildForwardHeaders(req: Request) {
     }
   }
 
+  // Add internal service token for service-to-service authentication
+  const serviceToken = process.env.INTERNAL_SERVICE_TOKEN
+  if (serviceToken && serviceToken.trim().length > 0) {
+    headers.set('X-Service-Token', serviceToken.trim())
+  }
+
   return headers
 }
 
