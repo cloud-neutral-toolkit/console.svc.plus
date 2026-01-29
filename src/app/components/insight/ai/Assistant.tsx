@@ -39,19 +39,47 @@ export function AIAssistant({ state }: AssistantProps) {
     }
   }
 
-  function appendMessage(prompt: string) {
+  async function appendMessage(prompt: string) {
     const timestamp = Date.now()
     const updatedHistory = [{ question: prompt, timestamp }, ...history].slice(0, 10)
     setHistory(updatedHistory)
+
+    // Optimistic update
     setConversation(prev => [
       ...prev,
       { author: 'user', text: prompt, timestamp },
-      {
-        author: 'ai',
-        text: `Using context (${contextSummary}) I will draft insights for “${prompt}”. Connect me to your backend to replace this placeholder response.`,
-        timestamp: timestamp + 1
-      }
     ])
+
+    try {
+      // Include context in the prompt or as a separate field if the API supports it
+      // For now, we prepend it to the prompt to ensure the bot knows the current view context
+      const contextAwarePrompt = `Context: [${contextSummary}]\n\nQuestion: ${prompt}`
+
+      const response = await fetch('https://clawdbot.svc.plus/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: contextAwarePrompt })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const reply = data.reply || data.message || JSON.stringify(data)
+
+      setConversation(prev => [
+        ...prev,
+        { author: 'ai', text: reply, timestamp: Date.now() }
+      ])
+    } catch (error: any) {
+      setConversation(prev => [
+        ...prev,
+        { author: 'ai', text: `Sorry, I encountered an error: ${error.message}`, timestamp: Date.now() }
+      ])
+    }
   }
 
   function handleSend() {
@@ -120,9 +148,8 @@ export function AIAssistant({ state }: AssistantProps) {
 
       {isOpen && (
         <div
-          className={`fixed right-6 z-40 flex flex-col rounded-3xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl transition-all ${
-            isMaximized ? 'top-6 bottom-6 w-[420px] lg:w-[460px]' : 'bottom-10 w-[360px] lg:w-[400px]'
-          } ${isMinimized ? 'h-14 overflow-hidden' : 'max-h-[85vh]'}`}
+          className={`fixed right-6 z-40 flex flex-col rounded-3xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl transition-all ${isMaximized ? 'top-6 bottom-6 w-[420px] lg:w-[460px]' : 'bottom-10 w-[360px] lg:w-[400px]'
+            } ${isMinimized ? 'h-14 overflow-hidden' : 'max-h-[85vh]'}`}
         >
           <div className="flex items-center justify-between border-b border-emerald-500/20 px-4 py-3">
             <div>
@@ -156,11 +183,10 @@ export function AIAssistant({ state }: AssistantProps) {
                   {conversation.map(entry => (
                     <li
                       key={entry.timestamp}
-                      className={`rounded-2xl px-3 py-2 text-sm ${
-                        entry.author === 'user'
+                      className={`rounded-2xl px-3 py-2 text-sm ${entry.author === 'user'
                           ? 'bg-emerald-500/10 text-emerald-100'
                           : 'bg-slate-900/80 text-slate-200'
-                      }`}
+                        }`}
                     >
                       <p className="text-xs uppercase tracking-wide text-slate-500">
                         {entry.author === 'user' ? 'You' : 'Assistant'} · {new Date(entry.timestamp).toLocaleTimeString()}
