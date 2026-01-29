@@ -1,3 +1,4 @@
+# Allow search engines to crawl the site
 User-agent: Googlebot
 Allow: /
 Allow: /_next/static/
@@ -5,14 +6,18 @@ Allow: /_next/image
 Disallow: /admin/
 Disallow: /api/
 Disallow: /internal/
-Disallow: /_next/
+Disallow: /panel/
+Disallow: /_next/data/
 
 User-agent: *
 Allow: /
-
+Allow: /_next/static/
+Allow: /_next/image
 Disallow: /admin/
 Disallow: /api/
-Disallow: /_next/
 Disallow: /internal/
+Disallow: /panel/
+Disallow: /_next/data/
 
+# Sitemap location
 Sitemap: https://console.svc.plus/sitemap.xml
