@@ -53,7 +53,7 @@ export default function ReleaseChannelSelector({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`relative flex items-center gap-2 rounded-md border border-gray-200 bg-white/80 text-sm text-gray-700 shadow-sm transition hover:border-purple-300 hover:text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+        className={`relative flex items-center gap-2 rounded-md border border-surface-border bg-surface text-sm text-text shadow-sm transition hover:border-primary/50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
           isIcon
             ? 'h-9 w-9 justify-center p-0'
             : isCompact
@@ -66,7 +66,7 @@ export default function ReleaseChannelSelector({
       >
         {isIcon ? (
           <svg
-            className="h-5 w-5 text-purple-600"
+            className="h-5 w-5 text-primary"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -86,14 +86,14 @@ export default function ReleaseChannelSelector({
           </svg>
         ) : (
           <>
-            <span className={`font-medium ${isCompact ? '' : 'text-gray-700'}`}>{labels.label}</span>
+            <span className={`font-medium ${isCompact ? '' : 'text-text'}`}>{labels.label}</span>
             {!isCompact && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-text-muted">
                 {labels.summaryPrefix}: {summary}
               </span>
             )}
             <svg
-              className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+              className={`h-4 w-4 text-text-subtle transition-transform ${open ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -105,37 +105,37 @@ export default function ReleaseChannelSelector({
           </>
         )}
         {isIcon && hasPreviewSelection && (
-          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-purple-500" />
+          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
         )}
       </button>
       {(isCompact || isIcon) && (
-        <div className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 hidden w-56 -translate-x-1/2 rounded-md bg-gray-900 px-3 py-2 text-xs text-white opacity-0 transition group-hover:block group-hover:opacity-100 group-focus-within:block group-focus-within:opacity-100">
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 hidden w-56 -translate-x-1/2 rounded-md bg-surface-inverted px-3 py-2 text-xs text-background opacity-0 transition group-hover:block group-hover:opacity-100 group-focus-within:block group-focus-within:opacity-100">
           <div className="font-semibold">{labels.label}</div>
-          <div className="mt-1 text-gray-200">
+          <div className="mt-1 text-background-muted">
             {labels.summaryPrefix}: {summary}
           </div>
         </div>
       )}
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-64 rounded-md border border-gray-200 bg-white shadow-lg">
-          <ul className="py-2 text-sm text-gray-700" role="listbox" aria-label={labels.label}>
+        <div className="absolute right-0 z-50 mt-2 w-64 rounded-md border border-surface-border bg-surface shadow-lg">
+          <ul className="py-2 text-sm text-text" role="listbox" aria-label={labels.label}>
             {CHANNEL_ORDER.map((channel) => {
               const channelLabels = labels[channel]
               const checked = selected.includes(channel)
               const isStable = channel === 'stable'
               return (
                 <li key={channel}>
-                  <label className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-gray-50">
+                  <label className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-surface-muted">
                     <input
                       type="checkbox"
-                      className="mt-1 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="mt-1 h-4 w-4 rounded border-surface-border text-primary focus:ring-primary"
                       checked={checked}
                       onChange={() => (!isStable ? onToggle(channel) : undefined)}
                       disabled={isStable}
                     />
                     <div>
-                      <div className="font-medium text-gray-900">{channelLabels.name}</div>
-                      <p className="text-xs text-gray-500">{channelLabels.description}</p>
+                      <div className="font-medium text-text">{channelLabels.name}</div>
+                      <p className="text-xs text-text-muted">{channelLabels.description}</p>
                     </div>
                   </label>
                 </li>
