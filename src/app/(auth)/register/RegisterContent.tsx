@@ -20,7 +20,6 @@ import { AuthLayout, AuthLayoutSocialButton } from '@components/auth/AuthLayout'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 
-import { WeChatIcon } from '../../components/icons/WeChatIcon'
 
 type AlertState = { type: 'error' | 'success' | 'info'; message: string }
 
@@ -37,9 +36,9 @@ export default function RegisterContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const githubAuthUrl = process.env.NEXT_PUBLIC_GITHUB_AUTH_URL || '/api/auth/github'
-  const wechatAuthUrl = process.env.NEXT_PUBLIC_WECHAT_AUTH_URL || '/api/auth/wechat'
-  const isSocialAuthVisible = false
+  const isSocialAuthVisible = true
+  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`
+  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`
 
   const socialButtons = useMemo<AuthLayoutSocialButton[]>(() => {
     if (!isSocialAuthVisible) {
@@ -53,12 +52,12 @@ export default function RegisterContent() {
         icon: <Github className="h-5 w-5" aria-hidden />,
       },
       {
-        label: t.social.wechat,
-        href: wechatAuthUrl,
-        icon: <WeChatIcon className="h-5 w-5" aria-hidden />,
+        label: "Google",
+        href: googleAuthUrl,
+        icon: <div className="h-5 w-5 flex items-center justify-center">G</div>,
       },
     ]
-  }, [githubAuthUrl, isSocialAuthVisible, t.social.github, t.social.wechat, wechatAuthUrl])
+  }, [githubAuthUrl, googleAuthUrl, isSocialAuthVisible, t.social.github])
 
   useEffect(() => {
     const sensitiveKeys = ['username', 'password', 'confirmPassword', 'email']
