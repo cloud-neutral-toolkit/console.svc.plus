@@ -207,8 +207,8 @@ export default function UnifiedNavigation() {
 
         <div className="hidden lg:block mx-auto w-full max-w-7xl px-6 sm:px-8">
           <div className="flex items-center gap-5 py-3">
-            <div className="flex flex-1 items-center gap-5">
-              <nav className="hidden items-center gap-2 text-sm font-medium text-text-muted lg:flex whitespace-nowrap">
+            <div className="flex flex-1 items-center">
+              <nav className="hidden items-center gap-1 text-sm font-medium text-text-muted lg:flex whitespace-nowrap -ml-2">
                 {filteredMainNav.map((item) => {
                   const active = isActive(item);
                   if (item.showOn === "mobile") return null;
@@ -216,7 +216,7 @@ export default function UnifiedNavigation() {
                     <Link
                       key={item.key}
                       href={item.href}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
                         ? "bg-primary/10 text-primary"
                         : "text-text-muted hover:text-text hover:bg-surface-muted"
                         }`}
@@ -235,7 +235,7 @@ export default function UnifiedNavigation() {
                     <Link
                       key={item.key}
                       href={item.href}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
                         ? "bg-primary/10 text-primary"
                         : "text-text-muted hover:text-text hover:bg-surface-muted"
                         }`}
