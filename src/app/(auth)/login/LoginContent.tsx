@@ -1,131 +1,157 @@
-'use client'
+"use client";
 
-import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Github } from 'lucide-react'
+import {
+  FormEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Github } from "lucide-react";
 
-import { AuthLayout, AuthLayoutSocialButton } from '@components/auth/AuthLayout'
-import { useLanguage } from '@i18n/LanguageProvider'
-import { translations } from '@i18n/translations'
+import {
+  AuthLayout,
+  AuthLayoutSocialButton,
+} from "@components/auth/AuthLayout";
+import { useLanguage } from "@i18n/LanguageProvider";
+import { translations } from "@i18n/translations";
 
 type LoginContentProps = {
-  accountServiceBaseUrl: string
-  children?: ReactNode
-}
+  accountServiceBaseUrl: string;
+  children?: ReactNode;
+};
 
-export default function LoginContent({ accountServiceBaseUrl, children }: LoginContentProps) {
-  const { language } = useLanguage()
-  const t = translations[language].auth.login
-  const alerts = t.alerts
-  const searchParams = useSearchParams()
-  const router = useRouter()
+export default function LoginContent({
+  accountServiceBaseUrl,
+  children,
+}: LoginContentProps) {
+  const { language } = useLanguage();
+  const t = translations[language].auth.login;
+  const alerts = t.alerts;
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
-    const sensitiveKeys = ['username', 'password', 'email']
-    const hasSensitiveParams = sensitiveKeys.some((key) => searchParams.has(key))
+    const sensitiveKeys = ["username", "password", "email"];
+    const hasSensitiveParams = sensitiveKeys.some((key) =>
+      searchParams.has(key),
+    );
 
     if (!hasSensitiveParams) {
-      return
+      return;
     }
 
-    const sanitized = new URLSearchParams(searchParams.toString())
-    sensitiveKeys.forEach((key) => sanitized.delete(key))
+    const sanitized = new URLSearchParams(searchParams.toString());
+    sensitiveKeys.forEach((key) => sanitized.delete(key));
 
-    const queryString = sanitized.toString()
-    router.replace(queryString ? `/login?${queryString}` : '/login', { scroll: false })
-  }, [router, searchParams])
+    const queryString = sanitized.toString();
+    router.replace(queryString ? `/login?${queryString}` : "/login", {
+      scroll: false,
+    });
+  }, [router, searchParams]);
 
-  const errorParam = searchParams.get('error')
-  const registeredParam = searchParams.get('registered')
-  const setupMfaParam = searchParams.get('setupMfa')
+  const errorParam = searchParams.get("error");
+  const registeredParam = searchParams.get("registered");
+  const setupMfaParam = searchParams.get("setupMfa");
 
   const normalize = useCallback(
     (value: string) =>
       value
         .trim()
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, ''),
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, ""),
     [],
-  )
+  );
 
-  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL || `${accountServiceBaseUrl}/api/auth/login`
+  const loginUrl =
+    process.env.NEXT_PUBLIC_LOGIN_URL ||
+    `${accountServiceBaseUrl}/api/auth/login`;
 
-  const socialButtonsDisabled = false
-  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`
-  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`
+  const socialButtonsDisabled = true;
+  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`;
+  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`;
 
-  const loginUrlRef = useRef(loginUrl)
+  const loginUrlRef = useRef(loginUrl);
 
-  const deriveSameOriginLoginFallback = useCallback((url: string): string | undefined => {
-    if (typeof window === 'undefined') {
-      return undefined
-    }
-
-    try {
-      const currentOrigin = window.location.origin
-      const parsed = new URL(url, currentOrigin)
-
-      if (parsed.origin === currentOrigin) {
-        const relative = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/api/auth/login'
-        return relative
+  const deriveSameOriginLoginFallback = useCallback(
+    (url: string): string | undefined => {
+      if (typeof window === "undefined") {
+        return undefined;
       }
 
-      const localHostnames = new Set(['localhost', '127.0.0.1', '[::1]'])
-      const parsedHostname = parsed.hostname.toLowerCase()
-      const browserHostname = window.location.hostname.toLowerCase()
+      try {
+        const currentOrigin = window.location.origin;
+        const parsed = new URL(url, currentOrigin);
 
-      const parsedIsLocal = localHostnames.has(parsedHostname)
-      const browserIsLocal = localHostnames.has(browserHostname)
+        if (parsed.origin === currentOrigin) {
+          const relative =
+            `${parsed.pathname}${parsed.search}${parsed.hash}` ||
+            "/api/auth/login";
+          return relative;
+        }
 
-      if (!browserIsLocal && parsedIsLocal) {
-        const relative = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/api/auth/login'
-        return relative
+        const localHostnames = new Set(["localhost", "127.0.0.1", "[::1]"]);
+        const parsedHostname = parsed.hostname.toLowerCase();
+        const browserHostname = window.location.hostname.toLowerCase();
+
+        const parsedIsLocal = localHostnames.has(parsedHostname);
+        const browserIsLocal = localHostnames.has(browserHostname);
+
+        if (!browserIsLocal && parsedIsLocal) {
+          const relative =
+            `${parsed.pathname}${parsed.search}${parsed.hash}` ||
+            "/api/auth/login";
+          return relative;
+        }
+
+        if (
+          window.location.protocol === "https:" &&
+          parsed.protocol === "http:" &&
+          parsedHostname === browserHostname
+        ) {
+          parsed.protocol = "https:";
+          return parsed.toString();
+        }
+      } catch (error) {
+        console.warn("Failed to derive same-origin login fallback", error);
       }
 
-      if (
-        window.location.protocol === 'https:' &&
-        parsed.protocol === 'http:' &&
-        parsedHostname === browserHostname
-      ) {
-        parsed.protocol = 'https:'
-        return parsed.toString()
-      }
-    } catch (error) {
-      console.warn('Failed to derive same-origin login fallback', error)
-    }
-
-    return undefined
-  }, [])
+      return undefined;
+    },
+    [],
+  );
 
   useEffect(() => {
-    loginUrlRef.current = loginUrl
-  }, [loginUrl])
-
-
+    loginUrlRef.current = loginUrl;
+  }, [loginUrl]);
 
   const initialAlert = useMemo(() => {
-    const successMessages: string[] = []
-    if (registeredParam === '1') {
-      successMessages.push(alerts.registered)
+    const successMessages: string[] = [];
+    if (registeredParam === "1") {
+      successMessages.push(alerts.registered);
     }
-    if (setupMfaParam === '1') {
-      const setupRequiredMessage = alerts.mfa?.setupRequired ?? alerts.genericError
+    if (setupMfaParam === "1") {
+      const setupRequiredMessage =
+        alerts.mfa?.setupRequired ?? alerts.genericError;
       if (setupRequiredMessage) {
-        successMessages.push(setupRequiredMessage)
+        successMessages.push(setupRequiredMessage);
       }
     }
 
     if (successMessages.length > 0) {
-      return { type: 'success', message: successMessages.join(' ') } as const
+      return { type: "success", message: successMessages.join(" ") } as const;
     }
 
     if (!errorParam) {
-      return null
+      return null;
     }
 
-    const normalizedError = normalize(errorParam)
+    const normalizedError = normalize(errorParam);
     const errorMap: Record<string, string> = {
       missing_credentials: alerts.missingCredentials,
       email_and_password_are_required: alerts.missingCredentials,
@@ -133,97 +159,102 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
       user_not_found: alerts.userNotFound ?? alerts.genericError,
       credentials_in_query: alerts.genericError,
       invalid_request: alerts.genericError,
+    };
+    const message = errorMap[normalizedError] ?? alerts.genericError;
+    return { type: "error", message } as const;
+  }, [alerts, errorParam, normalize, registeredParam, setupMfaParam]);
 
-    }
-    const message = errorMap[normalizedError] ?? alerts.genericError
-    return { type: 'error', message } as const
-  }, [alerts, errorParam, normalize, registeredParam, setupMfaParam])
-
-  const [alert, setAlert] = useState(initialAlert)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [alert, setAlert] = useState(initialAlert);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setAlert(initialAlert)
-  }, [initialAlert])
+    setAlert(initialAlert);
+  }, [initialAlert]);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+      event.preventDefault();
       if (isSubmitting) {
-        return
+        return;
       }
 
-      const formData = new FormData(event.currentTarget)
-      const username = String(formData.get('username') ?? '').trim()
-      const password = String(formData.get('password') ?? '')
-      const remember = formData.get('remember') === 'on'
+      const formData = new FormData(event.currentTarget);
+      const username = String(formData.get("username") ?? "").trim();
+      const password = String(formData.get("password") ?? "");
+      const remember = formData.get("remember") === "on";
 
       if (!username || !password) {
-        setAlert({ type: 'error', message: alerts.missingCredentials })
-        return
+        setAlert({ type: "error", message: alerts.missingCredentials });
+        return;
       }
 
-      setIsSubmitting(true)
-      setAlert(null)
+      setIsSubmitting(true);
+      setAlert(null);
 
       try {
         const requestPayload = {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
           body: JSON.stringify({
             username,
             password,
             remember,
           }),
-        } as const
+        } as const;
 
-        let response: Response
-        let usedUrl = loginUrlRef.current
+        let response: Response;
+        let usedUrl = loginUrlRef.current;
 
         try {
-          response = await fetch(usedUrl, requestPayload)
+          response = await fetch(usedUrl, requestPayload);
         } catch (primaryError) {
-          const sameOriginFallback = deriveSameOriginLoginFallback(usedUrl)
+          const sameOriginFallback = deriveSameOriginLoginFallback(usedUrl);
           if (sameOriginFallback && sameOriginFallback !== usedUrl) {
             try {
-              response = await fetch(sameOriginFallback, requestPayload)
-              loginUrlRef.current = sameOriginFallback
-              usedUrl = sameOriginFallback
+              response = await fetch(sameOriginFallback, requestPayload);
+              loginUrlRef.current = sameOriginFallback;
+              usedUrl = sameOriginFallback;
             } catch (fallbackError) {
-              console.error('Primary login request failed, same-origin fallback also failed', fallbackError)
-              throw fallbackError
+              console.error(
+                "Primary login request failed, same-origin fallback also failed",
+                fallbackError,
+              );
+              throw fallbackError;
             }
           } else {
-            const httpsPattern = /^https:/i
+            const httpsPattern = /^https:/i;
             if (httpsPattern.test(usedUrl)) {
-              const insecureUrl = usedUrl.replace(httpsPattern, 'http:')
+              const insecureUrl = usedUrl.replace(httpsPattern, "http:");
 
               try {
-                response = await fetch(insecureUrl, requestPayload)
-                loginUrlRef.current = insecureUrl
-                usedUrl = insecureUrl
+                response = await fetch(insecureUrl, requestPayload);
+                loginUrlRef.current = insecureUrl;
+                usedUrl = insecureUrl;
               } catch (fallbackError) {
-                console.error('Primary login request failed, insecure fallback also failed', fallbackError)
-                throw fallbackError
+                console.error(
+                  "Primary login request failed, insecure fallback also failed",
+                  fallbackError,
+                );
+                throw fallbackError;
               }
             } else {
-              throw primaryError
+              throw primaryError;
             }
           }
         }
 
         if (!response.ok) {
-          let errorCode = 'invalid_credentials'
+          let errorCode = "invalid_credentials";
           try {
-            const data = await response.json()
-            if (typeof data?.error === 'string') {
-              errorCode = data.error
+            const data = await response.json();
+            if (typeof data?.error === "string") {
+              errorCode = data.error;
             }
           } catch (error) {
-            console.error('Failed to parse login response', error)
+            console.error("Failed to parse login response", error);
           }
 
           const errorMap: Record<string, string> = {
@@ -232,26 +263,29 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
             user_not_found: alerts.userNotFound ?? alerts.genericError,
             invalid_request: alerts.genericError,
             credentials_in_query: alerts.genericError,
-          }
+          };
 
-          setAlert({ type: 'error', message: errorMap[normalize(errorCode)] ?? alerts.genericError })
-          return
+          setAlert({
+            type: "error",
+            message: errorMap[normalize(errorCode)] ?? alerts.genericError,
+          });
+          return;
         }
 
         const data: { redirectTo?: string } = await response
           .json()
-          .catch(() => ({}))
-        router.push(data?.redirectTo || '/')
-        router.refresh()
+          .catch(() => ({}));
+        router.push(data?.redirectTo || "/");
+        router.refresh();
       } catch (error) {
-        console.error('Failed to submit login request', error)
-        setAlert({ type: 'error', message: alerts.genericError })
+        console.error("Failed to submit login request", error);
+        setAlert({ type: "error", message: alerts.genericError });
       } finally {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     },
     [alerts, deriveSameOriginLoginFallback, isSubmitting, normalize, router],
-  )
+  );
 
   const socialButtons = useMemo<AuthLayoutSocialButton[]>(() => {
     return [
@@ -267,18 +301,26 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
         icon: <div className="h-5 w-5 flex items-center justify-center">G</div>, // Replace with proper icon later if available
         disabled: socialButtonsDisabled,
       },
-    ]
-  }, [githubAuthUrl, googleAuthUrl, socialButtonsDisabled, t.social.github])
+    ];
+  }, [githubAuthUrl, googleAuthUrl, socialButtonsDisabled, t.social.github]);
 
   const formContent = useMemo(() => {
     if (children) {
-      return children
+      return children;
     }
 
     return (
-      <form className="space-y-5" method="post" onSubmit={handleSubmit} noValidate>
+      <form
+        className="space-y-5"
+        method="post"
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <div className="space-y-2">
-          <label htmlFor="login-username" className="text-sm font-medium text-slate-600">
+          <label
+            htmlFor="login-username"
+            className="text-sm font-medium text-slate-600"
+          >
             {t.form.email}
           </label>
           <input
@@ -293,10 +335,16 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <label htmlFor="login-password" className="font-medium text-slate-600">
+            <label
+              htmlFor="login-password"
+              className="font-medium text-slate-600"
+            >
               {t.form.password}
             </label>
-            <Link href="#" className="font-medium text-sky-600 hover:text-sky-500">
+            <Link
+              href="#"
+              className="font-medium text-sky-600 hover:text-sky-500"
+            >
               {t.forgotPassword}
             </Link>
           </div>
@@ -324,11 +372,11 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
           aria-busy={isSubmitting}
           className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-500 hover:to-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isSubmitting ? t.form.submitting ?? t.form.submit : t.form.submit}
+          {isSubmitting ? (t.form.submitting ?? t.form.submit) : t.form.submit}
         </button>
       </form>
-    )
-  }, [children, handleSubmit, isSubmitting, t])
+    );
+  }, [children, handleSubmit, isSubmitting, t]);
   return (
     <AuthLayout
       mode="login"
@@ -338,10 +386,14 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
       alert={alert}
       socialHeading={t.social.title}
       socialButtons={socialButtons}
-      switchAction={{ text: t.registerPrompt.text, linkLabel: t.registerPrompt.link, href: '/register' }}
+      switchAction={{
+        text: t.registerPrompt.text,
+        linkLabel: t.registerPrompt.link,
+        href: "/register",
+      }}
       bottomNote={t.bottomNote}
     >
       {formContent}
     </AuthLayout>
-  )
+  );
 }
