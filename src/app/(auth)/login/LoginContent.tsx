@@ -9,8 +9,6 @@ import { AuthLayout, AuthLayoutSocialButton } from '@components/auth/AuthLayout'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 
-import { WeChatIcon } from '../../components/icons/WeChatIcon'
-
 type LoginContentProps = {
   accountServiceBaseUrl: string
   children?: ReactNode
@@ -52,9 +50,11 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
     [],
   )
 
-  const githubAuthUrl = process.env.NEXT_PUBLIC_GITHUB_AUTH_URL || '/api/auth/github'
-  const wechatAuthUrl = process.env.NEXT_PUBLIC_WECHAT_AUTH_URL || '/api/auth/wechat'
   const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL || `${accountServiceBaseUrl}/api/auth/login`
+
+  const socialButtonsDisabled = false
+  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`
+  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`
 
   const loginUrlRef = useRef(loginUrl)
 
@@ -103,7 +103,7 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
     loginUrlRef.current = loginUrl
   }, [loginUrl])
 
-  const socialButtonsDisabled = true
+
 
   const initialAlert = useMemo(() => {
     const successMessages: string[] = []
@@ -258,17 +258,17 @@ export default function LoginContent({ accountServiceBaseUrl, children }: LoginC
       {
         label: t.social.github,
         href: githubAuthUrl,
-        icon: <Github className="h-5 w-5" aria-hidden />, 
+        icon: <Github className="h-5 w-5" aria-hidden />,
         disabled: socialButtonsDisabled,
       },
       {
-        label: t.social.wechat,
-        href: wechatAuthUrl,
-        icon: <WeChatIcon className="h-5 w-5" aria-hidden />, 
+        label: "Google",
+        href: googleAuthUrl,
+        icon: <div className="h-5 w-5 flex items-center justify-center">G</div>, // Replace with proper icon later if available
         disabled: socialButtonsDisabled,
       },
     ]
-  }, [githubAuthUrl, socialButtonsDisabled, t.social.github, t.social.wechat, wechatAuthUrl])
+  }, [githubAuthUrl, googleAuthUrl, socialButtonsDisabled, t.social.github])
 
   const formContent = useMemo(() => {
     if (children) {
