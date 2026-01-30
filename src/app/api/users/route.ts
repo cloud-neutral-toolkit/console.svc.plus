@@ -2,12 +2,12 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 
-import { getInternalServerServiceBaseUrl } from '@server/serviceConfig'
+import { getAccountServiceApiBaseUrl } from '@server/serviceConfig'
 import { getAccountSession, userHasRole } from '@server/account/session'
 import type { AccountUserRole } from '@server/account/session'
 
-const SERVER_API_BASE = getInternalServerServiceBaseUrl()
-const SERVER_USERS_ENDPOINT = `${SERVER_API_BASE}/api/users`
+const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
+const USERS_ENDPOINT = `${ACCOUNT_API_BASE}/users`
 
 const ALLOWED_ROLES: AccountUserRole[] = ['admin', 'operator']
 
@@ -52,10 +52,11 @@ export async function GET() {
 
   const headers = new Headers({
     Accept: 'application/json',
+    Authorization: `Bearer ${session.token}`,
     ...buildForwardHeaders(user.role, user.permissions),
   })
 
-  const response = await fetch(SERVER_USERS_ENDPOINT, {
+  const response = await fetch(USERS_ENDPOINT, {
     method: 'GET',
     headers,
     cache: 'no-store',
