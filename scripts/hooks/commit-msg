@@ -1,0 +1,45 @@
+#!/bin/bash
+# commit-msg hook to enforce Conventional Commits
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Regex for Conventional Commits (Simplified)
+# Types: fix, feat, docs, chore, test, refactor, perf, style, ci, revert
+# Scope: optional, inside ()
+# Subject: required, no ending dot (optional enforcement)
+PATTERN="^(fix|feat|docs|chore|test|refactor|perf|style|ci|revert)(\([a-z0-9\._-]+\))?: .+$"
+
+if [[ ! "$COMMIT_MSG" =~ $PATTERN ]]; then
+    echo "❌ Error: Invalid commit message format."
+    echo "----------------------------------------------------------------"
+    echo "Your commit message must follow the Conventional Commits specification."
+    echo ""
+    echo "Format: <type>(<scope>): <subject>"
+    echo ""
+    echo "Allowed types:"
+    echo "  fix      - Bug fix"
+    echo "  feat     - New feature"
+    echo "  docs     - Documentation only"
+    echo "  chore    - Build process or auxiliary tool changes"
+    echo "  test     - Adding or correcting tests"
+    echo "  refactor - Code change that neither fixes a bug nor adds a feature"
+    echo "  perf     - A code change that improves performance"
+    echo "  style    - Changes that do not affect the meaning of the code"
+    echo "  ci       - CI configuration files and scripts changes"
+    echo "  revert   - Reverts a previous commit"
+    echo ""
+    echo "Example: feat(auth): add login support"
+    echo "----------------------------------------------------------------"
+    echo "See skills/git.conventional-commits.v1.md for more details."
+    exit 1
+fi
+
+# Check for length (Subject max 50 chars recommended, but let's say 72 hard limit for header)
+HEADER=$(head -n 1 "$COMMIT_MSG_FILE")
+LEN=${#HEADER}
+if [ "$LEN" -gt 72 ]; then
+    echo "⚠️  Warning: Commit message header is $LEN characters long (max 72 recommended)."
+fi
+
+exit 0
