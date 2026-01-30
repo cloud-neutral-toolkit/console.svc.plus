@@ -72,9 +72,53 @@ export default function LoginContent({
     process.env.NEXT_PUBLIC_LOGIN_URL ||
     `${accountServiceBaseUrl}/api/auth/login`;
 
-  const socialButtonsDisabled = true;
+  const socialButtonsDisabled = false;
   const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`;
   const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`;
+
+  useEffect(() => {
+    const publicToken = searchParams.get("public_token");
+    const userId = searchParams.get("userId");
+    const email = searchParams.get("email");
+    const role = searchParams.get("role");
+
+    if (!publicToken || !userId || !email) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setAlert({ type: "success", message: alerts.submit ?? "Authenticating..." });
+
+    const exchangeToken = async () => {
+      try {
+        const response = await fetch("/api/auth/token/exchange", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            publicToken,
+            userId,
+            email,
+            role: role || "user",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Token exchange failed");
+        }
+
+        router.push("/");
+        router.refresh();
+      } catch (error) {
+        console.error("Token exchange failed:", error);
+        setAlert({ type: "error", message: alerts.genericError });
+        setIsSubmitting(false);
+      }
+    };
+
+    exchangeToken();
+  }, [searchParams, router, alerts.submit, alerts.genericError]);
 
   const loginUrlRef = useRef(loginUrl);
 
