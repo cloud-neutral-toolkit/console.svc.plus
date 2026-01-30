@@ -220,26 +220,6 @@ export default function Navbar() {
 
   const mobileTabs = [
     { key: 'chat', label: labels.chat, icon: MessageSquare, href: '/services/moltbot/chats', active: pathname?.startsWith('/services/moltbot') },
-    {
-      key: 'homepage', label: labels.homepage, icon: ({ className }: { className?: string }) => (
-        <Image
-          src="/icons/cloudnative_32.png"
-          alt="logo"
-          width={16}
-          height={16}
-          className={className}
-          unoptimized
-        />
-      ), href: '/', active: pathname === '/'
-    },
-    {
-      key: 'about', label: labels.about, icon: ({ className }: { className?: string }) => (
-        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ), href: '/about', active: pathname === '/about'
-    },
-    { key: 'services', label: labels.moreServices, icon: LinkIcon, href: '/services', active: pathname === '/services' },
     { key: 'overview', label: labels.overview, icon: BarChart2, href: '/panel', active: pathname === '/panel' },
     {
       key: 'docs', label: labels.docs, icon: ({ className }: { className?: string }) => (
@@ -248,7 +228,15 @@ export default function Navbar() {
         </svg>
       ), href: '/docs', active: pathname?.startsWith('/docs')
     },
+    { key: 'services', label: labels.moreServices, icon: LinkIcon, href: '/services', active: pathname === '/services' },
     ...((user?.isAdmin || user?.isOperator) ? [{ key: 'instances', label: labels.instances, icon: Server, href: '/panel/management', active: pathname === '/panel/management' }] : []),
+    {
+      key: 'about', label: labels.about, icon: ({ className }: { className?: string }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ), href: '/about', active: pathname === '/about'
+    },
   ]
 
   return (

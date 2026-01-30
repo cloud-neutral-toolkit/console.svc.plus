@@ -746,7 +746,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       breadcrumbRoot: 'Download',
     },
-    chat: 'Chat',
+    chat: 'AI Assistant',
     homepage: 'Homepage',
     auth: {
       register: {
@@ -1480,7 +1480,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       breadcrumbRoot: '下载',
     },
-    chat: 'Chat',
+    chat: 'AI助手',
     homepage: '首页',
     auth: {
       register: {
