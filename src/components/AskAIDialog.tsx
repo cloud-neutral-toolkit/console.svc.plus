@@ -9,6 +9,8 @@ import { SourceHint } from './SourceHint'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { useRouter } from 'next/navigation'
+import { useMoltbotStore } from '@lib/moltbotStore'
+import { cn } from '@lib/utils'
 
 const MAX_MESSAGES = 20
 const MAX_CACHE_SIZE = 50
@@ -57,6 +59,8 @@ export function AskAIDialog({
   const { language } = useLanguage()
   const t = translations[language].askAI
   const router = useRouter()
+
+  const { mode, setMode } = useMoltbotStore()
 
   function handleMaximize() {
     onEnd() // Close the dialog
@@ -315,76 +319,104 @@ export function AskAIDialog({
     performAsk(normalizedInitial)
   }, [initialQuestion, open, performAsk])
 
+
   if (!open) return null
 
+  const isOverlay = mode === 'overlay'
+
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onMinimize} />
-      <div className="absolute inset-y-0 right-0 flex w-full justify-end">
-        <div className="relative flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl sm:max-w-[520px]">
-          <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500">{t.title}</p>
-              <h2 className="text-lg font-semibold text-gray-900">{t.subtitle}</h2>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <button
-                onClick={handleMaximize}
-                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                title="Full Screen / Moltbot Workspace"
-                aria-label="Open in Moltbot Workspace"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </button>
-              <button
-                onClick={onMinimize}
-                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                title="Minimize"
-                aria-label="Minimize chat"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <button
-                onClick={handleEnd}
-                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                title="Close"
-                aria-label="End conversation"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+    <div
+      className={cn(
+        'z-50 transition-all duration-300 ease-in-out',
+        isOverlay ? 'fixed inset-0' : 'relative h-full border-l border-surface-border'
+      )}
+      style={{ width: isOverlay ? '100%' : '400px' }}
+    >
+      {isOverlay && (
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          onClick={onMinimize}
+        />
+      )}
+      <div
+        className={cn(
+          'flex h-full w-full flex-col bg-background shadow-2xl transition-all duration-300',
+          isOverlay ? 'absolute inset-y-0 right-0 max-w-3xl sm:max-w-[520px]' : 'relative'
+        )}
+      >
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-text-muted">{t.title}</p>
+            <h2 className="text-lg font-semibold text-text">{t.subtitle}</h2>
           </div>
-
-          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 text-gray-800">
-            {messages.map((m, idx) => (
-              <ChatBubble key={idx} message={m.text} type={m.sender} />
-            ))}
-            {sources.length > 0 && <SourceHint sources={sources} />}
+          <div className="flex items-center gap-2 text-text-muted">
+            <button
+              onClick={handleMaximize}
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              title="Full Screen / Moltbot Workspace"
+              aria-label="Open in Moltbot Workspace"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </button>
+            <div className="mx-1 h-4 w-px bg-surface-border" />
+            <button
+              onClick={() => setMode(mode === 'overlay' ? 'right-sidebar' : 'overlay')}
+              className={cn(
+                "flex h-8 px-2 items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-surface-muted",
+                mode !== 'overlay' && "bg-primary/10 text-primary hover:bg-primary/20"
+              )}
+              title={mode === 'overlay' ? "Dock to Side" : "Float (Overlay)"}
+            >
+              {mode === 'overlay' ? "Dock" : "Float"}
+            </button>
+            <button
+              onClick={onMinimize}
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              title="Minimize"
+              aria-label="Minimize chat"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleEnd}
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              title="Close"
+              aria-label="End conversation"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
+        </div>
 
-          <div className="border-t px-4 py-3">
-            <div className="space-y-3 rounded-xl bg-gray-50 p-3 shadow-inner">
-              <textarea
-                className="w-full resize-none rounded-lg border border-gray-200 bg-white p-3 text-black shadow-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200"
-                rows={3}
-                placeholder={t.placeholder}
-                value={question}
-                onChange={e => setQuestion(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleAsk()
-                  }
-                }}
-              />
-              <div className="flex items-center justify-end">
-                <button
-                  onClick={handleAsk}
-                  className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                >
-                  {t.ask}
-                </button>
-              </div>
+        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 text-text">
+          {messages.map((m, idx) => (
+            <ChatBubble key={idx} message={m.text} type={m.sender} />
+          ))}
+          {sources.length > 0 && <SourceHint sources={sources} />}
+        </div>
+
+        <div className="border-t border-surface-border px-4 py-3">
+          <div className="space-y-3 rounded-xl bg-surface-muted/30 p-3 shadow-inner">
+            <textarea
+              className="w-full resize-none rounded-lg border border-surface-border bg-background p-3 text-text shadow-sm outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+              rows={3}
+              placeholder={t.placeholder}
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleAsk()
+                }
+              }}
+            />
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleAsk}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/60"
+              >
+                {t.ask}
+              </button>
             </div>
           </div>
         </div>

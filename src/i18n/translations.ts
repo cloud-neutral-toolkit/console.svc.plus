@@ -192,6 +192,7 @@ type AuthLoginAlerts = {
   invalidCredentials: string
   userNotFound?: string
   genericError: string
+  submit: string
   passwordRequired?: string
   mfa?: {
     missing: string

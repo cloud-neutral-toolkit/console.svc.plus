@@ -23,6 +23,9 @@ import UnifiedNavigation from "../components/UnifiedNavigation";
 import { useUserStore } from "../lib/userStore";
 import { useLanguage } from "../i18n/LanguageProvider";
 import { translations } from "../i18n/translations";
+import { useMoltbotStore } from "../lib/moltbotStore";
+import { cn } from "../lib/utils";
+import { AskAIDialog } from "../components/AskAIDialog";
 
 const iconMap: Record<string, any> = {
   // English keys
@@ -116,21 +119,43 @@ const shortcuts = [
 ];
 
 export default function HomePage() {
+  const { mode, isOpen, setIsOpen, setMinimized, close } = useMoltbotStore();
+  const isSidebar = mode !== 'overlay' && isOpen;
+
   return (
-    <div className="min-h-screen bg-background text-text transition-colors duration-150">
-      <div
-        className="absolute inset-0 bg-gradient-app-from opacity-20"
-        aria-hidden
-      />
-      <div className="relative mx-auto max-w-7xl px-6 pb-20">
-        <UnifiedNavigation />
-        <main className="space-y-12 pt-10">
-          <HeroSection />
-          <NextStepsSection />
-          <StatsSection />
-          <ShortcutsSection />
-        </main>
-        <Footer />
+    <div className="min-h-screen bg-background text-text transition-colors duration-150 flex flex-col">
+      <UnifiedNavigation />
+
+      <div className={cn(
+        "flex flex-1 relative overflow-hidden",
+        mode === 'left-sidebar' && "flex-row-reverse"
+      )}>
+        <div className="flex-1 overflow-y-auto relative">
+          <div className="relative mx-auto max-w-7xl px-6 pb-20">
+            <div
+              className="absolute inset-0 bg-gradient-app-from opacity-20 pointer-events-none"
+              aria-hidden
+            />
+            <main className="relative space-y-12 pt-10">
+              <HeroSection />
+              <NextStepsSection />
+              <StatsSection />
+              <ShortcutsSection />
+            </main>
+            <div className="relative">
+              <Footer />
+            </div>
+          </div>
+        </div>
+
+        <AskAIDialog
+          open={isOpen}
+          onMinimize={() => {
+            setIsOpen(false);
+            setMinimized(true);
+          }}
+          onEnd={close}
+        />
       </div>
     </div>
   );
