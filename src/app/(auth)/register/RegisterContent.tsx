@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Github } from 'lucide-react'
+import Link from "next/link";
+import { Github } from "lucide-react";
 import {
   ChangeEvent,
   ClipboardEvent,
@@ -13,36 +13,38 @@ import {
   useRef,
   useState,
   useId,
-} from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+} from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { AuthLayout, AuthLayoutSocialButton } from '@components/auth/AuthLayout'
-import { useLanguage } from '@i18n/LanguageProvider'
-import { translations } from '@i18n/translations'
+import {
+  AuthLayout,
+  AuthLayoutSocialButton,
+} from "@components/auth/AuthLayout";
+import { useLanguage } from "@i18n/LanguageProvider";
+import { translations } from "@i18n/translations";
 
+type AlertState = { type: "error" | "success" | "info"; message: string };
 
-type AlertState = { type: 'error' | 'success' | 'info'; message: string }
-
-const VERIFICATION_CODE_LENGTH = 6
-const RESEND_COOLDOWN_SECONDS = 60
-const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-const PASSWORD_STRENGTH_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
-const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9]{3,15}$/
+const VERIFICATION_CODE_LENGTH = 6;
+const RESEND_COOLDOWN_SECONDS = 60;
+const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const PASSWORD_STRENGTH_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9]{3,15}$/;
 
 export default function RegisterContent() {
-  const { language } = useLanguage()
-  const t = translations[language].auth.register
-  const alerts = t.alerts
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const { language } = useLanguage();
+  const t = translations[language].auth.register;
+  const alerts = t.alerts;
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const isSocialAuthVisible = true
-  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`
-  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`
+  const isSocialAuthVisible = false;
+  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`;
+  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`;
 
   const socialButtons = useMemo<AuthLayoutSocialButton[]>(() => {
     if (!isSocialAuthVisible) {
-      return []
+      return [];
     }
 
     return [
@@ -56,47 +58,51 @@ export default function RegisterContent() {
         href: googleAuthUrl,
         icon: <div className="h-5 w-5 flex items-center justify-center">G</div>,
       },
-    ]
-  }, [githubAuthUrl, googleAuthUrl, isSocialAuthVisible, t.social.github])
+    ];
+  }, [githubAuthUrl, googleAuthUrl, isSocialAuthVisible, t.social.github]);
 
   useEffect(() => {
-    const sensitiveKeys = ['username', 'password', 'confirmPassword', 'email']
-    const hasSensitiveParams = sensitiveKeys.some((key) => searchParams.has(key))
+    const sensitiveKeys = ["username", "password", "confirmPassword", "email"];
+    const hasSensitiveParams = sensitiveKeys.some((key) =>
+      searchParams.has(key),
+    );
 
     if (!hasSensitiveParams) {
-      return
+      return;
     }
 
-    const sanitized = new URLSearchParams(searchParams.toString())
-    sensitiveKeys.forEach((key) => sanitized.delete(key))
+    const sanitized = new URLSearchParams(searchParams.toString());
+    sensitiveKeys.forEach((key) => sanitized.delete(key));
 
-    const queryString = sanitized.toString()
-    router.replace(queryString ? `/register?${queryString}` : '/register', { scroll: false })
-  }, [router, searchParams])
+    const queryString = sanitized.toString();
+    router.replace(queryString ? `/register?${queryString}` : "/register", {
+      scroll: false,
+    });
+  }, [router, searchParams]);
 
   const normalize = useCallback(
     (value: string) =>
       value
         .trim()
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, ''),
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, ""),
     [],
-  )
+  );
 
   const initialAlert = useMemo<AlertState | null>(() => {
-    const errorParam = searchParams.get('error')
-    const successParam = searchParams.get('success')
+    const errorParam = searchParams.get("error");
+    const successParam = searchParams.get("success");
 
-    if (successParam === '1') {
-      return { type: 'success', message: alerts.success }
+    if (successParam === "1") {
+      return { type: "success", message: alerts.success };
     }
 
     if (!errorParam) {
-      return null
+      return null;
     }
 
-    const normalizedError = normalize(errorParam)
+    const normalizedError = normalize(errorParam);
     const errorMap: Record<string, string> = {
       missing_fields: alerts.missingFields,
       email_and_password_are_required: alerts.missingFields,
@@ -111,222 +117,238 @@ export default function RegisterContent() {
       invalid_name: alerts.invalidName ?? alerts.genericError,
       name_required: alerts.invalidName ?? alerts.genericError,
       credentials_in_query: alerts.genericError,
-    }
-    const message = errorMap[normalizedError] ?? alerts.genericError
-    return { type: 'error', message }
-  }, [alerts, normalize, searchParams])
+    };
+    const message = errorMap[normalizedError] ?? alerts.genericError;
+    return { type: "error", message };
+  }, [alerts, normalize, searchParams]);
 
-  const [alert, setAlert] = useState<AlertState | null>(initialAlert)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [alert, setAlert] = useState<AlertState | null>(initialAlert);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Wizard Step State: 0 = Info, 1 = Verification, 2 = Success (Processing/Redirecting)
-  const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0)
+  const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0);
 
-  const [codeDigits, setCodeDigits] = useState<string[]>(() => Array(VERIFICATION_CODE_LENGTH).fill(''))
-  const [resendCooldown, setResendCooldown] = useState(0)
-  const [isResending, setIsResending] = useState(false)
+  const [codeDigits, setCodeDigits] = useState<string[]>(() =>
+    Array(VERIFICATION_CODE_LENGTH).fill(""),
+  );
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
 
   const [formValues, setFormValues] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
     agreement: false,
-  })
+  });
 
-  const [isFormReady, setIsFormReady] = useState(false)
-  const formRef = useRef<HTMLFormElement | null>(null)
-  const codeInputRefs = useRef<(HTMLInputElement | null)[]>([])
-
-  useEffect(() => {
-    setAlert(initialAlert)
-  }, [initialAlert])
+  const [isFormReady, setIsFormReady] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    setIsFormReady(true)
-  }, [])
+    setAlert(initialAlert);
+  }, [initialAlert]);
+
+  useEffect(() => {
+    setIsFormReady(true);
+  }, []);
 
   useEffect(() => {
     if (resendCooldown <= 0) {
-      return
+      return;
     }
 
     const timer = window.setInterval(() => {
-      setResendCooldown((current) => (current > 0 ? current - 1 : 0))
-    }, 1000)
+      setResendCooldown((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
 
-    return () => window.clearInterval(timer)
-  }, [resendCooldown])
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
 
   const focusCodeInput = useCallback((index: number) => {
-    const input = codeInputRefs.current[index]
+    const input = codeInputRefs.current[index];
     if (input) {
-      input.focus()
-      input.select()
+      input.focus();
+      input.select();
     }
-  }, [])
+  }, []);
 
   const resetCodeDigits = useCallback(() => {
-    setCodeDigits(Array(VERIFICATION_CODE_LENGTH).fill(''))
-  }, [])
+    setCodeDigits(Array(VERIFICATION_CODE_LENGTH).fill(""));
+  }, []);
 
   const handleInputChange = useCallback(
-    (field: 'username' | 'email' | 'password' | 'confirmPassword') =>
+    (field: "username" | "email" | "password" | "confirmPassword") =>
       (event: ChangeEvent<HTMLInputElement>) => {
-        const { value } = event.target
-        setFormValues((previous) => ({ ...previous, [field]: value }))
+        const { value } = event.target;
+        setFormValues((previous) => ({ ...previous, [field]: value }));
       },
     [],
-  )
+  );
 
-  const handleAgreementChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setFormValues((previous) => ({ ...previous, agreement: event.target.checked }))
-  }, [])
+  const handleAgreementChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setFormValues((previous) => ({
+        ...previous,
+        agreement: event.target.checked,
+      }));
+    },
+    [],
+  );
 
   const handleCodeChange = useCallback(
     (index: number, value: string) => {
-      const sanitized = value.replace(/\D/g, '')
+      const sanitized = value.replace(/\D/g, "");
       setCodeDigits((previous) => {
-        const next = [...previous]
-        next[index] = sanitized ? sanitized[sanitized.length - 1] ?? '' : ''
-        return next
-      })
+        const next = [...previous];
+        next[index] = sanitized ? (sanitized[sanitized.length - 1] ?? "") : "";
+        return next;
+      });
 
       if (sanitized && index < VERIFICATION_CODE_LENGTH - 1) {
-        focusCodeInput(index + 1)
+        focusCodeInput(index + 1);
       } else if (sanitized && index === VERIFICATION_CODE_LENGTH - 1) {
         // Auto-submit when the last digit is entered
         // We use a timeout to let the state update first
         setTimeout(() => {
-          const form = formRef.current
-          if (form) form.requestSubmit()
-        }, 100)
+          const form = formRef.current;
+          if (form) form.requestSubmit();
+        }, 100);
       }
     },
     [focusCodeInput],
-  )
+  );
 
   const handleCodeKeyDown = useCallback(
     (index: number, event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Backspace' && !codeDigits[index] && index > 0) {
-        event.preventDefault()
+      if (event.key === "Backspace" && !codeDigits[index] && index > 0) {
+        event.preventDefault();
         setCodeDigits((previous) => {
-          const next = [...previous]
-          next[index - 1] = ''
-          return next
-        })
-        focusCodeInput(index - 1)
-        return
+          const next = [...previous];
+          next[index - 1] = "";
+          return next;
+        });
+        focusCodeInput(index - 1);
+        return;
       }
 
-      if (event.key === 'ArrowLeft' && index > 0) {
-        event.preventDefault()
-        focusCodeInput(index - 1)
-        return
+      if (event.key === "ArrowLeft" && index > 0) {
+        event.preventDefault();
+        focusCodeInput(index - 1);
+        return;
       }
 
-      if (event.key === 'ArrowRight' && index < VERIFICATION_CODE_LENGTH - 1) {
-        event.preventDefault()
-        focusCodeInput(index + 1)
+      if (event.key === "ArrowRight" && index < VERIFICATION_CODE_LENGTH - 1) {
+        event.preventDefault();
+        focusCodeInput(index + 1);
       }
     },
     [codeDigits, focusCodeInput],
-  )
+  );
 
   const handleCodePaste = useCallback(
     (index: number, event: ClipboardEvent<HTMLInputElement>) => {
-      event.preventDefault()
-      const clipboardValue = event.clipboardData.getData('text').replace(/\D/g, '')
+      event.preventDefault();
+      const clipboardValue = event.clipboardData
+        .getData("text")
+        .replace(/\D/g, "");
       if (!clipboardValue) {
-        return
+        return;
       }
 
-      const digits = clipboardValue.slice(0, VERIFICATION_CODE_LENGTH - index).split('')
+      const digits = clipboardValue
+        .slice(0, VERIFICATION_CODE_LENGTH - index)
+        .split("");
       setCodeDigits((previous) => {
-        const next = [...previous]
+        const next = [...previous];
         digits.forEach((digit, offset) => {
-          const targetIndex = index + offset
+          const targetIndex = index + offset;
           if (targetIndex < VERIFICATION_CODE_LENGTH) {
-            next[targetIndex] = digit
+            next[targetIndex] = digit;
           }
-        })
-        return next
-      })
+        });
+        return next;
+      });
 
-      const lastFilledIndex = Math.min(index + digits.length - 1, VERIFICATION_CODE_LENGTH - 1)
-      focusCodeInput(lastFilledIndex)
+      const lastFilledIndex = Math.min(
+        index + digits.length - 1,
+        VERIFICATION_CODE_LENGTH - 1,
+      );
+      focusCodeInput(lastFilledIndex);
     },
     [focusCodeInput],
-  )
+  );
 
   const showError = (message: string) => {
-    setAlert({ type: 'error', message })
-  }
+    setAlert({ type: "error", message });
+  };
 
   const showStatus = (message: string) => {
-    setAlert({ type: 'info', message })
-  }
+    setAlert({ type: "info", message });
+  };
 
   // Step 1: Request Verification Code
   const handleRequestVerification = async () => {
-    const { username, email, password, confirmPassword, agreement } = formValues
+    const { username, email, password, confirmPassword, agreement } =
+      formValues;
 
     if (!username.trim() || !USERNAME_PATTERN.test(username.trim())) {
-      showError(alerts.invalidName ?? alerts.missingFields)
-      return
+      showError(alerts.invalidName ?? alerts.missingFields);
+      return;
     }
 
     if (!email || !EMAIL_PATTERN.test(email)) {
-      showError(alerts.invalidEmail)
-      return
+      showError(alerts.invalidEmail);
+      return;
     }
 
     if (!password || !confirmPassword) {
-      showError(alerts.missingFields)
-      return
+      showError(alerts.missingFields);
+      return;
     }
 
     if (!PASSWORD_STRENGTH_PATTERN.test(password)) {
-      showError(alerts.weakPassword ?? alerts.genericError)
-      return
+      showError(alerts.weakPassword ?? alerts.genericError);
+      return;
     }
 
     if (password !== confirmPassword) {
-      showError(alerts.passwordMismatch)
-      return
+      showError(alerts.passwordMismatch);
+      return;
     }
 
     if (!agreement) {
-      showError(alerts.agreementRequired ?? alerts.missingFields)
-      return
+      showError(alerts.agreementRequired ?? alerts.missingFields);
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     showStatus(
       t.form.validation?.submitting ??
-      t.form.submitting ??
-      'Submitting registration request…',
-    )
+        t.form.submitting ??
+        "Submitting registration request…",
+    );
 
     try {
-      const response = await fetch('/api/auth/register/send', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register/send", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email: email.trim() }),
-      })
+      });
 
       if (!response.ok) {
         // ... (error handling)
-        let errorCode = 'generic_error'
+        let errorCode = "generic_error";
         try {
-          const data = await response.json()
-          if (typeof data?.error === 'string') {
-            errorCode = data.error
+          const data = await response.json();
+          if (typeof data?.error === "string") {
+            errorCode = data.error;
           }
         } catch (error) {
-          console.error('Failed to parse verification send response', error)
+          console.error("Failed to parse verification send response", error);
         }
 
         const errorMap: Record<string, string> = {
@@ -335,54 +357,55 @@ export default function RegisterContent() {
           verification_failed: alerts.verificationFailed ?? alerts.genericError,
           email_already_exists: alerts.userExists,
           account_service_unreachable: alerts.genericError,
-        }
+        };
 
-        showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-        return
+        showError(errorMap[normalize(errorCode)] ?? alerts.genericError);
+        return;
       }
 
       // Success: Move to Step 2
-      setCurrentStep(1)
-      setResendCooldown(RESEND_COOLDOWN_SECONDS)
-      resetCodeDigits()
+      setCurrentStep(1);
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      resetCodeDigits();
 
-      const successMessage = alerts.verificationSent ?? alerts.genericError
-      setAlert({ type: 'success', message: successMessage })
+      const successMessage = alerts.verificationSent ?? alerts.genericError;
+      setAlert({ type: "success", message: successMessage });
 
       // Focus code input after a short delay for state transition
-      setTimeout(() => focusCodeInput(0), 100)
-
+      setTimeout(() => focusCodeInput(0), 100);
     } catch (error) {
-      console.error('Failed to request verification code', error)
-      showError(alerts.genericError)
+      console.error("Failed to request verification code", error);
+      showError(alerts.genericError);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Step 2: Verify Code & Register
   const handleCompleteRegistration = async () => {
-    const verificationCode = codeDigits.join('')
+    const verificationCode = codeDigits.join("");
     if (verificationCode.length !== VERIFICATION_CODE_LENGTH) {
-      showError(alerts.codeRequired ?? alerts.invalidCode ?? alerts.missingFields)
-      return
+      showError(
+        alerts.codeRequired ?? alerts.invalidCode ?? alerts.missingFields,
+      );
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     showStatus(
       t.form.validation?.completing ??
-      t.form.completing ??
-      t.form.completeSubmit ??
-      t.form.submit,
-    )
+        t.form.completing ??
+        t.form.completeSubmit ??
+        t.form.submit,
+    );
 
     try {
-      const { username, email, password } = formValues
+      const { username, email, password } = formValues;
 
-      const registerResponse = await fetch('/api/auth/register', {
-        method: 'POST',
+      const registerResponse = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: username.trim(),
@@ -390,19 +413,21 @@ export default function RegisterContent() {
           password,
           code: verificationCode,
         }),
-      })
+      });
 
-      let registerData: { success?: boolean; error?: string } | null = null
+      let registerData: { success?: boolean; error?: string } | null = null;
       try {
-        registerData = await registerResponse.json()
+        registerData = await registerResponse.json();
       } catch (error) {
-        registerData = null
+        registerData = null;
       }
 
       if (!registerResponse.ok || registerData?.success === false) {
         // ... (error handling)
         const errorCode =
-          typeof registerData?.error === 'string' ? registerData.error : 'registration_failed'
+          typeof registerData?.error === "string"
+            ? registerData.error
+            : "registration_failed";
         const errorMap: Record<string, string> = {
           invalid_request: alerts.genericError,
           missing_credentials: alerts.missingFields,
@@ -417,132 +442,140 @@ export default function RegisterContent() {
           credentials_in_query: alerts.genericError,
           verification_required: alerts.codeRequired ?? alerts.genericError,
           invalid_code:
-            alerts.verificationFailed ?? alerts.invalidCode ?? alerts.genericError,
+            alerts.verificationFailed ??
+            alerts.invalidCode ??
+            alerts.genericError,
           account_service_unreachable: alerts.genericError,
-        }
+        };
 
-        showError(errorMap[normalize(errorCode)] ?? alerts.genericError)
-        return
+        showError(errorMap[normalize(errorCode)] ?? alerts.genericError);
+        return;
       }
 
       // 2. Login
-      const loginResponse = await fetch('/api/auth/login', {
-        method: 'POST',
+      const loginResponse = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: email.trim(),
           password,
         }),
-      })
+      });
 
-      let loginData:
-        | { success?: boolean; needMfa?: boolean; error?: string; redirectTo?: string }
-        | null = null
+      let loginData: {
+        success?: boolean;
+        needMfa?: boolean;
+        error?: string;
+        redirectTo?: string;
+      } | null = null;
       try {
-        loginData = await loginResponse.json()
+        loginData = await loginResponse.json();
       } catch (error) {
-        loginData = null
+        loginData = null;
       }
 
       if (!loginResponse.ok || !loginData?.success) {
         // Login failed but registration succeeded
-        const successMessage = alerts.registrationComplete ?? alerts.success
-        setAlert({ type: 'success', message: successMessage })
-        router.push('/login')
-        return
+        const successMessage = alerts.registrationComplete ?? alerts.success;
+        setAlert({ type: "success", message: successMessage });
+        router.push("/login");
+        return;
       }
 
       if (loginData?.needMfa) {
-        router.push('/login?needMfa=1')
-        router.refresh()
-        return
+        router.push("/login?needMfa=1");
+        router.refresh();
+        return;
       }
 
       // Success
-      setCurrentStep(2)
-      const successMessage = alerts.registrationComplete ?? alerts.success
-      setAlert({ type: 'success', message: successMessage })
+      setCurrentStep(2);
+      const successMessage = alerts.registrationComplete ?? alerts.success;
+      setAlert({ type: "success", message: successMessage });
 
-      router.push(loginData?.redirectTo || '/')
-      router.refresh()
-
+      router.push(loginData?.redirectTo || "/");
+      router.refresh();
     } catch (error) {
-      console.error('Failed to complete registration', error)
-      showError(alerts.genericError)
+      console.error("Failed to complete registration", error);
+      showError(alerts.genericError);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (isSubmitting) return
+    event.preventDefault();
+    if (isSubmitting) return;
 
     if (currentStep === 0) {
-      handleRequestVerification()
+      handleRequestVerification();
     } else if (currentStep === 1) {
-      handleCompleteRegistration()
+      handleCompleteRegistration();
     }
-  }
+  };
 
   const handleResend = useCallback(async () => {
-    if (isResending || resendCooldown > 0) return
+    if (isResending || resendCooldown > 0) return;
 
-    const { email } = formValues
-    if (!email) return
+    const { email } = formValues;
+    if (!email) return;
 
-    setIsResending(true)
+    setIsResending(true);
     const resendStatusMessage =
       t.form.verificationCodeResending ??
-      (t.form.verificationCodeResend ? `${t.form.verificationCodeResend}…` : 'Resending verification code…')
-    setAlert({ type: 'info', message: resendStatusMessage })
+      (t.form.verificationCodeResend
+        ? `${t.form.verificationCodeResend}…`
+        : "Resending verification code…");
+    setAlert({ type: "info", message: resendStatusMessage });
 
     try {
-      const response = await fetch('/api/auth/register/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
-      })
+      });
 
       if (!response.ok) {
-        setAlert({ type: 'error', message: alerts.genericError })
-        return
+        setAlert({ type: "error", message: alerts.genericError });
+        return;
       }
 
-      setResendCooldown(RESEND_COOLDOWN_SECONDS)
-      const message = alerts.verificationResent ?? alerts.verificationSent ?? 'Verification code resent.'
-      setAlert({ type: 'success', message })
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      const message =
+        alerts.verificationResent ??
+        alerts.verificationSent ??
+        "Verification code resent.";
+      setAlert({ type: "success", message });
     } catch (error) {
-      setAlert({ type: 'error', message: alerts.genericError })
+      setAlert({ type: "error", message: alerts.genericError });
     } finally {
-      setIsResending(false)
+      setIsResending(false);
     }
-  }, [alerts, formValues, isResending, resendCooldown, t.form])
-
+  }, [alerts, formValues, isResending, resendCooldown, t.form]);
 
   // Render Helpers
   const aboveForm = t.uuidNote ? (
     <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
       {t.uuidNote}
     </div>
-  ) : null
+  ) : null;
 
   const submitLabel = useMemo(() => {
     if (isSubmitting) {
-      if (currentStep === 0) return t.form.submitting ?? t.form.submit
-      return t.form.completing ?? t.form.submit
+      if (currentStep === 0) return t.form.submitting ?? t.form.submit;
+      return t.form.completing ?? t.form.submit;
     }
-    if (currentStep === 0) return '下一步 (获取验证码)'
-    return t.form.completeSubmit ?? '完成注册'
-  }, [isSubmitting, currentStep, t.form])
+    if (currentStep === 0) return "下一步 (获取验证码)";
+    return t.form.completeSubmit ?? "完成注册";
+  }, [isSubmitting, currentStep, t.form]);
 
   const resendLabel = isResending
-    ? t.form.verificationCodeResending ?? t.form.verificationCodeResend
+    ? (t.form.verificationCodeResending ?? t.form.verificationCodeResend)
     : resendCooldown > 0
       ? `${t.form.verificationCodeResend} (${resendCooldown}s)`
-      : t.form.verificationCodeResend
+      : t.form.verificationCodeResend;
 
   return (
     <AuthLayout
@@ -554,7 +587,11 @@ export default function RegisterContent() {
       socialHeading={t.social.title}
       socialButtons={socialButtons}
       aboveForm={aboveForm}
-      switchAction={{ text: t.loginPrompt.text, linkLabel: t.loginPrompt.link, href: '/login' }}
+      switchAction={{
+        text: t.loginPrompt.text,
+        linkLabel: t.loginPrompt.link,
+        href: "/login",
+      }}
       bottomNote={t.bottomNote}
     >
       <form
@@ -567,24 +604,32 @@ export default function RegisterContent() {
         {currentStep === 0 && (
           <>
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium text-slate-600">
-                {t.form.name || 'Username'}
+              <label
+                htmlFor="username"
+                className="text-sm font-medium text-slate-600"
+              >
+                {t.form.name || "Username"}
               </label>
               <input
                 id="username"
                 name="username"
                 type="text"
                 autoComplete="username"
-                placeholder={t.form.namePlaceholder || '4-16 chars, starts with letter'}
+                placeholder={
+                  t.form.namePlaceholder || "4-16 chars, starts with letter"
+                }
                 className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                 required
                 value={formValues.username}
-                onChange={handleInputChange('username')}
+                onChange={handleInputChange("username")}
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-slate-600">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-slate-600"
+              >
                 {t.form.email}
               </label>
               <input
@@ -596,13 +641,16 @@ export default function RegisterContent() {
                 className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                 required
                 value={formValues.email}
-                onChange={handleInputChange('email')}
+                onChange={handleInputChange("email")}
               />
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-slate-600">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-slate-600"
+                >
                   {t.form.password}
                 </label>
                 <input
@@ -614,11 +662,14 @@ export default function RegisterContent() {
                   className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                   required
                   value={formValues.password}
-                  onChange={handleInputChange('password')}
+                  onChange={handleInputChange("password")}
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="confirm-password" className="text-sm font-medium text-slate-600">
+                <label
+                  htmlFor="confirm-password"
+                  className="text-sm font-medium text-slate-600"
+                >
                   {t.form.confirmPassword}
                 </label>
                 <input
@@ -630,7 +681,7 @@ export default function RegisterContent() {
                   className="w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                   required
                   value={formValues.confirmPassword}
-                  onChange={handleInputChange('confirmPassword')}
+                  onChange={handleInputChange("confirmPassword")}
                 />
               </div>
             </div>
@@ -645,8 +696,11 @@ export default function RegisterContent() {
                 onChange={handleAgreementChange}
               />
               <span>
-                {t.form.agreement}{' '}
-                <Link href="/docs" className="font-semibold text-sky-600 hover:text-sky-500">
+                {t.form.agreement}{" "}
+                <Link
+                  href="/docs"
+                  className="font-semibold text-sky-600 hover:text-sky-500"
+                >
                   {t.form.terms}
                 </Link>
               </span>
@@ -657,7 +711,8 @@ export default function RegisterContent() {
         {currentStep === 1 && (
           <div className="space-y-6">
             <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-sky-700">
-              我们已向你的邮箱 <strong>{formValues.email}</strong> 发送一封验证邮件。
+              我们已向你的邮箱 <strong>{formValues.email}</strong>{" "}
+              发送一封验证邮件。
               <br />
               验证链接有效期 10 分钟。
             </div>
@@ -671,7 +726,7 @@ export default function RegisterContent() {
                   <input
                     key={index}
                     ref={(el) => {
-                      codeInputRefs.current[index] = el
+                      codeInputRefs.current[index] = el;
                     }}
                     type="text"
                     inputMode="numeric"
@@ -701,7 +756,7 @@ export default function RegisterContent() {
                 onClick={handleResend}
                 disabled={isResending || resendCooldown > 0}
                 className="text-sm font-medium text-sky-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
-                style={{ zIndex: 10, position: 'relative' }}
+                style={{ zIndex: 10, position: "relative" }}
               >
                 {resendLabel}
               </button>
@@ -711,12 +766,14 @@ export default function RegisterContent() {
 
         <button
           type="submit"
-          disabled={isSubmitting || (currentStep === 1 && codeDigits.some(d => !d))}
+          disabled={
+            isSubmitting || (currentStep === 1 && codeDigits.some((d) => !d))
+          }
           className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:from-sky-500 hover:to-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitLabel}
         </button>
       </form>
     </AuthLayout>
-  )
+  );
 }
