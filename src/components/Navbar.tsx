@@ -159,6 +159,8 @@ export default function Navbar() {
     openSource: isChinese ? '开源项目' : 'Open source',
     about: isChinese ? '关于' : 'About',
     moreServices: isChinese ? '更多服务' : 'More services',
+    chat: translations[language].chat,
+    homepage: translations[language].homepage,
   }
 
   useEffect(() => {
@@ -230,7 +232,7 @@ export default function Navbar() {
         {/* Mobile Header Layout */}
         <div className="lg:hidden flex flex-col bg-background">
           {/* Top Bar */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border/50">
+          <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
@@ -238,7 +240,7 @@ export default function Navbar() {
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <Link href="/" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
                 <Image
                   src="/icons/cloudnative_32.png"
                   alt="logo"
@@ -266,23 +268,6 @@ export default function Navbar() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Secondary Horizontal Scroll Menu */}
-          <div className="flex items-center gap-2 overflow-x-auto py-2 px-4 no-scrollbar border-b border-surface-border/50">
-            {mobileTabs.map(tab => (
-              <Link
-                key={tab.key}
-                href={tab.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${tab.active
-                  ? 'bg-rose-100 text-rose-600 border border-rose-200/50'
-                  : 'text-text-muted hover:text-text hover:bg-surface-muted'
-                  }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </Link>
-            ))}
           </div>
         </div>
 
@@ -425,99 +410,221 @@ export default function Navbar() {
           </div>
         </div>
 
-        {menuOpen ? (
-          <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:hidden">
-            <div className="flex flex-col gap-4 border-t border-white/10 bg-slate-900/80 py-3 text-slate-100">
-              {/*
-                <SearchComponent
-                  className="relative"
-                  buttonClassName="h-8 w-8"
-                  inputClassName="py-2 pr-12"
-                />
-                */}
-              <div className="flex flex-col gap-2 text-sm font-medium">
-                {mainLinks.map((link) => (
-                  <Link
-                    key={link.key}
-                    href={link.href}
-                    className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {link.label}
+
+        {/* Mobile Sidebar Drawer */}
+        {menuOpen && (
+          <div className="fixed inset-0 z-[60] lg:hidden">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+              onClick={() => setMenuOpen(false)}
+            />
+
+            {/* Content */}
+            <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-background shadow-2xl transition-transform duration-300 ease-in-out">
+              <div className="flex h-full flex-col overflow-y-auto border-r border-surface-border">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-surface-border p-4">
+                  <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+                    <Image
+                      src="/icons/cloudnative_32.png"
+                      alt="logo"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6"
+                      unoptimized
+                    />
+                    <span className="text-lg font-bold tracking-tight">Cloud-Neutral</span>
                   </Link>
-                ))}
-                <Link
-                  href="/about"
-                  className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {labels.about}
-                </Link>
-                <Link
-                  key={servicesLink.key}
-                  href={servicesLink.href}
-                  className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {servicesLink.label}
-                </Link>
-              </div>
-              {user ? (
-                <div className="rounded-xl border border-white/10 bg-slate-800/80 p-4 text-slate-100 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 text-sm font-semibold text-white">
-                      {accountInitial}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold">{user.username}</p>
-                      <p className="text-xs text-slate-300">{user.email}</p>
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-lg p-2 text-text-muted hover:bg-surface-muted transition-colors"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* User Info Section (if logged in) */}
+                {user && (
+                  <div className="border-b border-surface-border bg-surface-muted/30 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white">
+                        {accountInitial}
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <p className="truncate text-sm font-semibold">{user.username}</p>
+                        <p className="truncate text-xs text-text-muted">{user.email}</p>
+                      </div>
                     </div>
                   </div>
-                  <Link
-                    href="/panel"
-                    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300/50 hover:bg-indigo-500/10"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {accountCopy.userCenter}
-                  </Link>
-                  <Link
-                    href="/logout"
-                    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:border-rose-300/60 hover:bg-rose-500/10 focus:outline-none focus:ring-2 focus:ring-rose-400/30 focus:ring-offset-2 focus:ring-offset-slate-900"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {accountCopy.logout}
-                  </Link>
+                )}
+
+                {/* Navigation Items */}
+                <div className="flex-1 p-4">
+                  <div className="space-y-1">
+                    <Link
+                      href="/services/moltbot/chats"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith('/services/moltbot')
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <MessageSquare className="mr-3 h-5 w-5" />
+                      {labels.chat}
+                    </Link>
+                    <Link
+                      href="/"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <Image
+                        src="/icons/cloudnative_32.png"
+                        alt="homepage"
+                        width={20}
+                        height={20}
+                        className="mr-3 h-5 w-5 opacity-70"
+                        unoptimized
+                      />
+                      {labels.homepage}
+                    </Link>
+                    <Link
+                      href="/panel"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/panel'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <BarChart2 className="mr-3 h-5 w-5 opacity-70" />
+                      {isChinese ? '概览' : 'Overview'}
+                    </Link>
+                    <Link
+                      href="/docs"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith('/docs')
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <svg className="mr-3 h-5 w-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.082.477 4 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      {labels.docs}
+                    </Link>
+                    <Link
+                      href="/about"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/about'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <svg className="mr-3 h-5 w-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {labels.about}
+                    </Link>
+                    <Link
+                      href="/services"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/services'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text hover:bg-surface-muted'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <LinkIcon className="mr-3 h-5 w-5 opacity-70" />
+                      {labels.moreServices}
+                    </Link>
+                    {(user?.isAdmin || user?.isOperator) && (
+                      <Link
+                        href="/panel/management"
+                        className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/panel/management'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-text hover:bg-surface-muted'
+                          }`}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Server className="mr-3 h-5 w-5 opacity-70" />
+                        {isChinese ? '实例管理' : 'Instances'}
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Account Action */}
+                  <div className="mt-8 space-y-3 px-2">
+                    <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50">
+                      {isChinese ? '账户' : 'Account'}
+                    </p>
+                    {user ? (
+                      <>
+                        <Link
+                          href="/panel"
+                          className="flex w-full items-center justify-center rounded-xl border border-surface-border bg-surface-muted/50 py-3 text-sm font-bold shadow-sm transition hover:bg-surface-hover"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {accountCopy.userCenter}
+                        </Link>
+                        <Link
+                          href="/logout"
+                          className="flex w-full items-center justify-center rounded-xl bg-rose-500/10 py-3 text-sm font-bold text-rose-600 shadow-sm transition hover:bg-rose-500/20"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {accountCopy.logout}
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/login"
+                          className="flex w-full items-center justify-center rounded-xl border border-surface-border py-3 text-sm font-bold transition hover:bg-surface-muted"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {nav.account.login}
+                        </Link>
+                        <Link
+                          href="/register"
+                          className="flex w-full items-center justify-center rounded-xl bg-primary py-3 text-sm font-bold text-white shadow-md transition hover:opacity-90 active:scale-[0.98]"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {nav.account.register}
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 text-sm font-medium">
-                  <Link
-                    href="/login"
-                    className="py-2 text-sm opacity-80 transition hover:opacity-100"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {nav.account.login}
-                  </Link>
-                  <span className="h-3 w-px bg-white/20" aria-hidden="true" />
-                  <Link
-                    href="/register"
-                    className="rounded-md border border-white/10 px-3 py-1.5 text-indigo-100 transition hover:border-indigo-300/50 hover:bg-white/10"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {nav.account.register}
-                  </Link>
+
+                {/* Bottom Settings */}
+                <div className="border-t border-surface-border p-4 space-y-4">
+                  <div className="flex flex-col gap-3">
+                    <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50">
+                      {isChinese ? '设置' : 'Settings'}
+                    </p>
+                    <div className="flex items-center justify-between rounded-xl bg-surface-muted/50 p-2">
+                      <span className="ml-2 text-xs font-medium text-text-muted">{isChinese ? '界面语言' : 'Language'}</span>
+                      <LanguageToggle />
+                    </div>
+                    <div className="flex flex-col gap-2 rounded-xl bg-surface-muted/50 p-2">
+                      <span className="ml-2 text-xs font-medium text-text-muted mb-1">{isChinese ? '发布频道' : 'Channels'}</span>
+                      <ReleaseChannelSelector selected={selectedChannels} onToggle={toggleChannel} />
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div className="flex flex-col gap-2">
-                <ReleaseChannelSelector selected={selectedChannels} onToggle={toggleChannel} />
-                <LanguageToggle />
               </div>
             </div>
           </div>
-        ) : null}
+        )}
       </nav>
 
-      <AskAIButton />
-
+      {/* Hide AskAI button on small screens since it's redundant with Chat on mobile */}
+      <div className="hidden lg:block">
+        <AskAIButton />
+      </div>
     </>
   )
 }
