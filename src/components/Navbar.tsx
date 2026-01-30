@@ -161,6 +161,8 @@ export default function Navbar() {
     moreServices: isChinese ? '更多服务' : 'More services',
     chat: translations[language].chat,
     homepage: translations[language].homepage,
+    overview: isChinese ? '概览' : 'Overview',
+    instances: isChinese ? '实例管理' : 'Instances',
   }
 
   useEffect(() => {
@@ -217,10 +219,36 @@ export default function Navbar() {
   }
 
   const mobileTabs = [
-    { key: 'chat', label: 'Chat', icon: MessageSquare, href: '/services/moltbot/chats', active: pathname?.startsWith('/services/moltbot') },
-    { key: 'overview', label: 'Overview', icon: BarChart2, href: '/panel', active: pathname === '/panel' },
-    { key: 'channels', label: 'Channels', icon: LinkIcon, href: '/services', active: pathname === '/services' },
-    { key: 'instances', label: 'Instances', icon: Server, href: '/panel/management', active: pathname === '/panel/management' },
+    { key: 'chat', label: labels.chat, icon: MessageSquare, href: '/services/moltbot/chats', active: pathname?.startsWith('/services/moltbot') },
+    {
+      key: 'homepage', label: labels.homepage, icon: ({ className }: { className?: string }) => (
+        <Image
+          src="/icons/cloudnative_32.png"
+          alt="logo"
+          width={16}
+          height={16}
+          className={className}
+          unoptimized
+        />
+      ), href: '/', active: pathname === '/'
+    },
+    {
+      key: 'about', label: labels.about, icon: ({ className }: { className?: string }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ), href: '/about', active: pathname === '/about'
+    },
+    { key: 'services', label: labels.moreServices, icon: LinkIcon, href: '/services', active: pathname === '/services' },
+    { key: 'overview', label: labels.overview, icon: BarChart2, href: '/panel', active: pathname === '/panel' },
+    {
+      key: 'docs', label: labels.docs, icon: ({ className }: { className?: string }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.082.477 4 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ), href: '/docs', active: pathname?.startsWith('/docs')
+    },
+    ...((user?.isAdmin || user?.isOperator) ? [{ key: 'instances', label: labels.instances, icon: Server, href: '/panel/management', active: pathname === '/panel/management' }] : []),
   ]
 
   return (
@@ -252,24 +280,27 @@ export default function Navbar() {
                 <span className="font-bold text-lg tracking-tight">Cloud-Neutral</span>
               </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-surface-muted">
-                <span className="absolute w-2 h-2 bg-emerald-500 rounded-full"></span>
-              </div>
-              <div className="flex items-center p-1 rounded-full bg-surface-muted border border-surface-border">
-                <div className="p-1 px-2 rounded-full bg-primary text-white">
-                  <Monitor className="w-3.5 h-3.5" />
-                </div>
-                <div className="p-1 px-2 text-text-muted">
-                  <Sun className="w-3.5 h-3.5" />
-                </div>
-                <div className="p-1 px-2 text-text-muted">
-                  <Moon className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* Secondary Horizontal Scroll Menu - Only show on homepage as requested */}
+        {pathname === '/' && (
+          <div className="lg:hidden flex items-center gap-2 overflow-x-auto py-2 px-4 no-scrollbar border-t border-surface-border/50">
+            {mobileTabs.map(tab => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${tab.active
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'text-text-muted hover:text-text hover:bg-surface-muted border border-transparent'
+                  }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="hidden lg:block mx-auto w-full max-w-7xl px-6 sm:px-8">
           <div className="flex items-center gap-5 py-3">
@@ -290,7 +321,7 @@ export default function Navbar() {
                   <Link
                     key={link.key}
                     href={link.href}
-                    className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                    className="whitespace-nowrap text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                   >
                     {link.label}
                   </Link>
@@ -298,12 +329,12 @@ export default function Navbar() {
                 <Link
                   key={downloadLink.key}
                   href={downloadLink.href}
-                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                  className="whitespace-nowrap text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                 >
                   {downloadLink.label}
                 </Link>
                 <div className="group relative">
-                  <button className="flex items-center gap-1 text-sm opacity-80 transition hover:text-primary hover:opacity-100">
+                  <button className="flex items-center gap-1 whitespace-nowrap text-sm opacity-80 transition hover:text-primary hover:opacity-100">
                     <span>{labels.openSource}</span>
                     <svg
                       className="h-4 w-4 text-text-subtle transition group-hover:text-primary"
@@ -330,14 +361,14 @@ export default function Navbar() {
                 </div>
                 <Link
                   href="/about"
-                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                  className="whitespace-nowrap text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                 >
                   {labels.about}
                 </Link>
                 <Link
                   key={servicesLink.key}
                   href={servicesLink.href}
-                  className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                  className="whitespace-nowrap text-sm opacity-80 transition hover:text-primary hover:opacity-100"
                 >
                   {servicesLink.label}
                 </Link>
