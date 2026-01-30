@@ -588,6 +588,8 @@ export type Translation = {
     placeholder: string
     ask: string
   }
+  chat: string
+  homepage: string
 }
 
 export const translations: Record<'en' | 'zh', Translation> = {
@@ -744,6 +746,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       breadcrumbRoot: 'Download',
     },
+    chat: 'Chat',
+    homepage: 'Homepage',
     auth: {
       register: {
         badge: 'Create account',
@@ -1476,6 +1480,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       breadcrumbRoot: '下载',
     },
+    chat: 'Chat',
+    homepage: '首页',
     auth: {
       register: {
         badge: '立即注册',
