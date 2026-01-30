@@ -6,6 +6,9 @@ description = "Global allowlist"
 paths = [
     '''vendor/''',
     '''node_modules/''',
+    '''\.env''',
+    '''\.env\..*$''',
+    '''\.next/''',
     '''\.env\.example$''',
     '''\.env\.test$''',
     '''go\.sum$''',
