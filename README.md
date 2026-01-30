@@ -74,6 +74,12 @@ yarn dev
 yarn build
 ```
 
+## 认证配置 (Authentication Configuration)
+
+有关如何配置 GitHub 和 Google OIDC 认证的详细步骤，请参阅 [OIDC 认证指南](./docs/integrations/oidc-auth.md)。
+
+> For detailed steps on configuring GitHub and Google OIDC authentication, please refer to the [OIDC Authentication Guide](./docs/integrations/oidc-auth.md).
+
 ## 开发指南 (Development Guidelines)
 
 有关详细的编码标准、架构规则和 Agent 特定说明，请参阅 [AGENTS.md](./AGENTS.md)。

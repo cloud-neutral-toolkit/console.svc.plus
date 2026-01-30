@@ -57,17 +57,41 @@ function shouldUseSecureCookies(): boolean {
 const secureCookieBase = {
   httpOnly: true,
   secure: shouldUseSecureCookies(),
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const, // Change to lax to support cross-subdomain
   path: '/',
+}
+
+/**
+ * Resolves the cookie domain based on the current environment.
+ * If running on a .svc.plus subdomain, returns '.svc.plus' to allow SSO.
+ */
+function resolveCookieDomain(): string | undefined {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host.endsWith('.svc.plus')) {
+      return '.svc.plus'
+    }
+  }
+
+  // For server-side, check headers or environment
+  const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || process.env.APP_BASE_URL || ''
+  if (baseUrl.includes('.svc.plus')) {
+    return '.svc.plus'
+  }
+
+  return undefined
 }
 
 export function applySessionCookie(response: NextResponse, token: string, maxAge?: number) {
   const resolvedMaxAge = Number.isFinite(maxAge) && maxAge && maxAge > 0 ? Math.floor(maxAge) : SESSION_DEFAULT_MAX_AGE
+  const domain = resolveCookieDomain()
+
   response.cookies.set({
     name: SESSION_COOKIE_NAME,
     value: token,
     ...secureCookieBase,
     maxAge: resolvedMaxAge,
+    ...(domain ? { domain } : {}),
   })
 }
 
