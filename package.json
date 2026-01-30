@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",
+    "@floating-ui/dom": "^1.6.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -67,8 +68,7 @@
     "sanitize-html": "^2.13.0",
     "swr": "^2.3.0",
     "tailwind-merge": "^3.4.0",
-    "zustand": "^4.5.4",
-    "@floating-ui/dom": "^1.6.0"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
@@ -82,6 +82,7 @@
     "@types/node": "24.0.3",
     "@types/prismjs": "^1.26.3",
     "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.2.0",
     "@types/react-grid-layout": "^1.3.5",
     "@types/sanitize-html": "^2.16.0",
     "autoprefixer": "^10.4.16",
@@ -95,8 +96,7 @@
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2",
-    "vitest": "^4.0.7",
-    "@types/react-dom": "^18.2.0"
+    "vitest": "^4.0.7"
   },
   "resolutions": {
     "glob": "10.5.0",
