@@ -7,6 +7,7 @@ import {
   BookOpen,
   FileText,
   Layers,
+  LineChart,
   MessageSquare,
   PenSquare,
   Package,
@@ -40,19 +41,17 @@ const ServiceCard = ({
 
   const cardContent = (
     <div
-      className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${
-        isMaterial
+      className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${isMaterial
           ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
           : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
-      }`}
+        }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${
-            isMaterial
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${isMaterial
               ? "bg-primary/15 text-primary"
               : "bg-indigo-500/15 text-indigo-200"
-          }`}
+            }`}
         >
           <service.icon className="h-5 w-5" aria-hidden />
         </div>
@@ -70,11 +69,10 @@ const ServiceCard = ({
         </div>
       </div>
       <span
-        className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${
-          isMaterial
+        className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${isMaterial
             ? "text-primary group-hover:text-primary-hover"
             : "text-indigo-200 group-hover:text-white"
-        }`}
+          }`}
       >
         {isChinese ? "打开" : "Open"}
         <ArrowRight className="h-4 w-4" aria-hidden />
@@ -119,19 +117,17 @@ const PlaceholderCard = ({
 
   return (
     <div
-      className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${
-        isMaterial
+      className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${isMaterial
           ? "border-surface-border-strong bg-surface text-text-muted"
           : "border-white/15 bg-white/5 text-slate-300"
-      }`}
+        }`}
     >
       <div className="space-y-2">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${
-            isMaterial
+          className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${isMaterial
               ? "border-surface-border-strong text-text-subtle"
               : "border-white/20 text-slate-400"
-          }`}
+            }`}
         >
           <FileText className="h-4 w-4" aria-hidden />
         </div>
@@ -255,6 +251,16 @@ export default function ServicesPage() {
         : "Observability, alerts, and AI-assisted operations.",
       href: "/insight",
       icon: Activity,
+    },
+    {
+      key: "infra-monitor",
+      name: isChinese ? "基础设施监控" : "Infrastructure Monitoring",
+      description: isChinese
+        ? "监控您的云原生基础设施健康状态。"
+        : "Monitor the health of your cloud-native infrastructure.",
+      href: "https://infra.svc.plus/",
+      icon: LineChart,
+      external: true,
     },
     {
       key: "docs",
