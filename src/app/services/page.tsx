@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import {
-  Activity,
   ArrowRight,
-  BookOpen,
-  FileText,
-  Layers,
-  LineChart,
-  MessageSquare,
-  PenSquare,
-  Package,
+  BookText,
+  Bot,
+  Box,
+  CloudCog,
+  Database,
+  FileEdit,
+  Gauge,
+  MessageCircle,
 } from "lucide-react";
 import Footer from "../../components/Footer";
 import UnifiedNavigation from "../../components/UnifiedNavigation";
@@ -42,15 +42,15 @@ const ServiceCard = ({
   const cardContent = (
     <div
       className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${isMaterial
-        ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
-        : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
+          ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
+          : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
         }`}
     >
       <div className="flex items-start gap-3">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full ${isMaterial
-            ? "bg-primary/15 text-primary"
-            : "bg-indigo-500/15 text-indigo-200"
+              ? "bg-primary/15 text-primary"
+              : "bg-indigo-500/15 text-indigo-200"
             }`}
         >
           <service.icon className="h-5 w-5" aria-hidden />
@@ -70,8 +70,8 @@ const ServiceCard = ({
       </div>
       <span
         className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${isMaterial
-          ? "text-primary group-hover:text-primary-hover"
-          : "text-indigo-200 group-hover:text-white"
+            ? "text-primary group-hover:text-primary-hover"
+            : "text-indigo-200 group-hover:text-white"
           }`}
       >
         {isChinese ? "打开" : "Open"}
@@ -118,18 +118,18 @@ const PlaceholderCard = ({
   return (
     <div
       className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${isMaterial
-        ? "border-surface-border-strong bg-surface text-text-muted"
-        : "border-white/15 bg-white/5 text-slate-300"
+          ? "border-surface-border-strong bg-surface text-text-muted"
+          : "border-white/15 bg-white/5 text-slate-300"
         }`}
     >
       <div className="space-y-2">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${isMaterial
-            ? "border-surface-border-strong text-text-subtle"
-            : "border-white/20 text-slate-400"
+              ? "border-surface-border-strong text-text-subtle"
+              : "border-white/20 text-slate-400"
             }`}
         >
-          <FileText className="h-4 w-4" aria-hidden />
+          <Box className="h-4 w-4" aria-hidden />
         </div>
         <div
           className={`text-sm font-semibold ${isMaterial ? "text-heading" : "text-white/80"}`}
@@ -202,7 +202,7 @@ export default function ServicesPage() {
         ? "Markdown 发布与排版的在线编辑器。"
         : "Markdown publishing and layout editor.",
       href: "https://markdown-publisher.svc.plus",
-      icon: PenSquare,
+      icon: FileEdit,
       external: true,
     },
     {
@@ -212,7 +212,7 @@ export default function ServicesPage() {
         ? "一键将公众号内容转换为 Markdown。"
         : "Convert WeChat articles into Markdown.",
       href: "https://wechat-to-markdown.svc.plus",
-      icon: MessageSquare,
+      icon: MessageCircle,
       external: true,
     },
     {
@@ -222,7 +222,7 @@ export default function ServicesPage() {
         ? "智能网页阅读与分析服务。"
         : "Intelligent web page reading and analysis service.",
       href: "https://page-reading.svc.plus",
-      icon: FileText,
+      icon: Bot,
       external: true,
     },
     {
@@ -232,7 +232,7 @@ export default function ServicesPage() {
         ? "获取核心制品、镜像与下载资源。"
         : "Get core artifacts, mirrors, and downloads.",
       href: "/download",
-      icon: Package,
+      icon: Box,
     },
     {
       key: "cloudIac",
@@ -241,7 +241,7 @@ export default function ServicesPage() {
         ? "浏览云基础设施目录与自动化蓝图。"
         : "Browse cloud IaC catalog and automation blueprints.",
       href: "/cloud_iac",
-      icon: Layers,
+      icon: CloudCog,
     },
     {
       key: "insight",
@@ -250,7 +250,7 @@ export default function ServicesPage() {
         ? "进入观测、告警与智能协作控制面。"
         : "Observability, alerts, and AI-assisted operations.",
       href: "/insight",
-      icon: Activity,
+      icon: Gauge,
     },
     {
       key: "infra-monitor",
@@ -259,7 +259,7 @@ export default function ServicesPage() {
         ? "基于 Pigsty 4.0 (Apache-2.0) 构建的开源可观测性与监控平台。"
         : "Open-source observability based on Pigsty 4.0 (Apache-2.0).",
       href: "https://infra.svc.plus/",
-      icon: LineChart,
+      icon: Database,
       external: true,
     },
     {
@@ -269,7 +269,7 @@ export default function ServicesPage() {
         ? "阅读文档、方案与产品指南。"
         : "Read documentation, solutions, and guides.",
       href: "/docs",
-      icon: BookOpen,
+      icon: BookText,
     },
     {
       key: "moltbot",
