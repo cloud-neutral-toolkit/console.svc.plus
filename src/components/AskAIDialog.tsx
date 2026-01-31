@@ -327,10 +327,14 @@ export function AskAIDialog({
   return (
     <div
       className={cn(
-        'z-50 transition-all duration-300 ease-in-out',
-        isOverlay ? 'fixed inset-0' : 'relative h-full border-l border-surface-border'
+        'z-[60] transition-all duration-300 ease-in-out fixed right-0 bottom-0',
+        isOverlay ? 'left-0' : ''
       )}
-      style={{ width: isOverlay ? '100%' : '400px' }}
+      style={{
+        width: isOverlay ? '100%' : '400px',
+        top: 'var(--app-shell-nav-offset)',
+        height: 'calc(100vh - var(--app-shell-nav-offset))'
+      }}
     >
       {isOverlay && (
         <div
@@ -341,7 +345,7 @@ export function AskAIDialog({
       <div
         className={cn(
           'flex h-full w-full flex-col bg-background/80 backdrop-blur-md shadow-2xl transition-all duration-300',
-          isOverlay ? 'absolute inset-y-0 right-0 max-w-3xl sm:max-w-[520px]' : 'relative'
+          isOverlay ? 'absolute inset-y-0 right-0 max-w-3xl sm:max-w-[520px]' : 'relative ml-auto'
         )}
       >
         <div className="flex items-center justify-between gap-3 border-b px-4 py-3">

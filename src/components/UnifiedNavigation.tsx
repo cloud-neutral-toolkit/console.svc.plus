@@ -10,6 +10,7 @@ import LanguageToggle from "./LanguageToggle";
 import { AskAIButton } from "./AskAIButton";
 import ReleaseChannelSelector from "./ReleaseChannelSelector";
 import { useUserStore } from "@lib/userStore";
+import { useMoltbotStore } from "@lib/moltbotStore";
 import {
   createNavConfig,
   filterNavItems,
@@ -36,6 +37,7 @@ export default function UnifiedNavigation() {
   const navRef = useRef<HTMLElement | null>(null);
   const { language } = useLanguage();
   const user = useUserStore((state) => state.user);
+  const { setIsOpen, setMode } = useMoltbotStore();
   const nav = translations[language].nav;
   const accountCopy = nav.account;
   const accountInitial =
@@ -212,6 +214,26 @@ export default function UnifiedNavigation() {
                 {filteredMainNav.map((item) => {
                   const active = isActive(item);
                   if (item.showOn === "mobile") return null;
+                  if (item.key === 'chat') {
+                    return (
+                      <button
+                        key={item.key}
+                        onClick={() => {
+                          setIsOpen(true);
+                          setMode('overlay');
+                        }}
+                        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
+                          ? "bg-primary/10 text-primary"
+                          : "text-text-muted hover:text-text hover:bg-surface-muted"
+                          }`}
+                      >
+                        {item.icon && <item.icon className="w-4 h-4" />}
+                        <span className="text-[13px] tracking-tight">
+                          {getLabel(item.label, language)}
+                        </span>
+                      </button>
+                    )
+                  }
                   return (
                     <Link
                       key={item.key}
@@ -377,6 +399,29 @@ export default function UnifiedNavigation() {
                     {filteredMainNav.map((item) => {
                       const active = isActive(item);
                       if (item.showOn === "desktop") return null;
+                      if (item.key === 'chat') {
+                        return (
+                          <button
+                            key={item.key}
+                            onClick={() => {
+                              setIsOpen(true);
+                              setMode('overlay');
+                              setMenuOpen(false);
+                            }}
+                            className={`flex w-full items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
+                              ? "bg-primary/10 text-primary"
+                              : "text-text hover:bg-surface-muted"
+                              }`}
+                          >
+                            {item.icon && (
+                              <item.icon className="mr-3 h-5 w-5 opacity-70" />
+                            )}
+                            <span>
+                              {getLabel(item.label, language)}
+                            </span>
+                          </button>
+                        )
+                      }
                       return (
                         <Link
                           key={item.key}

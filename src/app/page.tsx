@@ -148,14 +148,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <AskAIDialog
-          open={isOpen}
-          onMinimize={() => {
-            setIsOpen(false);
-            setMinimized(true);
-          }}
-          onEnd={close}
-        />
+
       </div>
     </div>
   );
