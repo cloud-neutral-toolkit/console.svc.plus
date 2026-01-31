@@ -130,6 +130,7 @@ export type VlessNode = {
   transport?: VlessTransport
   path?: string
   mode?: string
+  flow?: string
 }
 
 export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNode): string | null {
@@ -146,15 +147,22 @@ export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNo
   const label = node?.name ?? defaultEndpoint.label
   const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
 
+  // Use node's flow if provided, otherwise default. For xhttp, flow is typically not used/empty.
+  const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
+
   const params = new URLSearchParams({
     type: transport,
     security: defaultEndpoint.security,
-    flow: defaultEndpoint.flow,
     encryption: defaultEndpoint.encryption,
     sni: serverName,
     fp: defaultEndpoint.fingerprint,
     allowInsecure: defaultEndpoint.allowInsecure ? '1' : '0',
   })
+
+  // Only add flow if it's not empty (e.g. for TCP vision)
+  if (flow) {
+    params.set('flow', flow)
+  }
 
   if (transport === 'xhttp') {
     params.set('path', node?.path ?? '/split')
@@ -180,6 +188,7 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
   const port = node?.port ?? defaultEndpoint.port
   const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
   const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
+  const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
 
   if (vnext) {
     vnext.address = address
@@ -187,6 +196,12 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
   }
   if (user) {
     user.id = uuid
+    if (flow) {
+      user.flow = flow
+    } else {
+      // Remove flow if not applicable (e.g. xhttp) or empty
+      delete (user as any).flow
+    }
   }
 
   if (outbound && outbound.streamSettings) {
