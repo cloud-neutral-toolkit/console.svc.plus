@@ -887,6 +887,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           link: 'Create an account',
         },
         alerts: {
+          submit: 'Sign in',
           registered: 'Registration complete. Sign in to continue.',
           missingCredentials: 'Enter your username or email and the authenticator code to continue.',
           invalidCredentials: 'Incorrect username or password. Please try again.',
@@ -900,7 +901,6 @@ export const translations: Record<'en' | 'zh', Translation> = {
             setupRequired: 'Multi-factor authentication must be completed before accessing the console.',
             challengeFailed: 'We could not prepare the multi-factor challenge. Try again later.',
           },
-          submit: 'Sign in',
         },
       },
       emailVerification: {
