@@ -64,7 +64,7 @@ export function AskAIDialog({
 
   function handleMaximize() {
     onEnd() // Close the dialog
-    const url = `/services/moltbot/chats${question ? `?q=${encodeURIComponent(question)}` : ''}`
+    const url = `/services/openclaw/chats${question ? `?q=${encodeURIComponent(question)}` : ''}`
     router.push(url)
   }
 
