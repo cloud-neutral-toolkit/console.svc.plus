@@ -72,9 +72,9 @@ export const createNavConfig = (
     {
       key: "chat",
       label: (lang) => (lang === "zh" ? "AI 助手" : "AI Assistant"),
-      href: "/services/moltbot/chats",
+      href: "/services/openclaw/chats",
       icon: MessageSquare,
-      active: (pathname) => pathname?.startsWith("/services/moltbot"),
+      active: (pathname) => pathname?.startsWith("/services/openclaw"),
       showOn: "both",
     },
     {
@@ -98,7 +98,7 @@ export const createNavConfig = (
       label: isChinese ? "更多服务" : "More Services",
       href: "/services",
       icon: Plus,
-      active: (pathname) => pathname.startsWith("/services") && !pathname.startsWith("/services/moltbot"),
+      active: (pathname) => pathname.startsWith("/services") && !pathname.startsWith("/services/openclaw"),
       showOn: "both",
     },
     {
