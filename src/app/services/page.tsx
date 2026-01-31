@@ -42,15 +42,15 @@ const ServiceCard = ({
   const cardContent = (
     <div
       className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${isMaterial
-          ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
-          : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
+        ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
+        : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
         }`}
     >
       <div className="flex items-start gap-3">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full ${isMaterial
-              ? "bg-primary/15 text-primary"
-              : "bg-indigo-500/15 text-indigo-200"
+            ? "bg-primary/15 text-primary"
+            : "bg-indigo-500/15 text-indigo-200"
             }`}
         >
           <service.icon className="h-5 w-5" aria-hidden />
@@ -70,8 +70,8 @@ const ServiceCard = ({
       </div>
       <span
         className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${isMaterial
-            ? "text-primary group-hover:text-primary-hover"
-            : "text-indigo-200 group-hover:text-white"
+          ? "text-primary group-hover:text-primary-hover"
+          : "text-indigo-200 group-hover:text-white"
           }`}
       >
         {isChinese ? "打开" : "Open"}
@@ -118,15 +118,15 @@ const PlaceholderCard = ({
   return (
     <div
       className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${isMaterial
-          ? "border-surface-border-strong bg-surface text-text-muted"
-          : "border-white/15 bg-white/5 text-slate-300"
+        ? "border-surface-border-strong bg-surface text-text-muted"
+        : "border-white/15 bg-white/5 text-slate-300"
         }`}
     >
       <div className="space-y-2">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${isMaterial
-              ? "border-surface-border-strong text-text-subtle"
-              : "border-white/20 text-slate-400"
+            ? "border-surface-border-strong text-text-subtle"
+            : "border-white/20 text-slate-400"
             }`}
         >
           <FileText className="h-4 w-4" aria-hidden />
@@ -256,8 +256,8 @@ export default function ServicesPage() {
       key: "infra-monitor",
       name: isChinese ? "基础设施监控" : "Infrastructure Monitoring",
       description: isChinese
-        ? "监控您的云原生基础设施健康状态。"
-        : "Monitor the health of your cloud-native infrastructure.",
+        ? "基于 Pigsty 4.0 (Apache-2.0) 构建的开源可观测性与监控平台。"
+        : "Open-source observability based on Pigsty 4.0 (Apache-2.0).",
       href: "https://infra.svc.plus/",
       icon: LineChart,
       external: true,
