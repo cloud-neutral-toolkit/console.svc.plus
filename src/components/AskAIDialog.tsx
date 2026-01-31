@@ -362,17 +362,7 @@ export function AskAIDialog({
             >
               <Maximize2 className="h-4 w-4" />
             </button>
-            <div className="mx-1 h-4 w-px bg-surface-border" />
-            <button
-              onClick={() => setMode(mode === 'overlay' ? 'right-sidebar' : 'overlay')}
-              className={cn(
-                "flex h-8 px-2 items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-surface-muted",
-                mode !== 'overlay' && "bg-primary/10 text-primary hover:bg-primary/20"
-              )}
-              title={mode === 'overlay' ? "Dock to Side" : "Float (Overlay)"}
-            >
-              {mode === 'overlay' ? "Dock" : "Float"}
-            </button>
+
             <button
               onClick={onMinimize}
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"

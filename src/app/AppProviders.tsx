@@ -10,17 +10,11 @@ import { cn } from '../lib/utils'
 export function AppProviders({ children }: { children: ReactNode }) {
   const { isOpen, isMinimized, setIsOpen, setMinimized, close, mode } = useMoltbotStore()
 
-  // Reserve space only in sidebar modes, not in overlay/float mode
-  const reserveSpace = isOpen && !isMinimized && mode !== 'overlay'
-
   return (
     <ThemeProvider>
       <LanguageProvider>
         <div className="flex flex-col min-h-screen">
-          <div className={cn(
-            "flex-1 flex flex-col relative w-full overflow-hidden transition-[padding] duration-300 ease-in-out",
-            reserveSpace ? "pr-[400px]" : ""
-          )}>
+          <div className="flex-1 flex flex-col relative w-full overflow-hidden">
             <div className="flex-1 flex flex-col w-full relative">
               {children}
             </div>
