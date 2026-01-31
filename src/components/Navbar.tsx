@@ -40,13 +40,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const isHiddenRoute = pathname
     ? [
-        "/login",
-        "/register",
-        "/xstream",
-        "/xcloudflow",
-        "/xscopehub",
-        "/blogs",
-      ].some((prefix) => pathname.startsWith(prefix))
+      "/login",
+      "/register",
+      "/xstream",
+      "/xcloudflow",
+      "/xscopehub",
+      "/blogs",
+    ].some((prefix) => pathname.startsWith(prefix))
     : false;
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedChannels, setSelectedChannels] = useState<ReleaseChannel[]>([
@@ -130,48 +130,48 @@ export default function Navbar() {
 
   const accountChildren: NavSubItem[] = user
     ? [
-        {
-          key: "userCenter",
-          label: accountCopy.userCenter,
-          href: "/panel",
-          togglePath: "/panel",
-        },
-        ...(user?.isAdmin || user?.isOperator
-          ? [
-              {
-                key: "management",
-                label: accountCopy.management,
-                href: "/panel/management",
-                togglePath: "/panel/management",
-              } satisfies NavSubItem,
-            ]
-          : []),
-        {
-          key: "logout",
-          label: accountCopy.logout,
-          href: "/logout",
-        },
-      ]
+      {
+        key: "userCenter",
+        label: accountCopy.userCenter,
+        href: "/panel",
+        togglePath: "/panel",
+      },
+      ...(user?.isAdmin || user?.isOperator
+        ? [
+          {
+            key: "management",
+            label: accountCopy.management,
+            href: "/panel/management",
+            togglePath: "/panel/management",
+          } satisfies NavSubItem,
+        ]
+        : []),
+      {
+        key: "logout",
+        label: accountCopy.logout,
+        href: "/logout",
+      },
+    ]
     : [
-        {
-          key: "register",
-          label: nav.account.register,
-          href: "/register",
-          togglePath: "/register",
-        },
-        {
-          key: "login",
-          label: nav.account.login,
-          href: "/login",
-          togglePath: "/login",
-        },
-        {
-          key: "demo",
-          label: nav.account.demo,
-          href: "/demo",
-          togglePath: "/demo",
-        },
-      ];
+      {
+        key: "register",
+        label: nav.account.register,
+        href: "/register",
+        togglePath: "/register",
+      },
+      {
+        key: "login",
+        label: nav.account.login,
+        href: "/login",
+        togglePath: "/login",
+      },
+      {
+        key: "demo",
+        label: nav.account.demo,
+        href: "/demo",
+        togglePath: "/demo",
+      },
+    ];
 
   const accountLabel = nav.account.title;
 
@@ -280,8 +280,8 @@ export default function Navbar() {
       key: "chat",
       label: labels.chat,
       icon: MessageSquare,
-      href: "/services/moltbot/chats",
-      active: pathname?.startsWith("/services/moltbot"),
+      href: "/services/openclaw/chats",
+      active: pathname?.startsWith("/services/openclaw"),
     },
     {
       key: "overview",
@@ -320,14 +320,14 @@ export default function Navbar() {
     },
     ...(user?.isAdmin || user?.isOperator
       ? [
-          {
-            key: "instances",
-            label: labels.instances,
-            icon: Server,
-            href: "/panel/management",
-            active: pathname === "/panel/management",
-          },
-        ]
+        {
+          key: "instances",
+          label: labels.instances,
+          icon: Server,
+          href: "/panel/management",
+          active: pathname === "/panel/management",
+        },
+      ]
       : []),
     {
       key: "about",
@@ -352,28 +352,28 @@ export default function Navbar() {
     },
     ...(!user
       ? [
-          {
-            key: "login",
-            label: nav.account.login,
-            icon: ({ className }: { className?: string }) => (
-              <svg
-                className={className}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                />
-              </svg>
-            ),
-            href: "/login",
-            active: pathname?.startsWith("/login"),
-          },
-        ]
+        {
+          key: "login",
+          label: nav.account.login,
+          icon: ({ className }: { className?: string }) => (
+            <svg
+              className={className}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+              />
+            </svg>
+          ),
+          href: "/login",
+          active: pathname?.startsWith("/login"),
+        },
+      ]
       : []),
   ];
 
@@ -422,11 +422,10 @@ export default function Navbar() {
               <Link
                 key={tab.key}
                 href={tab.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                  tab.active
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${tab.active
                     ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-text-muted hover:text-text hover:bg-surface-muted border border-transparent"
-                }`}
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -662,12 +661,11 @@ export default function Navbar() {
                 <div className="flex-1 p-4">
                   <div className="space-y-1">
                     <Link
-                      href="/services/moltbot/chats"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname?.startsWith("/services/moltbot")
+                      href="/services/openclaw/chats"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith("/services/openclaw")
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <MessageSquare className="mr-3 h-5 w-5" />
@@ -675,11 +673,10 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname === "/"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/"
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <Image
@@ -694,11 +691,10 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/panel"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname === "/panel"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/panel"
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <BarChart2 className="mr-3 h-5 w-5 opacity-70" />
@@ -706,11 +702,10 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/docs"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname?.startsWith("/docs")
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith("/docs")
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <svg
@@ -730,11 +725,10 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/about"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname === "/about"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/about"
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <svg
@@ -754,11 +748,10 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/services"
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        pathname === "/services"
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/services"
                           ? "bg-primary/10 text-primary"
                           : "text-text hover:bg-surface-muted"
-                      }`}
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <LinkIcon className="mr-3 h-5 w-5 opacity-70" />
@@ -767,11 +760,10 @@ export default function Navbar() {
                     {(user?.isAdmin || user?.isOperator) && (
                       <Link
                         href="/panel/management"
-                        className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                          pathname === "/panel/management"
+                        className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/panel/management"
                             ? "bg-primary/10 text-primary"
                             : "text-text hover:bg-surface-muted"
-                        }`}
+                          }`}
                         onClick={() => setMenuOpen(false)}
                       >
                         <Server className="mr-3 h-5 w-5 opacity-70" />
