@@ -19,13 +19,13 @@ export function Header() {
       </div>
       <div className="flex items-center gap-6">
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="#" className="text-sm font-medium text-text-muted hover:text-primary">
+          <Link href="/docs" className="text-sm font-medium text-text-muted hover:text-primary">
             Docs
           </Link>
-          <Link href="#" className="text-sm font-medium text-text-muted hover:text-primary">
+          <Link href="/docs" className="text-sm font-medium text-text-muted hover:text-primary">
             Support
           </Link>
-          <Link href="#" className="text-sm font-medium text-text-muted hover:text-primary">
+          <Link href="/docs/04-postgresql/changelog" className="text-sm font-medium text-text-muted hover:text-primary">
             Changelog
           </Link>
         </nav>
