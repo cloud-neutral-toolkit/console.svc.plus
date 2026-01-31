@@ -900,6 +900,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
             setupRequired: 'Multi-factor authentication must be completed before accessing the console.',
             challengeFailed: 'We could not prepare the multi-factor challenge. Try again later.',
           },
+          submit: 'Sign in',
         },
       },
       emailVerification: {
