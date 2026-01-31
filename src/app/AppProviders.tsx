@@ -10,11 +10,18 @@ import { cn } from '../lib/utils'
 export function AppProviders({ children }: { children: ReactNode }) {
   const { isOpen, isMinimized, setIsOpen, setMinimized, close, mode } = useMoltbotStore()
 
+  // Always reserve space if open and not minimized, since we only have "Float/Sidebar" mode now
+  // and user wants it to NEVER cover the homepage.
+  const reserveSpace = isOpen && !isMinimized
+
   return (
     <ThemeProvider>
       <LanguageProvider>
         <div className="flex flex-col min-h-screen">
-          <div className="flex-1 flex flex-col relative w-full overflow-hidden">
+          <div className={cn(
+            "flex-1 flex flex-col relative w-full overflow-hidden transition-[padding] duration-300 ease-in-out",
+            reserveSpace ? "pr-[400px]" : ""
+          )}>
             <div className="flex-1 flex flex-col w-full relative">
               {children}
             </div>

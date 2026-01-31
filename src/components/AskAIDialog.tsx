@@ -322,32 +322,16 @@ export function AskAIDialog({
 
   if (!open) return null
 
-  const isOverlay = mode === 'overlay'
-
   return (
     <div
-      className={cn(
-        'z-[60] transition-all duration-300 ease-in-out fixed right-0 bottom-0',
-        isOverlay ? 'left-0' : ''
-      )}
+      className="z-[60] transition-all duration-300 ease-in-out fixed right-0 bottom-0 border-l border-surface-border bg-background/80 backdrop-blur-md shadow-2xl"
       style={{
-        width: isOverlay ? '100%' : '400px',
+        width: '400px',
         top: 'var(--app-shell-nav-offset)',
         height: 'calc(100vh - var(--app-shell-nav-offset))'
       }}
     >
-      {isOverlay && (
-        <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={onMinimize}
-        />
-      )}
-      <div
-        className={cn(
-          'flex h-full w-full flex-col bg-background/80 backdrop-blur-md shadow-2xl transition-all duration-300',
-          isOverlay ? 'absolute inset-y-0 right-0 max-w-3xl sm:max-w-[520px]' : 'relative ml-auto'
-        )}
-      >
+      <div className="flex h-full w-full flex-col">
         <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-text-muted">{t.title}</p>
@@ -356,26 +340,24 @@ export function AskAIDialog({
           <div className="flex items-center gap-2 text-text-muted">
             <button
               onClick={handleMaximize}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
               title="Full Screen / Moltbot Workspace"
-              aria-label="Open in Moltbot Workspace"
             >
               <Maximize2 className="h-4 w-4" />
             </button>
-
+            <div className="h-4 w-px bg-surface-border mx-1" />
+            <span className="text-xs font-medium text-primary px-2">Float</span>
             <button
               onClick={onMinimize}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
               title="Minimize"
-              aria-label="Minimize chat"
             >
               <Minus className="h-4 w-4" />
             </button>
             <button
               onClick={handleEnd}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/60"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
               title="Close"
-              aria-label="End conversation"
             >
               <X className="h-4 w-4" />
             </button>
