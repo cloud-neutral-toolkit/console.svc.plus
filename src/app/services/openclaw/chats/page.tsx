@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function MoltbotPage() {
     return (
-        <div className="w-full h-[calc(100vh-64px)] p-4">
+        <div className="w-full h-[calc(100vh-var(--app-shell-nav-offset))] p-4">
             <Suspense fallback={<div className="flex h-full items-center justify-center">Loading chat...</div>}>
                 <MoltbotChat />
             </Suspense>

@@ -340,7 +340,7 @@ export function AskAIDialog({
       )}
       <div
         className={cn(
-          'flex h-full w-full flex-col bg-background shadow-2xl transition-all duration-300',
+          'flex h-full w-full flex-col bg-background/80 backdrop-blur-md shadow-2xl transition-all duration-300',
           isOverlay ? 'absolute inset-y-0 right-0 max-w-3xl sm:max-w-[520px]' : 'relative'
         )}
       >

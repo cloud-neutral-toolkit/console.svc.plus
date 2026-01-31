@@ -1324,7 +1324,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       opensource: 'We embrace open source. Human progress is made possible through continuous sharing and collaboration.',
     },
     askAI: {
-      title: 'Ask AI',
+      title: 'AI Assistant',
       subtitle: 'Do anything with Moltbot AI',
       placeholder: 'Type your question...',
       ask: 'Ask',
@@ -1482,7 +1482,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       breadcrumbRoot: '下载',
     },
-    chat: 'AI助手',
+
     homepage: '首页',
     auth: {
       register: {
@@ -1908,10 +1908,11 @@ export const translations: Record<'en' | 'zh', Translation> = {
       opensource: '我们拥抱开源。人类正是因为持续的共享与协作，才得以彼此成就。',
     },
     askAI: {
-      title: 'Ask AI',
+      title: 'AI 助手',
       subtitle: '使用 Moltbot AI 做任何事',
       placeholder: '输入您的指令或问题...',
       ask: '发送',
     },
+    chat: 'AI 助手',
   },
 }

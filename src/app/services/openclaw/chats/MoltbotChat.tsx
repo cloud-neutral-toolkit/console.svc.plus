@@ -9,6 +9,7 @@ import {
     Minus,
     X,
 } from 'lucide-react'
+import { cn } from '@lib/utils'
 import {
     HeroSection,
     NextStepsSection,
@@ -17,10 +18,15 @@ import {
 } from '@/app/page'
 import Footer from '@components/Footer'
 
+import { useLanguage } from '@/i18n/LanguageProvider'
+import { translations } from '@/i18n/translations'
+
 export type ChatLayoutMode = 'left' | 'right' | 'full'
 
 export function MoltbotChat() {
     const router = useRouter()
+    const { language } = useLanguage()
+    const t = translations[language].askAI
 
     // Layout state
     const [layout, setLayout] = useState<ChatLayoutMode>('full')
@@ -38,51 +44,54 @@ export function MoltbotChat() {
 
     // Render the chat interface (now an iframe)
     const renderChat = (isSidebar = false) => (
-        <div className={`flex flex-col rounded-2xl border border-emerald-500/30 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-300 h-full ${isSidebar ? 'w-[420px] shrink-0 z-10' : 'w-full'}`}>
+        <div className={cn(
+            "flex flex-col rounded-2xl border border-primary/20 bg-background/80 backdrop-blur-md shadow-2xl overflow-hidden transition-all duration-300 h-full",
+            isSidebar ? 'w-[420px] shrink-0 z-10' : 'w-full'
+        )}>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-emerald-500/20 px-6 py-4 bg-slate-900/50">
+            <div className="flex items-center justify-between border-b border-primary/10 px-6 py-4 bg-surface-muted/50">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                         <span className="text-xl">🦞</span>
                     </div>
                     <div>
-                        <p className="text-base font-semibold text-slate-100 leading-tight">AI Assistant</p>
-                        <p className="text-[10px] text-emerald-400/70 uppercase tracking-widest font-bold">Online</p>
+                        <p className="text-base font-semibold text-text leading-tight">{translations[language].chat}</p>
+                        <p className="text-[10px] text-primary/70 uppercase tracking-widest font-bold">Online</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1">
                     <button
                         onClick={(e) => { e.stopPropagation(); setLayout('left') }}
-                        className={`p-1.5 rounded-lg transition-colors ${layout === 'left' ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${layout === 'left' ? 'text-primary bg-primary/10' : 'text-text-muted hover:text-text hover:bg-surface-muted'}`}
                         title="Sidebar Left"
                     >
                         <PanelLeft className="size-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); setLayout('right') }}
-                        className={`p-1.5 rounded-lg transition-colors ${layout === 'right' ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${layout === 'right' ? 'text-primary bg-primary/10' : 'text-text-muted hover:text-text hover:bg-surface-muted'}`}
                         title="Sidebar Right"
                     >
                         <PanelRight className="size-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); setLayout('full') }}
-                        className={`p-1.5 rounded-lg transition-colors ${layout === 'full' ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${layout === 'full' ? 'text-primary bg-primary/10' : 'text-text-muted hover:text-text hover:bg-surface-muted'}`}
                         title="Fullscreen"
                     >
                         <Maximize2 className="size-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); router.push('/') }}
-                        className={`p-1.5 rounded-lg transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-800`}
+                        className={`p-1.5 rounded-lg transition-colors text-text-muted hover:text-text hover:bg-surface-muted`}
                         title="Minimize"
                     >
-                        <Minus className="size-4" />
+                        <PanelRight className="size-4 rotate-180" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); router.push('/') }}
-                        className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-1.5 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
                         title="Close"
                     >
                         <X className="size-4" />
