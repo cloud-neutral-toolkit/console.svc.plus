@@ -1619,6 +1619,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
             setupRequired: '请先完成多因素认证绑定后再访问控制台。',
             challengeFailed: '暂时无法发起多因素验证，请稍后再试。',
           },
+          submit: '立即登录',
         },
       },
       emailVerification: {
