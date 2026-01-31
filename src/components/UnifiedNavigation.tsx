@@ -220,7 +220,7 @@ export default function UnifiedNavigation() {
                         key={item.key}
                         onClick={() => {
                           setIsOpen(true);
-                          setMode('right-sidebar');
+                          setMode('overlay');
                         }}
                         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
                           ? "bg-primary/10 text-primary"
@@ -405,7 +405,7 @@ export default function UnifiedNavigation() {
                             key={item.key}
                             onClick={() => {
                               setIsOpen(true);
-                              setMode('right-sidebar');
+                              setMode('overlay');
                               setMenuOpen(false);
                             }}
                             className={`flex w-full items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
