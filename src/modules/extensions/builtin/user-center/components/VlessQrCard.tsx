@@ -62,7 +62,8 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
       port: isXhttp ? 443 : 1443, // Japan node specific defaults if not provided by backend
       server_name: rawNode.server_name || rawNode.address,
       path: isXhttp ? (rawNode.path || '/split') : undefined,
-      mode: isXhttp ? (rawNode.mode || 'auto') : undefined
+      mode: isXhttp ? (rawNode.mode || 'auto') : undefined,
+      flow: rawNode.flow
     }
   }, [rawNode, preferredTransport])
 
@@ -228,8 +229,8 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
               type="button"
               onClick={() => setPreferredTransport(transport)}
               className={`rounded-md px-3 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors ${preferredTransport === transport
-                  ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
-                  : 'bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] hover:bg-[var(--color-surface-border)]'
+                ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                : 'bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] hover:bg-[var(--color-surface-border)]'
                 }`}
             >
               {transport}
