@@ -28,10 +28,8 @@ const mockSeries: PrometheusResponse[] = [
 ]
 
 export async function fetchPromQL(query: string) {
-  void query
-  // Replace with API call when backend is ready.
-  await new Promise(resolve => setTimeout(resolve, 300))
-  return mockSeries
+  const adapter = createPrometheusAdapter()
+  return adapter.queryRange(query)
 }
 
 export function createPrometheusAdapter(baseUrl?: string, token?: string) {
@@ -39,15 +37,13 @@ export function createPrometheusAdapter(baseUrl?: string, token?: string) {
   return {
     async queryRange(query: string, params?: Record<string, string>) {
       void params
-      try {
-        return await client.request<PrometheusResponse[]>(`/prometheus/query`, {
-          method: 'POST',
-          body: JSON.stringify({ query })
-        })
-      } catch (err) {
-        console.warn('Prometheus adapter fallback to mock', err)
-        return fetchPromQL(query)
-      }
+      return await client.request<PrometheusResponse[]>(`/prometheus/api/v1/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ query }).toString()
+      })
     }
   }
 }

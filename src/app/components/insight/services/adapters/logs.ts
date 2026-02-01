@@ -20,9 +20,8 @@ const mockLogs: LogEntry[] = Array.from({ length: 25 }).map((_, idx) => ({
 }))
 
 export async function fetchLogs(query: string) {
-  void query
-  await new Promise(resolve => setTimeout(resolve, 200))
-  return mockLogs
+  const adapter = createLogsAdapter()
+  return adapter.queryLogs(query)
 }
 
 export function createLogsAdapter(baseUrl?: string, token?: string) {
@@ -30,15 +29,10 @@ export function createLogsAdapter(baseUrl?: string, token?: string) {
   return {
     async queryLogs(query: string, params?: Record<string, string>) {
       void params
-      try {
-        return await client.request<LogEntry[]>(`/logs/query`, {
-          method: 'POST',
-          body: JSON.stringify({ query })
-        })
-      } catch (err) {
-        console.warn('Logs adapter fallback to mock', err)
-        return fetchLogs(query)
-      }
+      return await client.request<LogEntry[]>(`/logs/query`, {
+        method: 'POST',
+        body: JSON.stringify({ query })
+      })
     }
   }
 }
