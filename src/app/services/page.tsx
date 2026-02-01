@@ -11,6 +11,7 @@ import {
   FileEdit,
   Gauge,
   MessageCircle,
+  Network,
 } from "lucide-react";
 import Footer from "../../components/Footer";
 import UnifiedNavigation from "../../components/UnifiedNavigation";
@@ -260,6 +261,16 @@ export default function ServicesPage() {
         : "Open-source observability based on Pigsty 4.0 (Apache-2.0).",
       href: "https://infra.svc.plus/",
       icon: Database,
+      external: true,
+    },
+    {
+      key: "ai-gateway",
+      name: isChinese ? "AI 网关" : "AI Gateway",
+      description: isChinese
+        ? "Litellm 驱动的 LLM API 统一管理与路由。"
+        : "Unified LLM API management and routing powered by Litellm.",
+      href: "https://ai-gateway.svc.plus",
+      icon: Network,
       external: true,
     },
     {
