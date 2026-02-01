@@ -246,22 +246,12 @@ export default function ServicesPage() {
     },
     {
       key: "insight",
-      name: isChinese ? "Insight 工作台" : "Insight Workbench",
+      name: isChinese ? "监控与观测" : "Monitoring & Observability",
       description: isChinese
-        ? "进入观测、告警与智能协作控制面。"
-        : "Observability, alerts, and AI-assisted operations.",
+        ? "基础设施、数据库与应用系统的全栈可观测性工作台。"
+        : "Full-stack observability workbench for infrastructure, databases, and apps.",
       href: "/insight",
       icon: Gauge,
-    },
-    {
-      key: "infra-monitor",
-      name: isChinese ? "基础设施监控" : "Infrastructure Monitoring",
-      description: isChinese
-        ? "基于 Pigsty 4.0 (Apache-2.0) 构建的开源可观测性与监控平台。"
-        : "Open-source observability based on Pigsty 4.0 (Apache-2.0).",
-      href: "https://infra.svc.plus/",
-      icon: Database,
-      external: true,
     },
     {
       key: "ai-gateway",
