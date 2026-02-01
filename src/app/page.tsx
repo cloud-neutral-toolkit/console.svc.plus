@@ -118,11 +118,38 @@ const shortcuts = [
   },
 ];
 
-import { redirect } from "next/navigation";
-
 export default function HomePage() {
-  redirect("/insight");
-  return null;
+  const { mode, isOpen, setIsOpen, setMinimized, close } = useMoltbotStore();
+  const isSidebar = mode !== 'overlay' && isOpen;
+
+  return (
+    <div className="min-h-screen bg-background text-text transition-colors duration-150 flex flex-col">
+      <UnifiedNavigation />
+
+      <div className={cn(
+        "flex flex-1 relative overflow-hidden",
+        mode === 'left-sidebar' && "flex-row-reverse"
+      )}>
+        <div className="flex-1 overflow-y-auto relative">
+          <div className="relative mx-auto max-w-7xl px-6 pb-20">
+            <div
+              className="absolute inset-0 bg-gradient-app-from opacity-20 pointer-events-none"
+              aria-hidden
+            />
+            <main className="relative space-y-12 pt-10">
+              <HeroSection />
+              <NextStepsSection />
+              <StatsSection />
+              <ShortcutsSection />
+            </main>
+            <div className="relative">
+              <Footer />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function HeroSection() {
