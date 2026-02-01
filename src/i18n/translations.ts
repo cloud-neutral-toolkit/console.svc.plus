@@ -1309,20 +1309,45 @@ export const translations: Record<'en' | 'zh', Translation> = {
       title: 'About the Project',
       subtitle: 'This platform is a comprehensive AI service integration system maintained by independent developers. We are dedicated to providing a stable, high-performance AI interaction experience through cutting-edge observability technologies and highly efficient architectural design.',
       disclaimer: 'Service Sources: This site integrates premium third-party AI capabilities, including NVIDIA API, Alibaba Cloud Tongyi Qianwen, OpenAI, and Google Gemini.\n\nData Security: We prioritize user privacy. While data is processed via third-party AI platforms, we implement strict encryption protocols across our entire transmission pipeline. Nonetheless, we advise users against inputting highly sensitive or confidential information.\n\nNon-Official Endorsement: All platform names mentioned (e.g., NVIDIA, Google, OpenAI) are used solely for technical acknowledgement to describe our underlying technology stack. These mentions do not imply any official partnership or endorsement.',
-      acknowledgments: 'Progress is built upon the shoulders of giants. We would like to thank the following platforms for providing the essential infrastructure and computational power that drives this project: Models & Computing: ChatGPT (OpenAI), Google AI (Gemini), NVIDIA NIM. Infrastructure: GitHub, Cloudflare, Vercel. Backend Support: Google Cloud Run, VictoriaMetrics (Observability Architecture).',
-      toolsTitle: 'Acknowledged tools and platforms used (in no particular order):',
-      toolsNote: '(The platform names above are listed for technical acknowledgment only and do not imply any official partnership or endorsement.)',
-      tools: [
-        { label: 'ChatGPT (OpenAI)', url: 'https://openai.com' },
-        { label: 'Google Gemini', url: 'https://gemini.google.com' },
-        { label: 'NVIDIA NIM', url: 'https://build.nvidia.com' },
-        { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
-        { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
-        { label: 'Vercel', url: 'https://vercel.com' },
-        { label: 'Google Cloud Run', url: 'https://cloud.google.com' },
-        { label: 'VictoriaMetrics', url: 'https://victoriametrics.com' },
+      acknowledgmentsTitle: 'Acknowledgements & Drivers',
+      acknowledgments: 'Progress is built upon the shoulders of giants. We would like to express our deepest gratitude to the following platforms and open-source projects for providing the infrastructure, computational power, and architectural inspiration that drive this project:',
+      sections: [
+        {
+          title: 'Core Models & Computing',
+          content: 'ChatGPT (OpenAI) / Google AI (Gemini) / NVIDIA NIM'
+        },
+        {
+          title: 'Upstream Open Source Projects & Services',
+          items: [
+            {
+              label: 'Pigsty 4.0',
+              description: 'Special thanks to the outstanding PostgreSQL distribution initiated by Rhodium Feng. This project references and adopts its advanced Observability Architecture and Database Governance Best Practices.',
+              url: 'https://pigsty.io'
+            },
+            {
+              label: 'VictoriaMetrics / VictoriaLogs',
+              description: 'Providing high-performance support for metrics and logs storage.',
+              url: 'https://victoriametrics.com'
+            },
+            {
+              label: 'Grafana / Prometheus',
+              description: 'Core components used for building our visual monitoring dashboards.',
+              url: 'https://grafana.com'
+            }
+          ]
+        },
+        {
+          title: 'Cloud Infrastructure',
+          content: 'GitHub / Cloudflare / Vercel / Google Cloud Run',
+          links: [
+            { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+            { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
+            { label: 'Vercel', url: 'https://vercel.com' },
+            { label: 'Google Cloud Run', url: 'https://cloud.google.com' }
+          ]
+        }
       ],
-      opensource: 'We believe in the power of Open Source. The advancement of human civilization relies on continuous knowledge sharing and technical collaboration. This project remains committed to embracing the open-source ecosystem and growing together with the developer community.',
+      opensource: 'We believe in the power of Open Source. The advancement of human civilization relies on continuous knowledge sharing and technical collaboration. By leveraging these exceptional open-source tools, we have been able to build a more robust system and remain committed to giving back to the community.',
     },
     askAI: {
       title: 'AI Assistant',
@@ -1892,22 +1917,47 @@ export const translations: Record<'en' | 'zh', Translation> = {
     },
     about: {
       title: '关于本项目',
-      subtitle: '本平台是由独立开发者维护的综合性 AI 服务集成系统。我们致力于通过前沿的观测技术与高效的架构设计，为用户提供稳定、流畅的 AI 交互体验。',
+      subtitle: '本平台是由独立开发者维护的综合性 AI 服务集成系统。我们致力于通过前沿的可观测技术与高效的架构设计，为用户提供稳定、流畅的 AI 交互体验。',
       disclaimer: '服务来源：本站集成了包括 NVIDIA API、阿里云通义千问、OpenAI 及 Google Gemini 在内的多种顶级第三方 AI 能力。\n\n数据安全：我们高度重视用户隐私。虽然数据会经过第三方 AI 平台处理，但我们承诺在传输链路中采取严格的加密措施。即便如此，仍建议用户避免输入极其敏感的机密信息。\n\n非官方背书：本站提及的所有平台名称（如 NVIDIA, Google 等）仅用于技术致谢，说明系统底层所采用的技术栈，不代表官方合作或背书。',
-      acknowledgments: '技术的进步源于巨人的肩膀。感谢以下平台为本项目提供的基础设施与算力支持： 模型与算力：ChatGPT (OpenAI), Google AI (Gemini), NVIDIA NIM. 基础设施：GitHub, Cloudflare, Vercel. 后端支撑：Google Cloud Run, VictoriaMetrics (可观测性架构)。',
-      toolsTitle: '致谢与使用的工具与平台（不分先后）：',
-      toolsNote: '以上平台名称仅用于技术致谢，不代表任何官方合作或背书！',
-      tools: [
-        { label: 'ChatGPT (OpenAI)', url: 'https://openai.com' },
-        { label: 'Google Gemini', url: 'https://gemini.google.com' },
-        { label: 'NVIDIA NIM', url: 'https://build.nvidia.com' },
-        { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
-        { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
-        { label: 'Vercel', url: 'https://vercel.com' },
-        { label: 'Google Cloud Run', url: 'https://cloud.google.com' },
-        { label: 'VictoriaMetrics', url: 'https://victoriametrics.com' },
+      acknowledgmentsTitle: '致谢与驱动力 (Acknowledgements)',
+      acknowledgments: '技术的进步源于巨人的肩膀。感谢以下平台与开源项目为本项目提供的基础设施、算力支持与架构灵感：',
+      sections: [
+        {
+          title: '核心模型与算力',
+          content: 'ChatGPT (OpenAI) / Google AI (Gemini) / NVIDIA NIM'
+        },
+        {
+          title: '上游开源项目与服务 (Upstream OSS & Services)',
+          items: [
+            {
+              label: 'Pigsty 4.0',
+              description: '感谢冯若航老师发起的这一杰出的 PostgreSQL 发行版，本项目参考并采用了其先进的 可观测性架构 与 数据库治理最佳实践。',
+              url: 'https://pigsty.io'
+            },
+            {
+              label: 'VictoriaMetrics / VictoriaLogs',
+              description: '提供高性能的指标与日志存储支持。',
+              url: 'https://victoriametrics.com'
+            },
+            {
+              label: 'Grafana / Prometheus',
+              description: '构建可视化监控面板的核心组件。',
+              url: 'https://grafana.com'
+            }
+          ]
+        },
+        {
+          title: '云基础设施',
+          content: 'GitHub / Cloudflare / Vercel / Google Cloud Run',
+          links: [
+            { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+            { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
+            { label: 'Vercel', url: 'https://vercel.com' },
+            { label: 'Google Cloud Run', url: 'https://cloud.google.com' }
+          ]
+        }
       ],
-      opensource: '我们坚信开源的力量。 人类文明的进步离不开持续的知识共享与技术协作，本项目也将持续拥抱开源生态，与开发者共同成长。',
+      opensource: '我们坚信开源的力量。 人类文明的进步离不开持续的知识共享与技术协作。通过引用这些优秀的开源工具，我们得以构建出更加稳健的系统，并将持续回馈社区。',
     },
     askAI: {
       title: 'AI 助手',
