@@ -44,9 +44,8 @@ const mockTrace: TraceSpan[] = [
 ]
 
 export async function fetchTraces(query: string) {
-  void query
-  await new Promise(resolve => setTimeout(resolve, 250))
-  return mockTrace
+  const adapter = createTracesAdapter()
+  return adapter.queryTraces(query)
 }
 
 export function createTracesAdapter(baseUrl?: string, token?: string) {
@@ -54,15 +53,10 @@ export function createTracesAdapter(baseUrl?: string, token?: string) {
   return {
     async queryTraces(query: string, params?: Record<string, string>) {
       void params
-      try {
-        return await client.request<TraceSpan[]>(`/traces/query`, {
-          method: 'POST',
-          body: JSON.stringify({ query })
-        })
-      } catch (err) {
-        console.warn('Traces adapter fallback to mock', err)
-        return fetchTraces(query)
-      }
+      return await client.request<TraceSpan[]>(`/traces/query`, {
+        method: 'POST',
+        body: JSON.stringify({ query })
+      })
     }
   }
 }
