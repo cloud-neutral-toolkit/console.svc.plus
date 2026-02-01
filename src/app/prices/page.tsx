@@ -3,7 +3,7 @@
 import React from "react";
 import UnifiedNavigation from "../../components/UnifiedNavigation";
 import Footer from "../../components/Footer";
-import { Check, Shield, Zap } from "lucide-react";
+import { Check, Shield } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "../../i18n/LanguageProvider";
 
@@ -18,35 +18,60 @@ export default function PricesPage() {
             : "Choose the plan that's right for you and your team.",
         plans: [
             {
-                name: isChinese ? "开源版" : "Open Source",
+                name: isChinese ? "开源版 (Self-Host)" : "Open Source (Self-Host)",
                 price: isChinese ? "免费" : "Free",
-                description: isChinese ? "适合个人开发者和爱好者" : "Perfect for hobbyists and side projects",
+                period: isChinese ? "/永久" : "/forever",
+                description: isChinese ? "适合个人开发者，完全自主掌控" : "For individual developers, fully self-controlled",
                 features: isChinese
-                    ? ["无限公共项目", "基础 CI/CD", "社区支持", "单用户"]
-                    : ["Unlimited public projects", "Basic CI/CD", "Community support", "Single user"],
-                button: isChinese ? "开始使用" : "Get Started",
+                    ? ["全套开源代码 (Apache 2.0)", "私有化部署 (Self-Hosted)", "基础 CI/CD 模板", "社区技术支持"]
+                    : ["Full Open Source Code (Apache 2.0)", "Private Deployment (Self-Hosted)", "Basic CI/CD Templates", "Community Support"],
+                button: isChinese ? "下载" : "Download",
                 highlight: false,
                 href: "/download"
             },
             {
-                name: isChinese ? "专业版" : "Pro",
-                price: "$19",
-                period: isChinese ? "/月" : "/mo",
-                description: isChinese ? "适合专业开发者和通过 Stripe 验证的用户" : "For professional developers and Stripe verified users",
+                name: isChinese ? "云端共享 (Cloud)" : "Cloud Shared",
+                price: "$1.9",
+                period: isChinese ? "起 / 月" : "/mo",
+                description: isChinese ? "零运维的云原生体验" : "Zero-ops cloud native experience",
                 features: isChinese
-                    ? ["包含开源版所有功能", "优先支持", "高级 CI/CD", "Stripe 身份验证", "私有项目"]
-                    : ["All Open Source features", "Priority support", "Advanced CI/CD", "Stripe Identity Verification", "Private projects"],
-                button: isChinese ? "Stripe 注册验证" : "Verify with Stripe",
-                highlight: true,
-                href: "https://stripe.com" // Placeholder for Stripe flow
+                    ? ["共享资源起步", "零运维体验", "适合初学者"]
+                    : ["Shared resources start", "Zero-ops experience", "For beginners"],
+                button: isChinese ? "开始使用" : "Get Started",
+                highlight: false,
+                href: "/register"
             },
             {
-                name: isChinese ? "企业版" : "Enterprise",
-                price: isChinese ? "定制" : "Custom",
-                description: isChinese ? "适合大型团队和组织" : "For large teams and organizations",
+                name: isChinese ? "基础版 (Basic)" : "Basic",
+                price: "$9.9",
+                period: isChinese ? "/ 月" : "/mo",
+                description: isChinese ? "托管式共享节点，省心省力" : "Managed shared nodes, hassle-free",
                 features: isChinese
-                    ? ["包含专业版所有功能", "SSO 单点登录", "SLA 保证", "专属以客户经理", "本地部署支持"]
-                    : ["All Pro features", "SSO & SAML", "SLA Guarantee", "Dedicated account manager", "On-premise deployment"],
+                    ? ["托管式共享节点", "公开项目托管", "基础资源配额"]
+                    : ["Managed shared nodes", "Public project hosting", "Basic resource quota"],
+                button: isChinese ? "选择计划" : "Choose Plan",
+                highlight: false,
+                href: "/register"
+            },
+            {
+                name: isChinese ? "专业版 (Pro)" : "Pro",
+                price: "$19.9",
+                period: isChinese ? "/ 月" : "/mo",
+                description: isChinese ? "专为专业开发者打造" : "Built for professional developers",
+                features: isChinese
+                    ? ["优先技术支持", "专属 AI 编程助手", "独享高性能节点", "全链路可信访问环境"]
+                    : ["Priority Support", "Exclusive AI Coding Assistant", "Dedicated High-Performance Nodes", "Full-link Trusted Access Environment"],
+                button: isChinese ? "Stripe 注册验证" : "Verify with Stripe",
+                highlight: true,
+                href: "https://stripe.com"
+            },
+            {
+                name: isChinese ? "定制版本" : "Custom Version",
+                price: isChinese ? "定制" : "Custom",
+                description: isChinese ? "量身定制的企业级解决方案" : "Tailored enterprise solutions",
+                features: isChinese
+                    ? ["SLA 保证", "专属 1V1 支持", "SSO 单点登录", "量身定制解决方案", "包含专业版所有功能"]
+                    : ["SLA Guarantee", "Exclusive 1V1 Support", "SSO Single Sign-On", "Tailored Solutions", "Includes all Pro features"],
                 button: isChinese ? "联系我们" : "Contact Sales",
                 highlight: false,
                 href: "/support"
@@ -74,12 +99,12 @@ export default function PricesPage() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
                         {content.plans.map((plan, index) => (
                             <div
                                 key={index}
                                 className={`
-                  relative rounded-2xl p-8 border 
+                  relative rounded-2xl p-6 border 
                   ${plan.highlight
                                         ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10 transform hover:-translate-y-1 transition-all duration-300'
                                         : 'border-surface-border bg-surface hover:border-surface-border-hover'
@@ -88,27 +113,27 @@ export default function PricesPage() {
                 `}
                             >
                                 {plan.highlight && (
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                        {isChinese ? "最受欢迎" : "Most Popular"}
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                                        {isChinese ? "推荐" : "Recommended"}
                                     </div>
                                 )}
 
-                                <div className="mb-8">
-                                    <h3 className="text-lg font-semibold text-text-muted mb-2">{plan.name}</h3>
+                                <div className="mb-6">
+                                    <h3 className="text-base font-semibold text-text-muted mb-2 truncate">{plan.name}</h3>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-4xl font-bold text-heading">{plan.price}</span>
-                                        {plan.period && <span className="text-text-muted">{plan.period}</span>}
+                                        <span className="text-3xl font-bold text-heading">{plan.price}</span>
+                                        {plan.period && <span className="text-xs text-text-muted">{plan.period}</span>}
                                     </div>
-                                    <p className="text-sm text-text-subtle mt-4">{plan.description}</p>
+                                    <p className="text-xs text-text-subtle mt-3 line-clamp-2 min-h-[2.5em]">{plan.description}</p>
                                 </div>
 
-                                <div className="flex-1 space-y-4 mb-8">
+                                <div className="flex-1 space-y-3 mb-6">
                                     {plan.features.map((feature, i) => (
-                                        <div key={i} className="flex items-start gap-3">
+                                        <div key={i} className="flex items-start gap-2">
                                             <div className={`mt-0.5 rounded-full p-0.5 ${plan.highlight ? 'bg-primary/20 text-primary' : 'bg-surface-muted text-text-muted'}`}>
-                                                <Check size={14} />
+                                                <Check size={12} />
                                             </div>
-                                            <span className="text-sm text-text-muted">{feature}</span>
+                                            <span className="text-xs text-text-muted leading-tight">{feature}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -116,7 +141,7 @@ export default function PricesPage() {
                                 <Link
                                     href={plan.href}
                                     className={`
-                    w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-colors
+                    w-full py-2 rounded-lg text-xs font-semibold text-center transition-colors
                     ${plan.highlight
                                             ? 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/25'
                                             : 'bg-surface-muted text-text hover:bg-surface-hover border border-surface-border'
