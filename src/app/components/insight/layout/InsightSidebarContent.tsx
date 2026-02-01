@@ -58,7 +58,7 @@ export function InsightSidebarContent({
             <SidebarHeader className={`flex items-start justify-between mb-7 ${collapsed ? 'flex-col items-center gap-4' : ''}`}>
                 {!collapsed && (
                     <div className="space-y-2">
-                        <h1 className="text-lg font-semibold text-slate-100">Insight Workbench</h1>
+                        <h1 className="text-lg font-semibold text-slate-100">Observability Workbench</h1>
                         <p className="text-sm text-slate-400">
                             Navigate topology, run cross-domain queries and keep SLOs on track.
                         </p>
@@ -94,8 +94,8 @@ export function InsightSidebarContent({
                                 <button
                                     onClick={() => onSelectSection(section.id)}
                                     className={`w-full rounded-xl transition ${collapsed
-                                            ? 'flex flex-col items-center gap-2 px-2 py-3'
-                                            : 'flex items-center gap-3 px-3 py-2 text-left'
+                                        ? 'flex flex-col items-center gap-2 px-2 py-3'
+                                        : 'flex items-center gap-3 px-3 py-2 text-left'
                                         } ${active
                                             ? 'bg-slate-800 text-slate-100 shadow-inner shadow-slate-800/60'
                                             : 'text-slate-300 hover:bg-slate-800/60'
@@ -128,8 +128,8 @@ export function InsightSidebarContent({
                                                         <button
                                                             key={option.id}
                                                             className={`flex flex-col rounded-xl border px-3 py-2 text-left transition ${activeMode
-                                                                    ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-200'
-                                                                    : 'border-slate-800 bg-slate-900/70 text-slate-200 hover:border-slate-700'
+                                                                ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-200'
+                                                                : 'border-slate-800 bg-slate-900/70 text-slate-200 hover:border-slate-700'
                                                                 }`}
                                                             onClick={() => onTopologyChange(option.id)}
                                                             type="button"
@@ -161,8 +161,8 @@ export function InsightSidebarContent({
                                                         <button
                                                             key={option.id}
                                                             className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${activeLanguage
-                                                                    ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-200'
-                                                                    : 'border-slate-800 bg-slate-900/70 text-slate-200 hover:border-slate-700'
+                                                                ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-200'
+                                                                : 'border-slate-800 bg-slate-900/70 text-slate-200 hover:border-slate-700'
                                                                 }`}
                                                             onClick={() => onToggleLanguage(option.id)}
                                                             type="button"
