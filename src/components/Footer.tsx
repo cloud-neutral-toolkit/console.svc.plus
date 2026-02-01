@@ -17,7 +17,7 @@ export default function Footer() {
     {
       label: "GitHub",
       icon: Github,
-      href: "https://github.com/cloud-neutrl-toolkit",
+      href: "https://github.com/Cloud-Neutral-Toolkit",
     },
     { label: "X", icon: Twitter, href: "https://x.com/Cloud_Neutral" },
     {
