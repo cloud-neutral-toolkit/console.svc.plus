@@ -32,7 +32,7 @@ export default function SupportPage() {
                 description: isChinese
                     ? "与其他开发者交流，分享经验和解决问题。"
                     : "Connect with other developers, share experiences, and solve problems.",
-                link: "https://github.com/Cloud-Neutral-Toolkit/console.svc.plus/discussions",
+                link: "https://github.com/orgs/cloud-neutral-toolkit/discussions",
                 linkText: isChinese ? "加入讨论" : "Join Discussions"
             },
             {
