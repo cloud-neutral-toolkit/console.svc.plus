@@ -19,7 +19,7 @@ import { useLanguage } from "../../i18n/LanguageProvider";
 import { useViewStore } from "../../components/theme/viewStore";
 import Material3Layout from "./Material3Layout";
 
-const placeholderCount = 3;
+const placeholderCount = 1;
 type ServiceCardData = {
   key: string;
   name: string;
