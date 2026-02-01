@@ -17,6 +17,8 @@ import {
   FileText,
   Book,
   Info,
+  CreditCard,
+  LifeBuoy,
 } from "lucide-react";
 
 export type ReleaseChannel = "stable" | "beta" | "develop";
@@ -99,6 +101,22 @@ export const createNavConfig = (
       href: "/services",
       icon: Plus,
       active: (pathname) => pathname.startsWith("/services") && !pathname.startsWith("/services/openclaw"),
+      showOn: "both",
+    },
+    {
+      key: "prices",
+      label: isChinese ? "价格" : "Prices",
+      href: "/prices",
+      icon: CreditCard,
+      active: (pathname) => pathname === "/prices",
+      showOn: "both",
+    },
+    {
+      key: "support",
+      label: isChinese ? "支持" : "Support",
+      href: "/support",
+      icon: LifeBuoy,
+      active: (pathname) => pathname === "/support",
       showOn: "both",
     },
     {

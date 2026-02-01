@@ -1,5 +1,7 @@
 "use client";
 import { Github, Linkedin, Moon, Sun, Twitter } from "lucide-react";
+import Link from 'next/link';
+import { useLanguage } from "../i18n/LanguageProvider";
 
 import { useThemeStore } from "@components/theme";
 import { useViewStore } from "./theme/viewStore";
@@ -8,6 +10,8 @@ export default function Footer() {
   const isDark = useThemeStore((state) => state.isDark);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { view, setView } = useViewStore();
+  const { language } = useLanguage();
+  const isChinese = language === "zh";
 
   const socials = [
     {
@@ -34,7 +38,19 @@ export default function Footer() {
   return (
     <footer className="mt-12 flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-slate-300">
       <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-between">
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex gap-4 order-2 sm:order-1">
+          <Link href="/terms" className="hover:text-white transition-colors">
+            {isChinese ? "服务条款" : "Terms of Service"}
+          </Link>
+          <Link href="/privacy" className="hover:text-white transition-colors">
+            {isChinese ? "隐私政策" : "Privacy Policy"}
+          </Link>
+          <Link href="/support" className="hover:text-white transition-colors">
+            {isChinese ? "联系我们" : "Contact Us"}
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-center gap-3 order-1 sm:order-2">
           {socials.map(({ label, icon: Icon, href }) => (
             <a
               key={label}
@@ -46,7 +62,7 @@ export default function Footer() {
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 order-3">
           <button
             data-testid="view-switcher"
             type="button"

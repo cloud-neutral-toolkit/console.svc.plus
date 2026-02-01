@@ -681,7 +681,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
     contactDescription:
       'Share your feedback or feature ideas and we will respond as soon as possible. For technical help, reach us via email.',
     contactEmailLabel: 'Technical support email',
-    contactEmail: 'manbuzhe2008@gmail.com',
+    contactEmail: 'haitaopanhq@gmail.com',
     download: {
       home: {
         title: 'Download Center',
