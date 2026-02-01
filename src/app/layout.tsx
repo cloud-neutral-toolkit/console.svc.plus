@@ -97,6 +97,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', '${GA_ID}');
           `}
         </Script>
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "a887725c960b462d9ac98bf5fd2bbc3f"}'
+          strategy="afterInteractive"
+        />
       </head>
       <body className={bodyClassName}>
         <AppProviders>{children}</AppProviders>
