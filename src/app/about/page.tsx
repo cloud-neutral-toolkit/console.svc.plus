@@ -55,7 +55,7 @@ export default function AboutPage() {
                   <h3 className="font-semibold text-warning-foreground">
                     Disclaimer
                   </h3>
-                  <p className="text-sm leading-relaxed text-warning-foreground/80">
+                  <p className="text-sm leading-relaxed text-warning-foreground/80 whitespace-pre-wrap">
                     {t.disclaimer}
                   </p>
                 </div>
@@ -65,7 +65,7 @@ export default function AboutPage() {
             {/* Acknowledgments */}
             <div className="space-y-8 rounded-3xl border border-surface-border bg-surface p-8 lg:p-12 shadow-2xl backdrop-blur-sm">
               <div className="space-y-6">
-                <p className="text-lg leading-relaxed text-text-muted">
+                <p className="text-lg leading-relaxed text-text-muted whitespace-pre-wrap">
                   {t.acknowledgments}
                 </p>
 
@@ -112,7 +112,7 @@ export default function AboutPage() {
                   >
                     <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                   </svg>
-                  <p className="font-medium">{t.opensource}</p>
+                  <p className="font-medium whitespace-pre-wrap">{t.opensource}</p>
                 </div>
               </div>
             </div>
