@@ -483,10 +483,14 @@ type AboutTranslation = {
   title: string
   subtitle: string
   disclaimer: string
+  acknowledgmentsTitle: string
   acknowledgments: string
-  toolsTitle: string
-  toolsNote: string
-  tools: { label: string; url: string }[]
+  sections: {
+    title: string
+    content?: string
+    items?: { label: string; description: string; url: string }[]
+    links?: { label: string; url: string }[]
+  }[]
   opensource: string
 }
 

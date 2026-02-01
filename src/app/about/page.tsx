@@ -65,33 +65,68 @@ export default function AboutPage() {
             {/* Acknowledgments */}
             <div className="space-y-8 rounded-3xl border border-surface-border bg-surface p-8 lg:p-12 shadow-2xl backdrop-blur-sm">
               <div className="space-y-6">
+                <h2 className="text-2xl font-bold tracking-tight text-heading">
+                  {t.acknowledgmentsTitle}
+                </h2>
                 <p className="text-lg leading-relaxed text-text-muted whitespace-pre-wrap">
                   {t.acknowledgments}
                 </p>
 
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-primary">
-                    {t.toolsTitle}
-                  </h3>
-                  <ul className="grid gap-3 sm:grid-cols-2">
-                    {t.tools.map((tool, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center gap-2 text-sm text-text-muted"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        <a
-                          href={tool.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="transition-colors hover:text-text hover:underline hover:decoration-primary"
-                        >
-                          {tool.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-xs text-text-subtle">{t.toolsNote}</p>
+                <div className="space-y-12 pt-4">
+                  {t.sections.map((section, sIndex) => (
+                    <div key={sIndex} className="space-y-4">
+                      <h3 className="text-sm font-semibold uppercase tracking-wider text-primary border-b border-primary/20 pb-2">
+                        {section.title}
+                      </h3>
+
+                      {section.content && (
+                        <p className="text-sm text-text-muted leading-relaxed whitespace-pre-wrap">
+                          {section.content}
+                        </p>
+                      )}
+
+                      {section.items && (
+                        <div className="grid gap-4 sm:grid-cols-1">
+                          {section.items.map((item, iIndex) => (
+                            <div key={iIndex} className="group relative rounded-xl border border-surface-border bg-surface-hover/30 p-4 transition-all hover:border-primary/20 hover:bg-surface-hover/50">
+                              <div className="flex flex-col gap-1">
+                                <a
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-semibold text-text hover:text-primary transition-colors flex items-center gap-2"
+                                >
+                                  {item.label}
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link opacity-0 group-hover:opacity-100 transition-opacity"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+                                </a>
+                                <p className="text-sm text-text-muted leading-relaxed">
+                                  {item.description}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {section.links && (
+                        <ul className="grid gap-3 sm:grid-cols-2">
+                          {section.links.map((link, lIndex) => (
+                            <li key={lIndex} className="flex items-center gap-2 text-sm text-text-muted">
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                              <a
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="transition-colors hover:text-text hover:underline hover:decoration-primary"
+                              >
+                                {link.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
