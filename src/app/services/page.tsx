@@ -250,8 +250,9 @@ export default function ServicesPage() {
       description: isChinese
         ? "基础设施、数据库与应用系统的全栈可观测性工作台。"
         : "Full-stack observability workbench for infrastructure, databases, and apps.",
-      href: "/insight",
+      href: "https://infra.svc.plus/",
       icon: Gauge,
+      external: true,
     },
     {
       key: "ai-gateway",
