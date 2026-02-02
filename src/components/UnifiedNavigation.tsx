@@ -299,11 +299,11 @@ export default function UnifiedNavigation() {
                         sideOffset={8}
                         className="z-50 min-w-[220px] overflow-hidden rounded-[12px] border border-surface-border bg-surface p-1 shadow-shadow-md animate-in fade-in zoom-in-95 duration-[120ms] data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 motion-reduce:animate-none"
                       >
-                        <div className="px-4 py-3 border-b border-surface-border/50 mb-1">
+                        <div className="px-4 py-3 border-b border-surface-border/50 mb-1 text-right">
                           <p className="text-sm font-semibold text-text leading-none mb-1.5">
                             {user.username}
                           </p>
-                          <p className="text-[12px] text-text-muted leading-none">
+                          <p className="text-[12px] text-text-muted leading-none break-all">
                             {user.email}
                           </p>
                         </div>
@@ -317,16 +317,16 @@ export default function UnifiedNavigation() {
                             >
                               <Link
                                 href={item.href}
-                                className={`flex h-[38px] items-center gap-3 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
+                                className={`flex h-[38px] flex-row-reverse items-center justify-between gap-3 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
                                   ? "text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 focus:bg-rose-500/10 focus:text-rose-600"
                                   : "text-text-muted hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
                                   }`}
                                 onClick={() => setAccountMenuOpen(false)}
                               >
                                 {item.icon && (
-                                  <item.icon className={`w-4 h-4 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
+                                  <item.icon className={`w-4 h-4 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
                                 )}
-                                <span>
+                                <span className="flex-1 text-right">
                                   {typeof item.label === "function"
                                     ? item.label(language)
                                     : item.label}
