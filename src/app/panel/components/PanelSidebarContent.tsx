@@ -37,9 +37,10 @@ function isActive(pathname: string, href: string) {
 
 export interface PanelSidebarContentProps {
     onNavigate?: () => void
+    collapsed?: boolean
 }
 
-export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
+export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSidebarContentProps) {
     const pathname = usePathname()
     const { language } = useLanguage()
     const copy = translations[language].userCenter.mfa
@@ -91,9 +92,13 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
 
     return (
         <>
-            <SidebarHeader className="space-y-1 text-right text-[var(--color-text)] transition-colors mb-6">
-                <h2 className="text-lg font-bold text-[var(--color-heading)]">{translations[language].userCenter.overview.heading}</h2>
-                <p className="text-sm text-[var(--color-text-subtle)]">{language === 'zh' ? '在同一处掌控权限与功能特性。' : 'Manage permissions and features in one place.'}</p>
+            <SidebarHeader className={`space-y-1 text-[var(--color-text)] transition-all duration-300 mb-6 ${collapsed ? 'text-center' : 'text-left'}`}>
+                <h2 className={`text-lg font-bold text-[var(--color-heading)] truncate transition-opacity duration-300 ${collapsed ? 'opacity-0 h-0 invisible' : 'opacity-100'}`}>
+                    {translations[language].userCenter.overview.heading}
+                </h2>
+                <p className={`text-sm text-[var(--color-text-subtle)] truncate transition-opacity duration-300 ${collapsed ? 'opacity-0 h-0 invisible' : 'opacity-100'}`}>
+                    {language === 'zh' ? '在同一处掌控权限与功能特性。' : 'Manage permissions and features in one place.'}
+                </p>
 
                 {requiresSetup ? (
                     <div className="mt-4 rounded-[var(--radius-lg)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)] transition-colors">
@@ -127,10 +132,10 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                     return (
                         <div key={section.id} className="space-y-3">
                             <p
-                                className={`text-xs font-semibold uppercase tracking-wide text-right ${sectionDisabled
+                                className={`text-xs font-semibold uppercase tracking-wide transition-all duration-300 ${sectionDisabled
                                     ? 'text-[var(--color-text-subtle)] opacity-60'
                                     : 'text-[var(--color-text-subtle)]'
-                                    }`}
+                                    } ${collapsed ? 'text-center scale-0 h-0 opacity-0 invisible' : 'text-left'}`}
                             >
                                 {translations[language].userCenter.sections[section.id as keyof typeof translations.en.userCenter.sections] || section.title}
                             </p>
@@ -141,7 +146,7 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                                     const { Icon } = item
 
                                     const baseClasses = [
-                                        'group flex flex-row-reverse items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-3 text-sm transition-colors',
+                                        'group flex items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-3 text-sm transition-all duration-300',
                                     ]
                                     if (item.disabled) {
                                         baseClasses.push(
@@ -183,13 +188,13 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                                     ]
 
                                     const content = (
-                                        <div className={baseClasses.join(' ')}>
-                                            <span className={iconClasses.join(' ')}>
+                                        <div className={baseClasses.join(' ')} title={collapsed ? item.label : undefined}>
+                                            <span className={`${iconClasses.join(' ')} shrink-0`}>
                                                 <Icon className="h-4 w-4" />
                                             </span>
-                                            <span className="flex flex-1 flex-col text-right">
-                                                <span className="font-semibold">{item.label}</span>
-                                                <span className={descriptionClasses.join(' ')}>{item.description}</span>
+                                            <span className={`flex flex-1 flex-col truncate transition-all duration-300 ${collapsed ? 'w-0 opacity-0 invisible overflow-hidden' : 'w-auto opacity-100 visible'}`}>
+                                                <span className="font-semibold text-left">{item.label}</span>
+                                                <span className={`${descriptionClasses.join(' ')} text-left`}>{item.description}</span>
                                             </span>
                                         </div>
                                     )

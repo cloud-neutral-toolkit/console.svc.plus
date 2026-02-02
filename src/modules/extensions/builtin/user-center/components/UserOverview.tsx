@@ -107,15 +107,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   return (
     <div className="space-y-6 text-[var(--color-text)] transition-colors">
       <div>
-        <h1 className="text-3xl font-bold text-[var(--color-heading)]">{copy.heading}</h1>
-        <p className="mt-2 text-sm text-[var(--color-text-subtle)]">
-          {isLoading
-            ? copy.loading
-            : user
-              ? copy.welcome.replace('{name}', displayName)
-              : copy.guest}
-        </p>
-        <p className="mt-1 text-xs text-[var(--color-text-subtle)] opacity-80">{copy.uuidNote}</p>
+        <p className="text-sm text-[var(--color-text-subtle)] opacity-90">{copy.uuidNote}</p>
       </div>
 
       {!hideMfaMainPrompt && requiresSetup ? (
