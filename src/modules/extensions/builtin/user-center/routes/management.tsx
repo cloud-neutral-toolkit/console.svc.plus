@@ -10,6 +10,7 @@ import PermissionMatrixEditor, {
   type PermissionMatrix,
 } from '../management/components/PermissionMatrixEditor'
 import UserGroupManagement, { type ManagedUser } from '../management/components/UserGroupManagement'
+import { EmailBlacklist } from '../management/components/EmailBlacklist'
 import { resolveAccess } from '@lib/accessControl'
 import { useUserStore } from '@lib/userStore'
 
@@ -72,6 +73,7 @@ export default function UserCenterManagementRoute() {
   const [matrixError, setMatrixError] = useState<string | undefined>()
   const [roleUpdateMessage, setRoleUpdateMessage] = useState<string | undefined>()
   const [pendingRoleUpdates, setPendingRoleUpdates] = useState<Set<string>>(new Set())
+  const [isBlacklistOpen, setIsBlacklistOpen] = useState(false)
 
   const metricsSWR = useSWR<UserMetricsResponse>(canAccess ? '/api/admin/users/metrics' : null, jsonFetcher, {
     revalidateOnFocus: false,
@@ -244,6 +246,48 @@ export default function UserCenterManagementRoute() {
     [canEditRoles, markRolePending, usersSWR],
   )
 
+  const handlePauseUser = useCallback(async (userId: string) => {
+    try {
+      await jsonFetcher(`/api/admin/users/${userId}/pause`, { method: 'POST' })
+      usersSWR.mutate()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '操作失败')
+    }
+  }, [usersSWR])
+
+  const handleResumeUser = useCallback(async (userId: string) => {
+    try {
+      await jsonFetcher(`/api/admin/users/${userId}/resume`, { method: 'POST' })
+      usersSWR.mutate()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '操作失败')
+    }
+  }, [usersSWR])
+
+  const handleDeleteUser = useCallback(async (userId: string) => {
+    try {
+      await jsonFetcher(`/api/admin/users/${userId}`, { method: 'DELETE' })
+      usersSWR.mutate()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '操作失败')
+    }
+  }, [usersSWR])
+
+  const handleRenewUuid = useCallback(async (userId: string) => {
+    const days = prompt('设置过期天数 (0 为永久):', '0')
+    if (days === null) return
+    try {
+      await jsonFetcher(`/api/admin/users/${userId}/renew-uuid`, {
+        method: 'POST',
+        body: JSON.stringify({ expires_in_days: parseInt(days) || 0 }),
+      })
+      alert('UUID 已重置')
+      usersSWR.mutate()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '操作失败')
+    }
+  }, [usersSWR])
+
   const matrixPending = matrixSaving || isUserLoading
   const metricsLoading = metricsSWR.isLoading
   const settingsLoading = settingsSWR.isLoading
@@ -280,7 +324,13 @@ export default function UserCenterManagementRoute() {
         onRoleChange={handleRoleChange}
         canEditRoles={canEditRoles}
         pendingUserIds={pendingRoleUpdates}
+        onPauseUser={handlePauseUser}
+        onResumeUser={handleResumeUser}
+        onDeleteUser={handleDeleteUser}
+        onRenewUuid={handleRenewUuid}
+        onManageBlacklist={() => setIsBlacklistOpen(true)}
       />
+      <EmailBlacklist isOpen={isBlacklistOpen} onClose={() => setIsBlacklistOpen(false)} />
     </div>
   )
 }
