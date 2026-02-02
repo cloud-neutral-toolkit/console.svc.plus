@@ -26,6 +26,7 @@ type RouteGuard = {
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const { language } = useLanguage()
@@ -88,10 +89,10 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   return (
     <div className="relative flex min-h-screen bg-gradient-to-br from-[var(--gradient-app-from)] via-[var(--gradient-app-via)] to-[var(--gradient-app-to)] text-[var(--color-text)]">
       <Sidebar
-        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
         onNavigate={() => setOpen(false)}
+        collapsed={isCollapsed}
       />
 
       {open && (
@@ -102,7 +103,11 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       )}
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <Header onMenu={() => setOpen((prev) => !prev)} />
+        <Header
+          onMenu={() => setOpen((prev) => !prev)}
+          onCollapse={() => setIsCollapsed((prev) => !prev)}
+          isCollapsed={isCollapsed}
+        />
         <main className="flex flex-1 flex-col space-y-6 bg-[var(--color-surface-translucent)] px-3 py-5 text-[var(--color-text)] transition-colors sm:px-4 md:px-6 lg:px-8">
           {requiresSetup ? (
             <div className="rounded-[var(--radius-lg)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning-foreground)] transition-colors">

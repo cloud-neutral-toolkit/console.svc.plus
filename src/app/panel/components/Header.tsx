@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react'
 
 import { useUserStore } from '@lib/userStore'
 import type { UserRole } from '@lib/userStore'
@@ -29,6 +29,8 @@ const ROLE_BADGES: Record<UserRole, { label: string; className: string }> = {
 
 interface HeaderProps {
   onMenu: () => void
+  onCollapse?: () => void
+  isCollapsed?: boolean
 }
 
 function resolveAccountInitial(input?: string | null) {
@@ -44,7 +46,7 @@ function resolveAccountInitial(input?: string | null) {
   return normalized.charAt(0).toUpperCase()
 }
 
-export default function Header({ onMenu }: HeaderProps) {
+export default function Header({ onMenu, onCollapse, isCollapsed }: HeaderProps) {
   const { language } = useLanguage()
   const user = useUserStore((state) => state.user)
   const isLoading = useUserStore((state) => state.isLoading)
@@ -59,21 +61,30 @@ export default function Header({ onMenu }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[color:var(--color-surface-border)] bg-[var(--color-surface-translucent)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-sm)] backdrop-blur transition-colors md:px-6">
-      <button
-        type="button"
-        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-2 text-sm font-medium text-[var(--color-text-subtle)] transition-colors hover:border-[color:var(--color-primary-border)] hover:text-[var(--color-primary)] md:hidden"
-        onClick={onMenu}
-        aria-label="Toggle navigation menu"
-      >
-        <Menu className="h-4 w-4" />
-        Menu
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-2 text-sm font-medium text-[var(--color-text-subtle)] transition-colors hover:border-[color:var(--color-primary-border)] hover:text-[var(--color-primary)] md:hidden"
+          onClick={onMenu}
+          aria-label="Toggle navigation menu"
+        >
+          <Menu className="h-4 w-4" />
+          Menu
+        </button>
 
-      <div className="flex flex-1 items-center justify-end gap-4 md:justify-between">
-        <div className="hidden flex-col text-sm text-[var(--color-text-subtle)] transition-colors md:flex">
-          <span className="font-semibold text-[var(--color-heading)]">{translations[language].userCenter.overview.heading}</span>
-          <span>{language === 'zh' ? '在同一处掌控权限与功能特性' : 'Personalized access across every service touchpoint'}</span>
-        </div>
+        {onCollapse && (
+          <button
+            type="button"
+            className="hidden items-center justify-center rounded-lg border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-2 text-[var(--color-text-subtle)] transition-colors hover:border-[color:var(--color-primary-border)] hover:text-[var(--color-primary)] md:flex"
+            onClick={onCollapse}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-1 items-center justify-end gap-4 md:justify-end">
         <div className="flex items-center gap-3">
           <Link
             href="/"

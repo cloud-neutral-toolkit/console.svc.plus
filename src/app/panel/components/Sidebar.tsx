@@ -8,12 +8,12 @@ export interface SidebarProps extends PanelSidebarContentProps {
   className?: string
 }
 
-export default function Sidebar({ className = '', onNavigate }: SidebarProps) {
+export default function Sidebar({ className = '', onNavigate, collapsed = false }: SidebarProps) {
   return (
     <SidebarRoot
-      className={`w-64 border-r border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] p-6 text-[var(--color-text)] shadow-[var(--shadow-md)] backdrop-blur ${className}`}
+      className={`transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} border-r border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] p-4 text-[var(--color-text)] shadow-[var(--shadow-md)] backdrop-blur ${className}`}
     >
-      <PanelSidebarContent onNavigate={onNavigate} />
+      <PanelSidebarContent onNavigate={onNavigate} collapsed={collapsed} />
     </SidebarRoot>
   )
 }
