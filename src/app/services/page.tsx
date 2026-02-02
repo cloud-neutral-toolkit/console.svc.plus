@@ -316,7 +316,7 @@ export default function ServicesPage() {
         className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.18),transparent_35%),radial-gradient(circle_at_80%_0,rgba(168,85,247,0.15),transparent_30%),radial-gradient(circle_at_50%_60%,rgba(52,211,153,0.08),transparent_35%)]"
         aria-hidden
       />
-      <div className="relative mx-auto max-w-7xl px-6 pb-20">
+      <div className="relative w-full px-8 pb-20">
         <UnifiedNavigation />
         <main className="space-y-10 pt-10">
           <header className="space-y-4">
