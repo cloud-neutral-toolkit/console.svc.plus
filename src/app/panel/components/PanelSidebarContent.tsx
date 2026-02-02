@@ -23,6 +23,7 @@ interface NavItem {
 }
 
 interface NavSection {
+    id: string
     title: string
     items: NavItem[]
 }
@@ -80,6 +81,7 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                 }
 
                 return {
+                    id: section.id,
                     title: section.title,
                     items,
                 }
@@ -89,7 +91,7 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
 
     return (
         <>
-            <SidebarHeader className="space-y-1 text-[var(--color-text)] transition-colors mb-6">
+            <SidebarHeader className="space-y-1 text-right text-[var(--color-text)] transition-colors mb-6">
                 <h2 className="text-lg font-bold text-[var(--color-heading)]">{translations[language].userCenter.overview.heading}</h2>
                 <p className="text-sm text-[var(--color-text-subtle)]">{language === 'zh' ? '在同一处掌控权限与功能特性。' : 'Manage permissions and features in one place.'}</p>
 
@@ -123,22 +125,23 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                     const sectionDisabled = section.items.every((item) => item.disabled)
 
                     return (
-                        <div key={section.title} className="space-y-3">
+                        <div key={section.id} className="space-y-3">
                             <p
-                                className={`text-xs font-semibold uppercase tracking-wide ${sectionDisabled
+                                className={`text-xs font-semibold uppercase tracking-wide text-right ${sectionDisabled
                                     ? 'text-[var(--color-text-subtle)] opacity-60'
                                     : 'text-[var(--color-text-subtle)]'
                                     }`}
                             >
-                                {section.title}
+                                {translations[language].userCenter.sections[section.id as keyof typeof translations.en.userCenter.sections] || section.title}
                             </p>
                             <div className={`space-y-2 ${sectionDisabled ? 'opacity-60' : ''}`}>
                                 {section.items.map((item) => {
                                     const active = isActive(pathname, item.href)
+                                    const isDashboard = item.href === '/panel'
                                     const { Icon } = item
 
                                     const baseClasses = [
-                                        'group flex items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-3 text-sm transition-colors',
+                                        'group flex flex-row-reverse items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-3 text-sm transition-colors',
                                     ]
                                     if (item.disabled) {
                                         baseClasses.push(
@@ -149,10 +152,14 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                                             'border-transparent text-[var(--color-text-subtle)] hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)]',
                                         )
                                     }
+
                                     if (active) {
                                         baseClasses.push(
                                             'border-[color:var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)] shadow-[var(--shadow-sm)]',
                                         )
+                                    } else if (isDashboard) {
+                                        // Dashboard visual priority when not active
+                                        baseClasses.push('shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] bg-[var(--color-surface-muted)]/30')
                                     }
 
                                     const iconClasses = ['flex h-8 w-8 items-center justify-center rounded-xl transition-colors']
@@ -160,6 +167,8 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                                         iconClasses.push('bg-[var(--color-primary)] text-[var(--color-primary-foreground)]')
                                     } else if (item.disabled) {
                                         iconClasses.push('bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] opacity-60')
+                                    } else if (isDashboard) {
+                                        iconClasses.push('bg-[var(--color-primary-muted)] text-[var(--color-primary)]')
                                     } else {
                                         iconClasses.push(
                                             'bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] group-hover:bg-[var(--color-primary-muted)] group-hover:text-[var(--color-primary)]',
@@ -178,7 +187,7 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                                             <span className={iconClasses.join(' ')}>
                                                 <Icon className="h-4 w-4" />
                                             </span>
-                                            <span className="flex flex-col">
+                                            <span className="flex flex-1 flex-col text-right">
                                                 <span className="font-semibold">{item.label}</span>
                                                 <span className={descriptionClasses.join(' ')}>{item.description}</span>
                                             </span>
