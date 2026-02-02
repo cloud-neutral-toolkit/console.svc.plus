@@ -90,9 +90,8 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
     return (
         <>
             <SidebarHeader className="space-y-1 text-[var(--color-text)] transition-colors mb-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">XControl</p>
-                <h2 className="text-lg font-bold text-[var(--color-heading)]">User Center</h2>
-                <p className="text-sm text-[var(--color-text-subtle)]">在同一处掌控权限与功能特性。</p>
+                <h2 className="text-lg font-bold text-[var(--color-heading)]">{translations[language].userCenter.overview.heading}</h2>
+                <p className="text-sm text-[var(--color-text-subtle)]">{language === 'zh' ? '在同一处掌控权限与功能特性。' : 'Manage permissions and features in one place.'}</p>
 
                 {requiresSetup ? (
                     <div className="mt-4 rounded-[var(--radius-lg)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)] transition-colors">
@@ -127,8 +126,8 @@ export function PanelSidebarContent({ onNavigate }: PanelSidebarContentProps) {
                         <div key={section.title} className="space-y-3">
                             <p
                                 className={`text-xs font-semibold uppercase tracking-wide ${sectionDisabled
-                                        ? 'text-[var(--color-text-subtle)] opacity-60'
-                                        : 'text-[var(--color-text-subtle)]'
+                                    ? 'text-[var(--color-text-subtle)] opacity-60'
+                                    : 'text-[var(--color-text-subtle)]'
                                     }`}
                             >
                                 {section.title}

@@ -5,6 +5,8 @@ import { Menu } from 'lucide-react'
 
 import { useUserStore } from '@lib/userStore'
 import type { UserRole } from '@lib/userStore'
+import { useLanguage } from '@i18n/LanguageProvider'
+import { translations } from '@i18n/translations'
 
 const ROLE_BADGES: Record<UserRole, { label: string; className: string }> = {
   guest: {
@@ -43,6 +45,7 @@ function resolveAccountInitial(input?: string | null) {
 }
 
 export default function Header({ onMenu }: HeaderProps) {
+  const { language } = useLanguage()
   const user = useUserStore((state) => state.user)
   const isLoading = useUserStore((state) => state.isLoading)
   const role: UserRole = user?.role ?? 'guest'
@@ -68,8 +71,8 @@ export default function Header({ onMenu }: HeaderProps) {
 
       <div className="flex flex-1 items-center justify-end gap-4 md:justify-between">
         <div className="hidden flex-col text-sm text-[var(--color-text-subtle)] transition-colors md:flex">
-          <span className="font-semibold text-[var(--color-heading)]">XControl User Center</span>
-          <span>Personalized access across every service touchpoint</span>
+          <span className="font-semibold text-[var(--color-heading)]">{translations[language].userCenter.overview.heading}</span>
+          <span>{language === 'zh' ? '在同一处掌控权限与功能特性' : 'Personalized access across every service touchpoint'}</span>
         </div>
         <div className="flex items-center gap-3">
           <Link
