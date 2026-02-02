@@ -275,7 +275,13 @@ export default function UnifiedNavigation() {
 
             <div className="hidden flex-1 items-center justify-end gap-3 lg:flex">
               {user ? (
-                <div className="flex items-center gap-3 relative">
+                <div className="flex items-center gap-3">
+                  <LanguageToggle />
+                  <ReleaseChannelSelector
+                    selected={selectedChannels}
+                    onToggle={toggleChannel}
+                    variant="icon"
+                  />
                   <DropdownMenu.Root open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
                     <DropdownMenu.Trigger asChild>
                       <button
@@ -332,12 +338,6 @@ export default function UnifiedNavigation() {
                       </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                   </DropdownMenu.Root>
-                  <LanguageToggle />
-                  <ReleaseChannelSelector
-                    selected={selectedChannels}
-                    onToggle={toggleChannel}
-                    variant="icon"
-                  />
                 </div>
               ) : (
                 <>
