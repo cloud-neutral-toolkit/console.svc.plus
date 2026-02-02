@@ -97,11 +97,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', '${GA_ID}');
           `}
         </Script>
+        {/* Cloudflare Web Analytics */}
         <Script
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon='{"token": "CF_TOKEN_PLACEHOLDER"}'
           strategy="afterInteractive"
         />
+        {/* End Cloudflare Web Analytics */}
       </head>
       <body className={bodyClassName}>
         <AppProviders>{children}</AppProviders>
