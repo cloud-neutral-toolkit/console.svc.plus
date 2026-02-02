@@ -4,21 +4,24 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo, type ComponentType } from 'react'
 
+import { Plus, type LucideIcon } from 'lucide-react'
+
 import { getExtensionRegistry } from '@extensions/loader'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { resolveAccess } from '@lib/accessControl'
 import { useUserStore } from '@lib/userStore'
-import { SidebarHeader, SidebarContent } from '../../../components/layout/SidebarRoot'
+import { SidebarHeader, SidebarContent, SidebarFooter } from '../../../components/layout/SidebarRoot'
 
 const registry = getExtensionRegistry()
 const PlaceholderIcon: ComponentType<{ className?: string }> = () => null
 
 interface NavItem {
+    id?: string
     href: string
     label: string
     description: string
-    Icon: ComponentType<{ className?: string }>
+    Icon: ComponentType<{ className?: string }> | LucideIcon
     disabled: boolean
 }
 
@@ -68,6 +71,7 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
                         const Icon = route.icon ?? PlaceholderIcon
 
                         return {
+                            id: route.id,
                             href: route.path,
                             label: route.label,
                             description: route.description ?? '',
@@ -75,7 +79,7 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
                             disabled,
                         }
                     })
-                    .filter((value): value is NavItem => Boolean(value))
+                    .filter((value) => Boolean(value)) as NavItem[]
 
                 if (items.length === 0) {
                     return null
@@ -87,7 +91,7 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
                     items,
                 }
             })
-            .filter((value): value is NavSection => Boolean(value))
+            .filter((value) => Boolean(value)) as NavSection[]
     }, [requiresSetup, user])
 
     return (
@@ -193,7 +197,9 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
                                                 <Icon className="h-4 w-4" />
                                             </span>
                                             <span className={`flex flex-1 flex-col truncate transition-all duration-300 ${collapsed ? 'w-0 opacity-0 invisible overflow-hidden' : 'w-auto opacity-100 visible'}`}>
-                                                <span className="font-semibold text-left">{item.label}</span>
+                                                <span className="font-semibold text-left">
+                                                    {(item.id && translations[language].userCenter.items[item.id as keyof typeof translations.en.userCenter.items]) || item.label}
+                                                </span>
                                                 <span className={`${descriptionClasses.join(' ')} text-left`}>{item.description}</span>
                                             </span>
                                         </div>
@@ -218,6 +224,18 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
                     )
                 })}
             </SidebarContent>
+
+            <SidebarFooter className="p-4 border-t border-[color:var(--color-surface-border)]">
+                <button
+                    className={`group w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] rounded-xl font-bold text-sm shadow-[var(--shadow-sm)] hover:opacity-90 transition-all duration-300 ${collapsed ? 'px-0' : ''}`}
+                    title={collapsed ? (language === 'zh' ? '创建项目' : 'New Project') : undefined}
+                >
+                    <Plus className={`size-5 transition-transform group-hover:rotate-90`} />
+                    <span className={`transition-all duration-300 ${collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+                        {language === 'zh' ? '创建项目' : 'New Project'}
+                    </span>
+                </button>
+            </SidebarFooter>
         </>
     )
 }
