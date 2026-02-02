@@ -478,8 +478,24 @@ type UserCenterTranslation = {
   sections: {
     workspace: string
     productivity: string
+    infra: string
     management: string
     preferences: string
+  }
+  items: {
+    dashboard: string
+    mail: string
+    agents: string
+    apis: string
+    accounts: string
+    subscription: string
+    ldp: string
+    appearance: string
+    deployments: string
+    resources: string
+    apiKeys: string
+    logs: string
+    settings: string
   }
   overview: UserCenterOverviewTranslation
   mfa: UserCenterMfaTranslation
@@ -950,8 +966,24 @@ export const translations: Record<'en' | 'zh', Translation> = {
       sections: {
         workspace: 'Workspace',
         productivity: 'Productivity Tools',
+        infra: 'Infrastructure',
         management: 'Accounts & Access',
         preferences: 'Preferences',
+      },
+      items: {
+        dashboard: 'Dashboard',
+        mail: 'Mail',
+        agents: 'Agents',
+        apis: 'APIs',
+        accounts: 'Accounts',
+        subscription: 'Subscription',
+        ldp: 'LDP',
+        appearance: 'Appearance',
+        deployments: 'Deployments',
+        resources: 'Resources',
+        apiKeys: 'API Keys',
+        logs: 'Logs',
+        settings: 'Settings',
       },
       overview: {
         heading: 'User Center',
@@ -1702,8 +1734,24 @@ export const translations: Record<'en' | 'zh', Translation> = {
       sections: {
         workspace: '工作台',
         productivity: '生产力工具',
+        infra: '资源运维',
         management: '账户与权限',
         preferences: '偏好设置',
+      },
+      items: {
+        dashboard: '仪表盘',
+        mail: '邮箱服务',
+        agents: '运行节点',
+        apis: '接口集成',
+        accounts: '账户中心',
+        subscription: '订阅计划',
+        ldp: '身份平面',
+        appearance: '个性化',
+        deployments: '部署管理',
+        resources: '资源列表',
+        apiKeys: '接口密钥',
+        logs: '运行日志',
+        settings: '系统设置',
       },
       overview: {
         heading: '用户中心',

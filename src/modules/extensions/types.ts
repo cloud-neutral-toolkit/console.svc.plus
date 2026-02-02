@@ -27,6 +27,7 @@ export interface ExtensionMenuItem {
 }
 
 export interface ExtensionRoute {
+  id?: string
   path: string
   label: string
   description?: string

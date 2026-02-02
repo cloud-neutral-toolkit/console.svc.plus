@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Sidebar } from '../../components/Sidebar'
 import { Header } from '../../components/Header'
 
 interface Material3LayoutProps {
@@ -11,7 +10,6 @@ interface Material3LayoutProps {
 export function Material3Layout({ children }: Material3LayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-text">
-      <Sidebar />
       <div className="flex-1 flex flex-col overflow-y-auto">
         <Header />
         <main className="p-8 max-w-6xl mx-auto w-full">

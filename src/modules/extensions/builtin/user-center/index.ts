@@ -13,6 +13,7 @@ export const userCenterExtension: DashboardExtension = {
   },
   routes: [
     {
+      id: 'dashboard',
       path: '/panel',
       label: 'Dashboard',
       description: '专属于你的信息总览',
@@ -24,6 +25,7 @@ export const userCenterExtension: DashboardExtension = {
       sidebar: { section: 'workspace', order: 0 },
     },
     {
+      id: 'mail',
       path: '/panel/mail',
       label: 'Mail',
       description: '租户邮件与 AI 助理',
@@ -34,6 +36,7 @@ export const userCenterExtension: DashboardExtension = {
       sidebar: { section: 'workspace', order: 1 },
     },
     {
+      id: 'agents',
       path: '/panel/agent',
       label: 'Agents',
       description: '管理运行节点',
@@ -51,6 +54,7 @@ export const userCenterExtension: DashboardExtension = {
       },
     },
     {
+      id: 'apis',
       path: '/panel/api',
       label: 'APIs',
       description: '洞察后端服务',
@@ -68,6 +72,7 @@ export const userCenterExtension: DashboardExtension = {
       },
     },
     {
+      id: 'accounts',
       path: '/panel/account',
       label: 'Accounts',
       description: '目录与多因素设置',
@@ -78,6 +83,7 @@ export const userCenterExtension: DashboardExtension = {
       sidebar: { section: 'management', order: 20 },
     },
     {
+      id: 'subscription',
       path: '/panel/subscription',
       label: 'Subscription',
       description: '订阅方案与计费规则',
@@ -95,6 +101,7 @@ export const userCenterExtension: DashboardExtension = {
       },
     },
     {
+      id: 'ldp',
       path: '/panel/ldp',
       label: 'LDP',
       description: '低时延身份平面',
@@ -112,6 +119,7 @@ export const userCenterExtension: DashboardExtension = {
       },
     },
     {
+      id: 'appearance',
       path: '/panel/appearance',
       label: 'Appearance',
       description: '个性化主题设置',
