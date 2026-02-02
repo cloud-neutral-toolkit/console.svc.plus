@@ -475,6 +475,12 @@ type UserCenterMfaTranslation = {
 }
 
 type UserCenterTranslation = {
+  sections: {
+    workspace: string
+    productivity: string
+    management: string
+    preferences: string
+  }
   overview: UserCenterOverviewTranslation
   mfa: UserCenterMfaTranslation
 }
@@ -941,6 +947,12 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
     },
     userCenter: {
+      sections: {
+        workspace: 'Workspace',
+        productivity: 'Productivity Tools',
+        management: 'Accounts & Access',
+        preferences: 'Preferences',
+      },
       overview: {
         heading: 'User Center',
         loading: 'Loading your personalized space…',
@@ -1687,6 +1699,12 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
     },
     userCenter: {
+      sections: {
+        workspace: '工作台',
+        productivity: '生产力工具',
+        management: '账户与权限',
+        preferences: '偏好设置',
+      },
       overview: {
         heading: '用户中心',
         loading: '正在加载你的专属空间…',
