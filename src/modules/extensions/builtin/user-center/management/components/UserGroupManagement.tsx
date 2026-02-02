@@ -20,6 +20,11 @@ type UserGroupManagementProps = {
   onRoleChange?: (userId: string, role: string) => void
   onInvite?: () => void
   onImport?: () => void
+  onPauseUser?: (userId: string) => void
+  onResumeUser?: (userId: string) => void
+  onDeleteUser?: (userId: string) => void
+  onRenewUuid?: (userId: string) => void
+  onManageBlacklist?: () => void
 }
 
 const ROLE_OPTIONS = [
@@ -36,6 +41,11 @@ export function UserGroupManagement({
   onRoleChange,
   onInvite,
   onImport,
+  onPauseUser,
+  onResumeUser,
+  onDeleteUser,
+  onRenewUuid,
+  onManageBlacklist,
 }: UserGroupManagementProps) {
   const data = useMemo(() => users ?? [], [users])
   const pendingSet = pendingUserIds ?? new Set<string>()
@@ -49,6 +59,13 @@ export function UserGroupManagement({
             <p className="text-sm text-gray-500">查看当前成员并调整角色或发起邀请</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={onManageBlacklist}
+              className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-gray-300 hover:bg-gray-50"
+            >
+              管理黑名单
+            </button>
             <button
               type="button"
               onClick={onInvite}
@@ -74,60 +91,98 @@ export function UserGroupManagement({
                 <th className="px-4 py-2 font-medium">角色</th>
                 <th className="px-4 py-2 font-medium">用户组</th>
                 <th className="px-4 py-2 font-medium">状态</th>
+                <th className="px-4 py-2 font-medium">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white/80">
               {isLoading
                 ? Array.from({ length: 5 }).map((_, index) => (
-                    <tr key={index} className="animate-pulse">
+                  <tr key={index} className="animate-pulse">
+                    <td className="px-4 py-3">
+                      <span className="inline-block h-4 w-48 rounded bg-gray-200" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block h-4 w-24 rounded bg-gray-200" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block h-4 w-32 rounded bg-gray-200" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block h-4 w-16 rounded bg-gray-200" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block h-4 w-24 rounded bg-gray-200" />
+                    </td>
+                  </tr>
+                ))
+                : data.map((user) => {
+                  const role = user.role ?? 'user'
+                  const isPending = pendingSet.has(user.id)
+                  return (
+                    <tr key={user.id} className="transition hover:bg-purple-50/50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-800">{user.email}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-block h-4 w-48 rounded bg-gray-200" />
+                        <select
+                          className="w-40 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                          value={role}
+                          disabled={!canEditRoles || isPending}
+                          onChange={(event) => onRoleChange?.(user.id, event.target.value)}
+                        >
+                          {ROLE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {isPending ? <p className="mt-1 text-xs text-purple-500">更新中…</p> : null}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">{user.groups?.join('、') || '—'}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}
+                        >
+                          {user.active ? '活跃' : '已暂停'}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-block h-4 w-24 rounded bg-gray-200" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-block h-4 w-32 rounded bg-gray-200" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-block h-4 w-16 rounded bg-gray-200" />
+                        <div className="flex gap-2">
+                          {user.active ? (
+                            <button
+                              onClick={() => onPauseUser?.(user.id)}
+                              className="text-xs text-orange-600 hover:text-orange-700"
+                            >
+                              暂停
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => onResumeUser?.(user.id)}
+                              className="text-xs text-green-600 hover:text-green-700"
+                            >
+                              恢复
+                            </button>
+                          )}
+                          <button
+                            onClick={() => onRenewUuid?.(user.id)}
+                            className="text-xs text-blue-600 hover:text-blue-700"
+                          >
+                            重置 UUID
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm('确定要删除该用户吗？此操作不可逆。')) {
+                                onDeleteUser?.(user.id)
+                              }
+                            }}
+                            className="text-xs text-red-600 hover:text-red-700"
+                          >
+                            删除
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                : data.map((user) => {
-                    const role = user.role ?? 'user'
-                    const isPending = pendingSet.has(user.id)
-                    return (
-                      <tr key={user.id} className="transition hover:bg-purple-50/50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{user.email}</td>
-                        <td className="px-4 py-3">
-                          <select
-                            className="w-40 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                            value={role}
-                            disabled={!canEditRoles || isPending}
-                            onChange={(event) => onRoleChange?.(user.id, event.target.value)}
-                          >
-                            {ROLE_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          {isPending ? <p className="mt-1 text-xs text-purple-500">更新中…</p> : null}
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">{user.groups?.join('、') || '—'}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              user.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {user.active ? '活跃' : '未激活'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
+                  )
+                })}
             </tbody>
           </table>
           {!isLoading && data.length === 0 ? (
@@ -138,5 +193,4 @@ export function UserGroupManagement({
     </Card>
   )
 }
-
 export default UserGroupManagement
