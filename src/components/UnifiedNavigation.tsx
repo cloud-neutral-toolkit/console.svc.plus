@@ -4,13 +4,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageProvider";
-import { Menu, X, Sun, Moon, Monitor, Plus } from "lucide-react";
+import { Menu, X, Sun, Moon, Monitor, Plus, BarChart2 } from "lucide-react";
 import { translations } from "../i18n/translations";
 import LanguageToggle from "./LanguageToggle";
 import { AskAIButton } from "./AskAIButton";
 import ReleaseChannelSelector from "./ReleaseChannelSelector";
 import { useUserStore } from "@lib/userStore";
 import { useMoltbotStore } from "@lib/moltbotStore";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   createNavConfig,
   filterNavItems,
@@ -272,42 +273,65 @@ export default function UnifiedNavigation() {
               </nav>
             </div>
 
-            <div className="hidden flex-1 items-center justify-end gap-4 lg:flex">
+            <div className="hidden flex-1 items-center justify-end gap-3 lg:flex">
               {user ? (
-                <div className="relative" ref={accountMenuRef}>
-                  <button
-                    type="button"
-                    onClick={() => setAccountMenuOpen((prev) => !prev)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white shadow-shadow-sm transition hover:from-primary-hover hover:to-accent focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background"
-                    aria-haspopup="menu"
-                    aria-expanded={accountMenuOpen}
-                  >
-                    {accountInitial}
-                  </button>
-                  {accountMenuOpen ? (
-                    <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-surface-border bg-surface/95 shadow-shadow-md">
-                      <div className="border-b border-surface-border bg-surface-muted px-4 py-3">
-                        <p className="text-sm font-semibold text-text">
-                          {user.username}
-                        </p>
-                        <p className="text-xs text-text-muted">{user.email}</p>
-                      </div>
-                      <div className="py-1 text-sm text-text">
-                        {accountNav.map((item) => (
-                          <Link
-                            key={item.key}
-                            href={item.href}
-                            className="block px-4 py-2 text-sm opacity-80 transition hover:bg-primary/10 hover:opacity-100"
-                            onClick={() => setAccountMenuOpen(false)}
-                          >
-                            {typeof item.label === "function"
-                              ? item.label(language)
-                              : item.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
+                <div className="flex items-center gap-2">
+                  <DropdownMenu.Root open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
+                    <DropdownMenu.Trigger asChild>
+                      <button
+                        type="button"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white shadow-shadow-sm transition hover:from-primary-hover hover:to-accent focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background outline-none ring-offset-background"
+                        aria-label="User account menu"
+                      >
+                        {accountInitial}
+                      </button>
+                    </DropdownMenu.Trigger>
+
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        align="end"
+                        sideOffset={8}
+                        className="z-50 min-w-[220px] overflow-hidden rounded-[12px] border border-surface-border bg-surface/95 p-1 shadow-shadow-md backdrop-blur-sm animate-in fade-in zoom-in-95 duration-[120ms] data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 motion-reduce:animate-none"
+                      >
+                        <div className="px-4 py-3 border-b border-surface-border/50 mb-1">
+                          <p className="text-sm font-semibold text-text leading-none mb-1.5">
+                            {user.username}
+                          </p>
+                          <p className="text-[12px] text-text-muted leading-none">
+                            {user.email}
+                          </p>
+                        </div>
+
+                        <div className="space-y-0.5">
+                          {accountNav.map((item) => (
+                            <DropdownMenu.Item
+                              key={item.key}
+                              asChild
+                              className="outline-none"
+                            >
+                              <Link
+                                href={item.href}
+                                className={`flex h-[38px] items-center gap-2.5 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
+                                  ? "text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 focus:bg-rose-500/10 focus:text-rose-600"
+                                  : "text-text-muted hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
+                                  }`}
+                                onClick={() => setAccountMenuOpen(false)}
+                              >
+                                {item.icon && (
+                                  <item.icon className={`w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
+                                )}
+                                <span>
+                                  {typeof item.label === "function"
+                                    ? item.label(language)
+                                    : item.label}
+                                </span>
+                              </Link>
+                            </DropdownMenu.Item>
+                          ))}
+                        </div>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 text-sm font-medium text-text-muted">

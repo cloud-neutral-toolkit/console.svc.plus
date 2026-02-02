@@ -85,6 +85,32 @@ const tailwindConfig = {
       boxShadow: {
         soft: '0 35px 80px -45px rgba(37, 78, 219, 0.35), 0 25px 60px -40px rgba(15, 23, 42, 0.25)',
       },
+
+      // 自定义动效
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'fade-out': {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0.95)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'scale-out': {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(0.95)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 120ms ease-out',
+        'fade-out': 'fade-out 120ms ease-in',
+        'zoom-in-95': 'scale-in 120ms ease-out',
+        'zoom-out-95': 'scale-out 120ms ease-in',
+      },
     },
   },
 
