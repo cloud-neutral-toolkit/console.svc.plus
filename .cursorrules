@@ -1,0 +1,12 @@
+# UI Development Rules
+
+## 1. 弹窗与下拉规范 (Popovers & Dropdowns)
+- **定位逻辑**：除非特殊说明，右上角的触发器对应的弹出层必须强制 `right-0` (或 `align="end"`) 对齐。
+- **层级管理**：所有 Floating UI 必须显式声明 `z-[50+]` 以防被 Content Card 遮挡或透视。
+- **背景显示**：下拉容器背景应使用不透明色（如 `bg-white` 或主题定义的 `bg-surface`），避免透明度导致的视觉干扰。
+
+## 2. 列表项规范 (List Items)
+- **对齐**：所有带有图标的列表项必须使用 `flex items-center`。
+- **防止重叠**：图标与文字之间应保持足够的间距（推荐 `gap-3` 或 `12px`）。
+- **防压缩**：图标必须带有 `flex-shrink: 0` (或 Tailwind 的 `shrink-0`)，防止在容器宽度不足时图标变形。
+- **最小宽度**：涉及用户信息的容器应设置合理的 `min-width` (如 `min-w-[200px]`) 以保证长文字内容正常显示。

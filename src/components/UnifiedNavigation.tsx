@@ -275,7 +275,7 @@ export default function UnifiedNavigation() {
 
             <div className="hidden flex-1 items-center justify-end gap-3 lg:flex">
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 relative">
                   <DropdownMenu.Root open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
                     <DropdownMenu.Trigger asChild>
                       <button
@@ -291,7 +291,7 @@ export default function UnifiedNavigation() {
                       <DropdownMenu.Content
                         align="end"
                         sideOffset={8}
-                        className="z-50 min-w-[220px] overflow-hidden rounded-[12px] border border-surface-border bg-surface/95 p-1 shadow-shadow-md backdrop-blur-sm animate-in fade-in zoom-in-95 duration-[120ms] data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 motion-reduce:animate-none"
+                        className="z-50 min-w-[220px] overflow-hidden rounded-[12px] border border-surface-border bg-surface p-1 shadow-shadow-md animate-in fade-in zoom-in-95 duration-[120ms] data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 motion-reduce:animate-none"
                       >
                         <div className="px-4 py-3 border-b border-surface-border/50 mb-1">
                           <p className="text-sm font-semibold text-text leading-none mb-1.5">
@@ -311,14 +311,14 @@ export default function UnifiedNavigation() {
                             >
                               <Link
                                 href={item.href}
-                                className={`flex h-[38px] items-center gap-2.5 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
+                                className={`flex h-[38px] items-center gap-3 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
                                   ? "text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 focus:bg-rose-500/10 focus:text-rose-600"
                                   : "text-text-muted hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
                                   }`}
                                 onClick={() => setAccountMenuOpen(false)}
                               >
                                 {item.icon && (
-                                  <item.icon className={`w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
+                                  <item.icon className={`w-4 h-4 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
                                 )}
                                 <span>
                                   {typeof item.label === "function"
@@ -332,33 +332,41 @@ export default function UnifiedNavigation() {
                       </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                   </DropdownMenu.Root>
+                  <LanguageToggle />
+                  <ReleaseChannelSelector
+                    selected={selectedChannels}
+                    onToggle={toggleChannel}
+                    variant="icon"
+                  />
                 </div>
               ) : (
-                <div className="flex items-center gap-3 text-sm font-medium text-text-muted">
-                  <Link
-                    href="/login"
-                    className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
-                  >
-                    {nav.account.login}
-                  </Link>
-                  <span
-                    className="h-3 w-px bg-surface-border"
-                    aria-hidden="true"
+                <>
+                  <div className="flex items-center gap-3 text-sm font-medium text-text-muted">
+                    <Link
+                      href="/login"
+                      className="text-sm opacity-80 transition hover:text-primary hover:opacity-100"
+                    >
+                      {nav.account.login}
+                    </Link>
+                    <span
+                      className="h-3 w-px bg-surface-border"
+                      aria-hidden="true"
+                    />
+                    <Link
+                      href="/register"
+                      className="rounded-md border border-surface-border px-3 py-1 text-primary transition hover:border-primary/40 hover:bg-surface-muted"
+                    >
+                      {nav.account.register}
+                    </Link>
+                  </div>
+                  <LanguageToggle />
+                  <ReleaseChannelSelector
+                    selected={selectedChannels}
+                    onToggle={toggleChannel}
+                    variant="icon"
                   />
-                  <Link
-                    href="/register"
-                    className="rounded-md border border-surface-border px-3 py-1 text-primary transition hover:border-primary/40 hover:bg-surface-muted"
-                  >
-                    {nav.account.register}
-                  </Link>
-                </div>
+                </>
               )}
-              <LanguageToggle />
-              <ReleaseChannelSelector
-                selected={selectedChannels}
-                onToggle={toggleChannel}
-                variant="icon"
-              />
             </div>
           </div>
         </div>
