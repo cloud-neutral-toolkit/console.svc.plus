@@ -41,7 +41,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/agent'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'productivity', order: 0 },
+      sidebar: { section: 'productivity', order: 10 },
       featureFlag: {
         id: 'user-center.agent',
         title: 'Agent 管理',
@@ -58,7 +58,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/api'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'productivity', order: 1 },
+      sidebar: { section: 'productivity', order: 11 },
       featureFlag: {
         id: 'user-center.api',
         title: 'API 监控',
@@ -75,7 +75,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/account'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'management', order: 0 },
+      sidebar: { section: 'management', order: 20 },
     },
     {
       path: '/panel/subscription',
@@ -85,7 +85,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/subscription'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'management', order: 1 },
+      sidebar: { section: 'management', order: 21 },
       featureFlag: {
         id: 'user-center.subscription',
         title: '订阅与计费',
@@ -102,7 +102,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/ldp'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'management', order: 2 },
+      sidebar: { section: 'management', order: 22 },
       featureFlag: {
         id: 'user-center.ldp',
         title: 'LDP 管理',
@@ -119,7 +119,7 @@ export const userCenterExtension: DashboardExtension = {
       loader: () => import('./routes/theme'),
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'preferences', order: 0 },
+      sidebar: { section: 'preferences', order: 30 },
     },
     {
       path: '/panel/management',
@@ -130,7 +130,7 @@ export const userCenterExtension: DashboardExtension = {
       guard: { requireLogin: true, roles: ['admin', 'operator'] },
       match: 'startsWith',
       redirect: { unauthenticated: '/login', forbidden: '/panel' },
-      sidebar: { section: 'admin', order: 0, hidden: true },
+      sidebar: { section: 'admin', order: 99, hidden: true },
     },
   ],
 }
