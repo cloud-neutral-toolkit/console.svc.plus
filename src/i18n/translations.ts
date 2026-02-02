@@ -946,7 +946,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         loading: 'Loading your personalized space…',
         welcome: 'Welcome back, {name}.',
         guest: 'Sign in to unlock your user center.',
-        uuidNote: 'Your UUID uniquely identifies you across XControl services.',
+        uuidNote: 'Your UUID uniquely identifies you across our services.',
         lockBanner: {
           title: 'Finish MFA setup',
           body: 'Complete multi-factor authentication to unlock every panel section.',
@@ -1692,7 +1692,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         loading: '正在加载你的专属空间…',
         welcome: '欢迎回来，{name}。',
         guest: '请登录后解锁属于你的用户中心。',
-        uuidNote: 'UUID 是你在 XControl 中的唯一身份凭证，后续的所有服务都与它关联在一起。',
+        uuidNote: 'UUID 是你的唯一身份凭证，后续的所有服务都与它关联在一起。',
         lockBanner: {
           title: '完成多因素认证',
           body: '完成 MFA 绑定后即可访问所有控制台板块。',
