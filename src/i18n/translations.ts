@@ -587,6 +587,7 @@ export type Translation = {
       nextSteps: {
         title: string
         badge: string
+        learnMore: string
         items: { title: string; status: string }[]
       }
       stats: { value: string; label: string }[]
@@ -1136,7 +1137,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           playground: 'Try Samples in Playground',
           tutorials: 'View Tutorials',
         },
-        signedIn: 'Signed in',
+        signedIn: 'Signed in as {{username}}',
         trustedBy: 'Cloud-native · Vendor-neutral · Freely portable',
         heroCards: [
           {
@@ -1155,6 +1156,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         nextSteps: {
           title: 'Your Next Steps',
           badge: 'Data detected',
+          learnMore: 'Learn more',
           items: [
             { title: 'Add a new user to your project', status: 'NEW' },
             { title: 'Register a new application', status: 'NEW' },
@@ -1900,7 +1902,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           playground: '在 Playground 中试用',
           tutorials: '查看教程',
         },
-        signedIn: '已登录',
+        signedIn: '已登录为 {{username}}',
         trustedBy: '云原生 · 去平台绑定 · 可自由迁移',
         heroCards: [
           {
@@ -1919,6 +1921,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
         nextSteps: {
           title: '后续步骤',
           badge: '检测到数据',
+          learnMore: '了解更多',
           items: [
             { title: '向项目添加新用户', status: 'NEW' },
             { title: '注册新应用程序', status: 'NEW' },

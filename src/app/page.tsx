@@ -173,7 +173,7 @@ export function HeroSection() {
           {user ? (
             <div className="flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-1.5 text-sm font-medium text-success">
               <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              {t.signedIn} as {user.username}
+              {t.signedIn.replace('{{username}}', user.username)}
             </div>
           ) : (
             <button className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover">
@@ -259,7 +259,7 @@ export function NextStepsSection() {
                   {item.title}
                 </p>
                 <button className="inline-flex items-center gap-1 text-xs font-semibold text-primary transition hover:text-primary-hover">
-                  Learn more
+                  {t.nextSteps.learnMore}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </button>
               </div>
