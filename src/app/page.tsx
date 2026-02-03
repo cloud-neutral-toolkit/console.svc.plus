@@ -161,10 +161,12 @@ export function HeroSection() {
     <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
       <div className="flex flex-col justify-center space-y-8">
         <div className="space-y-4">
-          <p className="font-semibold uppercase tracking-wider text-text-subtle">
-            {t.hero.eyebrow}
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight text-heading sm:text-6xl">
+          {t.hero.eyebrow && (
+            <p className="font-semibold uppercase tracking-wider text-text-subtle">
+              {t.hero.eyebrow}
+            </p>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight text-heading sm:text-5xl">
             {t.hero.title}
           </h1>
           <p className="text-lg text-text-muted">{t.hero.subtitle}</p>
