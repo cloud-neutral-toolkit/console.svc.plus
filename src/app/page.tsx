@@ -61,66 +61,8 @@ const iconMap: Record<string, any> = {
 
 const getIcon = (key: string, fallback: any) => iconMap[key] || fallback;
 
-const nextSteps = [
-  { title: "Add a new user to your project", status: "NEW", icon: Users },
-  { title: "Register a new application", status: "NEW", icon: AppWindow },
-  { title: "Deploy your application", status: "READY", icon: Command },
-  { title: "Invite a user", status: "READY", icon: MousePointerClick },
-];
-
-const stats = [
-  {
-    value: "~150k",
-    label: "Applications integrated with Cloud-Neutral Toolkit",
-  },
-  { value: "~330k", label: "Daily active users" },
-  { value: "7", label: "Go check out our examples & guides" },
-];
-
-const shortcuts = [
-  {
-    title: "Get started",
-    description: "An overview of using Cloud-Neutral Toolkit",
-    icon: Sparkles,
-  },
-  {
-    title: "Creating your application",
-    description: "Integrate Cloud-Neutral Toolkit into your application",
-    icon: AppWindow,
-  },
-  {
-    title: "More about Authentication",
-    description:
-      "Understand all about authenticating with Cloud-Neutral Toolkit",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Understanding Authorization",
-    description:
-      "Scope out all about authorization using Cloud-Neutral Toolkit",
-    icon: Lock,
-  },
-  {
-    title: "Machine-to-Machine",
-    description: "Integrate Cloud-Neutral Toolkit into your services",
-    icon: Layers,
-  },
-  {
-    title: "Connect via CLI",
-    description: "Connect Cloud-Neutral Toolkit with your application via CLI",
-    icon: Terminal,
-  },
-  {
-    title: "REST & Admin APIs",
-    description:
-      "Programmatically integrate Cloud-Neutral Toolkit into your application",
-    icon: Link,
-  },
-];
-
 export default function HomePage() {
-  const { mode, isOpen, setIsOpen, setMinimized, close } = useMoltbotStore();
-  const isSidebar = mode !== 'overlay' && isOpen;
+  const { mode, isOpen } = useMoltbotStore();
 
   return (
     <div className="min-h-screen bg-background text-text transition-colors duration-150 flex flex-col">
@@ -128,10 +70,10 @@ export default function HomePage() {
 
       <div className={cn(
         "flex flex-1 relative overflow-hidden",
-        mode === 'left-sidebar' && "flex-row-reverse"
+        mode === 'left-sidebar' && isOpen && "flex-row-reverse"
       )}>
         <div className="flex-1 overflow-y-auto relative">
-          <div className="relative mx-auto max-w-7xl px-6 pb-20">
+          <div className="relative mx-auto max-w-6xl px-6 pb-20">
             <div
               className="absolute inset-0 bg-gradient-app-from opacity-20 pointer-events-none"
               aria-hidden
@@ -158,7 +100,7 @@ export function HeroSection() {
   const t = translations[language].marketing.home;
 
   return (
-    <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+    <section className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
       <div className="flex flex-col justify-center space-y-8">
         <div className="space-y-4">
           {t.hero.eyebrow && (
@@ -204,7 +146,7 @@ export function HeroSection() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        {t.heroCards.map((card, index: number) => {
+        {t.heroCards.map((card) => {
           const Icon = getIcon(card.title, PlusCircle);
           return (
             <div
