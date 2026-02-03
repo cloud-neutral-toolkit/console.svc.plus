@@ -1140,16 +1140,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
         trustedBy: 'Cloud-native · Vendor-neutral · Freely portable',
         heroCards: [
           {
-            title: 'Create your app',
-            description: 'Add your application and configure the client details to start integrating quickly.',
+            title: 'Global Acceleration Network',
+            description: 'Leverage globally distributed edge nodes to achieve high-speed application distribution and stable connections, ensuring users enjoy an ultra-fast access experience.',
           },
           {
-            title: 'Register your app',
-            description: 'Register your application to manage access and configure redirect URIs.',
+            title: 'Full-link SaaS Hosting',
+            description: 'Provide one-stop hosting services from development and deployment to maintenance, simplifying architectural complexity and helping applications quickly achieve SaaS transformation.',
           },
           {
-            title: 'Deploy your app',
-            description: 'Manage your application and users within Cloud-Neutral Toolkit for secure access.',
+            title: 'AI-Driven Observability',
+            description: 'Utilize AI to intelligently analyze full-link logs and performance metrics, identifying potential anomalies in real-time and providing predictive insights to ensure smooth system operation.',
           },
         ],
         nextSteps: {
@@ -1904,16 +1904,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
         trustedBy: '云原生 · 去平台绑定 · 可自由迁移',
         heroCards: [
           {
-            title: '创建您的应用',
-            description: '添加您的应用程序并配置客户端详细信息，以便快速开始集成。',
+            title: '全球加速网络',
+            description: '依托全球分布的边缘节点，实现应用的高速分发与稳定连接，确保用户享受极速的访问体验。',
           },
           {
-            title: '注册您的应用',
-            description: '注册您的应用程序以管理访问权限并配置重定向 URI。',
+            title: '全链路 SaaS 托管',
+            description: '提供从开发、部署到维护的一站式托管服务，简化架构复杂度，助力应用快速实现 SaaS 化转型。',
           },
           {
-            title: '部署您的应用',
-            description: '在 Cloud-Neutral Toolkit 中管理您的应用程序和用户，以确保访问安全。',
+            title: 'AI 驱动的可观测性',
+            description: '利用 AI 智能分析全链路日志与性能指标，实时识别潜在异常并提供预测性洞察，保障系统平稳运行。',
           },
         ],
         nextSteps: {
