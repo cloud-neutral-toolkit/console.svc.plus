@@ -1129,8 +1129,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
       home: {
         hero: {
           eyebrow: '',
-          title: 'Let inspiration go live instantly, let growth have no boundaries.',
-          subtitle: 'From Idea to prototype, one-stop full-link hosting. AI-driven self-evolution.',
+          title: 'Let inspiration go live instantly, let growth have no boundaries',
+          subtitle: 'From Idea to prototype, one-stop full-link hosting, AI-driven self-evolution',
         },
         heroButtons: {
           create: 'Create Application',
@@ -1894,8 +1894,8 @@ export const translations: Record<'en' | 'zh', Translation> = {
       home: {
         hero: {
           eyebrow: '',
-          title: '让灵感即刻上线，让增长永无边界。',
-          subtitle: '从 Idea 到产品原型，一站式全链路托管。AI 驱动的自我进化',
+          title: '让灵感即刻上线，让增长永无边界',
+          subtitle: '从 Idea 到产品原型，一站式全链路托管，AI 驱动的自我进化',
         },
         heroButtons: {
           create: '创建应用',

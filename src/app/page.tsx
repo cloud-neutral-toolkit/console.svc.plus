@@ -166,10 +166,10 @@ export function HeroSection() {
               {t.hero.eyebrow}
             </p>
           )}
-          <h1 className="text-3xl font-bold tracking-tight text-heading sm:text-5xl">
+          <h1 className="text-xl font-bold tracking-tight text-heading sm:text-3xl">
             {t.hero.title}
           </h1>
-          <p className="text-lg text-text-muted">{t.hero.subtitle}</p>
+          <p className="text-base text-text-muted">{t.hero.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {user ? (
