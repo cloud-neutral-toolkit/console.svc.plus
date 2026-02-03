@@ -29,9 +29,9 @@ import { AskAIDialog } from "../components/AskAIDialog";
 
 const iconMap: Record<string, any> = {
   // English keys
-  "Create your app": PlusCircle,
-  "Register your app": ShieldCheck,
-  "Deploy your app": Users,
+  "Global Acceleration Network": Link,
+  "Full-link SaaS Hosting": Layers,
+  "AI-Driven Observability": Sparkles,
   "Add a new user to your project": Users,
   "Register a new application": AppWindow,
   "Deploy your application": Command,
@@ -44,9 +44,9 @@ const iconMap: Record<string, any> = {
   "Connect via CLI": Terminal,
   "REST & Admin APIs": Link,
   // Chinese keys
-  创建您的应用: PlusCircle,
-  注册您的应用: ShieldCheck,
-  部署您的应用: Users,
+  全球加速网络: Link,
+  "全链路 SaaS 托管": Layers,
+  "AI 驱动的可观测性": Sparkles,
   向项目添加新用户: Users,
   注册新应用程序: AppWindow,
   部署您的应用程序: Command,
@@ -215,9 +215,6 @@ export function HeroSection() {
               <div className="space-y-1">
                 <h3 className="font-semibold text-heading">{card.title}</h3>
                 <p className="text-sm text-text-muted">{card.description}</p>
-                <button className="mt-2 flex items-center gap-1 text-xs font-semibold text-primary transition group-hover:text-primary-hover">
-                  Go to action <ArrowRight className="h-3 w-3" />
-                </button>
               </div>
             </div>
           );
