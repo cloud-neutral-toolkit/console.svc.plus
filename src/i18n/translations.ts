@@ -1129,7 +1129,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       home: {
         hero: {
           eyebrow: 'Create, authenticate, deploy',
-          title: 'Get started with Cloud-Neutral Toolkit',
+          title: 'Let inspiration go live instantly, let growth have no boundaries.',
           subtitle: 'Integrate Cloud-Neutral Toolkit into your application or use one of our samples to get started quickly.',
         },
         heroButtons: {
@@ -1141,16 +1141,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
         trustedBy: 'Cloud-native · Vendor-neutral · Freely portable',
         heroCards: [
           {
-            title: 'Global Acceleration Network',
-            description: 'Leverage globally distributed edge nodes to achieve high-speed application distribution and stable connections, ensuring users enjoy an ultra-fast access experience.',
+            title: '1. Acceleration: From Idea to Prototype',
+            description: 'Lightning-fast build speeds. No more distractions from environment configuration and infrastructure. Deep integration with Next.js and Go ensures your ideas have production-grade efficiency from the first line of code.',
           },
           {
-            title: 'Full-link SaaS Hosting',
-            description: 'Provide one-stop hosting services from development and deployment to maintenance, simplifying architectural complexity and helping applications quickly achieve SaaS transformation.',
+            title: '2. Delivery: One-stop Full-link Hosting',
+            description: 'Minimalist deployment, global distribution. Full lifecycle management from development to deployment. One-click delivery to global edge nodes. We handle the underlying complex architecture and SaaS transformation, you focus on product logic.',
           },
           {
-            title: 'AI-Driven Observability',
-            description: 'Utilize AI to intelligently analyze full-link logs and performance metrics, identifying potential anomalies in real-time and providing predictive insights to ensure smooth system operation.',
+            title: '3. Operations: AI-Driven Self-Evolution',
+            description: 'Intelligent monitoring, rock-solid stability. The system is not just running, it is evolving. AI-driven observability scanning full-link metrics in real-time, predicting and alerting before failures occur, ensuring global service stability.',
           },
         ],
         nextSteps: {
@@ -1894,7 +1894,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
       home: {
         hero: {
           eyebrow: '构建、认证、部署',
-          title: '开始使用 Cloud-Neutral Toolkit',
+          title: '让灵感即刻上线，让增长永无边界。',
           subtitle: '将 Cloud-Neutral Toolkit 集成到您的应用中，或使用我们的示例快速入门。',
         },
         heroButtons: {
@@ -1906,16 +1906,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
         trustedBy: '云原生 · 去平台绑定 · 可自由迁移',
         heroCards: [
           {
-            title: '全球加速网络',
-            description: '依托全球分布的边缘节点，实现应用的高速分发与稳定连接，确保用户享受极速的访问体验。',
+            title: '1. 加速：从 Idea 到产品原型',
+            description: '闪电般的构建速度 不再为环境配置和基础设施分心。支持 Next.js 与 Go 的深度集成，让您的创意从第一行代码开始，便具备生产级别的运行效率。',
           },
           {
-            title: '全链路 SaaS 托管',
-            description: '提供从开发、部署到维护的一站式托管服务，简化架构复杂度，助力应用快速实现 SaaS 化转型。',
+            title: '2. 交付：一站式全链路托管',
+            description: '极简部署，全球分发 从开发到部署的全生命周期管理，一键即可将应用推送到全球分布的边缘节点。我们负责底层的复杂架构与 SaaS 化转型，您只需专注于产品逻辑。',
           },
           {
-            title: 'AI 驱动的可观测性',
-            description: '利用 AI 智能分析全链路日志与性能指标，实时识别潜在异常并提供预测性洞察，保障系统平稳运行。',
+            title: '3. 运维：AI 驱动的自我进化',
+            description: '智能监控，稳若磐石 系统不仅在运行，更在持续进化。AI 驱动的可观测性系统实时扫描全链路指标，在故障露头前完成预测与预警，确保您的服务在全球范围内始终稳定。',
           },
         ],
         nextSteps: {
