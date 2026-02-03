@@ -3,21 +3,32 @@
 export const dynamic = 'error'
 
 import './globals.css'
+import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 import { AppProviders } from './AppProviders'
 
-export const metadata = {
+const DEFAULT_TITLE = 'Cloud-Neutral Console | Unified Cloud Native Tools'
+const DEFAULT_DESCRIPTION =
+  'Cloud-Neutral Console unifies cloud-native operations. Manage infrastructure, deployment, identity, and observability across providers from one control plane.'
+const DEFAULT_OG_IMAGE = '/icons/webchat.jpg'
+
+export const metadata: Metadata = {
   metadataBase: new URL('https://console.svc.plus'),
   title: {
-    default: 'Cloud-Neutral | Unified Cloud Native Tools',
+    default: DEFAULT_TITLE,
     template: '%s | Cloud-Neutral',
   },
-  description: 'Unified tools for your cloud native stack. Manage infrastructure, deployments, and services across multiple cloud providers with a single, powerful platform.',
+  description: DEFAULT_DESCRIPTION,
+  applicationName: 'Cloud-Neutral Console',
+  category: 'technology',
   keywords: ['cloud native', 'kubernetes', 'infrastructure', 'devops', 'cloud management', 'multi-cloud', 'platform engineering'],
   authors: [{ name: 'Cloud-Neutral Team' }],
   creator: 'Cloud-Neutral',
   publisher: 'Cloud-Neutral',
+  alternates: {
+    canonical: '/',
+  },
   formatDetection: {
     email: false,
     address: false,
@@ -26,15 +37,24 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://console.svc.plus',
-    title: 'Cloud-Neutral | Unified Cloud Native Tools',
-    description: 'Unified tools for your cloud native stack. Manage infrastructure, deployments, and services across multiple cloud providers.',
+    url: '/',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     siteName: 'Cloud-Neutral',
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'Cloud-Neutral Console',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cloud-Neutral | Unified Cloud Native Tools',
-    description: 'Unified tools for your cloud native stack',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,
@@ -71,9 +91,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@type': 'Organization',
               name: 'Cloud-Neutral',
               url: 'https://console.svc.plus',
-              logo: 'https://console.svc.plus/logo.png',
-              description: 'Unified tools for your cloud native stack',
-            }),
+              logo: 'https://console.svc.plus/icons/cloudnative_32.png',
+              description: DEFAULT_DESCRIPTION,
+            }).replace(/</g, '\\u003c'),
           }}
         />
         <script
@@ -84,8 +104,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@type': 'WebSite',
               name: 'Cloud-Neutral',
               url: 'https://console.svc.plus',
-              description: 'Unified tools for your cloud native stack',
-            }),
+              description: DEFAULT_DESCRIPTION,
+            }).replace(/</g, '\\u003c'),
           }}
         />
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
