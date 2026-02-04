@@ -80,6 +80,12 @@ yarn build
 
 > For detailed steps on configuring GitHub and Google OIDC authentication, please refer to the [OIDC Authentication Guide](./docs/integrations/oidc-auth.md).
 
+## 统计配置 (Homepage Stats Configuration)
+
+首页“注册用户数 / 访问量”所需 Cloudflare 变量说明，请参阅 [Cloudflare Web Analytics 集成配置](./docs/integrations/cloudflare-web-analytics.md)。
+
+> For Cloudflare variables used by homepage stats, see the [Cloudflare Web Analytics integration guide](./docs/integrations/cloudflare-web-analytics.md).
+
 ## 开发指南 (Development Guidelines)
 
 有关详细的编码标准、架构规则和 Agent 特定说明，请参阅 [AGENTS.md](./AGENTS.md)。
