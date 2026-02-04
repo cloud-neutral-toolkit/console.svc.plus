@@ -247,19 +247,9 @@ export function StatsSection() {
       ? numberFormatter.format(data.registeredUsers)
       : t.stats[0]?.value ?? "0+";
 
-  const visitsCount =
-    typeof data?.visits?.daily === "number"
-      ? data.visits.daily
-      : typeof data?.visits?.weekly === "number"
-        ? data.visits.weekly
-        : typeof data?.visits?.monthly === "number"
-          ? data.visits.monthly
-          : null;
-
-  const visitsValue =
-    typeof visitsCount === "number"
-      ? compactFormatter.format(visitsCount)
-      : t.stats[1]?.value ?? "0+";
+  const dailyVisits = typeof data?.visits?.daily === "number" ? data.visits.daily : null;
+  const weeklyVisits = typeof data?.visits?.weekly === "number" ? data.visits.weekly : null;
+  const monthlyVisits = typeof data?.visits?.monthly === "number" ? data.visits.monthly : null;
 
   const displayStats = [
     {
@@ -270,15 +260,23 @@ export function StatsSection() {
           : "Registered users",
     },
     {
-      value: visitsValue,
-      label: language === "zh" ? "访问量" : "Visits",
+      value: typeof dailyVisits === "number" ? compactFormatter.format(dailyVisits) : (t.stats[1]?.value ?? "0+"),
+      label: language === "zh" ? "最近24小时访量" : "Recent 24h Visits",
+    },
+    {
+      value: typeof weeklyVisits === "number" ? compactFormatter.format(weeklyVisits) : "0+",
+      label: language === "zh" ? "周访量" : "Weekly Visits",
+    },
+    {
+      value: typeof monthlyVisits === "number" ? compactFormatter.format(monthlyVisits) : "0+",
+      label: language === "zh" ? "月访量" : "Monthly Visits",
     },
     t.stats[2],
   ];
 
   return (
     <section className="rounded-2xl border border-surface-border bg-gradient-to-r from-surface-muted via-surface/0 to-surface-muted p-6 shadow-inner shadow-shadow-sm">
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {displayStats.map((stat, index: number) => (
           <div key={index} className="space-y-1 text-center md:text-left">
             <div className="text-3xl font-semibold text-heading">
