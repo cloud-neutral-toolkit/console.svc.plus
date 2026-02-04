@@ -380,11 +380,9 @@ type UserCenterOverviewTranslation = {
       copyLink: string
       copied: string
       downloadQr: string
-      downloadConfig: string
       generating: string
       error: string
       missingUuid: string
-      downloadTooltip: string
       warning: string
       macPath: string
       linuxPath: string
@@ -1033,12 +1031,9 @@ export const translations: Record<'en' | 'zh', Translation> = {
             copyLink: 'Copy link',
             copied: 'Link copied',
             downloadQr: 'Download QR',
-            downloadConfig: 'Download config',
             generating: 'Generating QR code…',
             error: 'We could not generate the QR code. Try again later.',
             missingUuid: 'We could not locate your UUID. Refresh the page or sign in again.',
-            downloadTooltip:
-              'Your UUID is the only credential required to access this node. Keep it private and do not share it.\nmacOS: /opt/homebrew/etc/config.json\nLinux: /usr/local/etc/config.json',
             warning: 'Your UUID is the only credential required to access this node. Keep it private and do not share it.',
             macPath: '/opt/homebrew/etc/config.json',
             linuxPath: '/usr/local/etc/config.json',
@@ -1808,12 +1803,9 @@ export const translations: Record<'en' | 'zh', Translation> = {
             copyLink: '复制链接',
             copied: '链接已复制',
             downloadQr: '下载二维码',
-            downloadConfig: '下载配置',
             generating: '二维码生成中…',
             error: '二维码生成失败，请稍后重试。',
             missingUuid: '无法获取您的 UUID，请刷新页面或重新登录。',
-            downloadTooltip:
-              'UUID 是访问节点的唯一凭证，请谨慎保存，勿随意分发。\nmacOS：/opt/homebrew/etc/config.json\nLinux：/usr/local/etc/config.json',
             warning: 'UUID 是访问节点的唯一凭证，请谨慎保存，勿随意分发。',
             macPath: '/opt/homebrew/etc/config.json',
             linuxPath: '/usr/local/etc/config.json',

@@ -26,11 +26,9 @@ export type VlessQrCopy = {
   copyLink: string
   copied: string
   downloadQr: string
-  downloadConfig: string
   generating: string
   error: string
   missingUuid: string
-  downloadTooltip: string
   qrAlt: string
 }
 
@@ -164,25 +162,7 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
     document.body.removeChild(link)
   }, [qrDataUrl, effectiveNode?.name])
 
-  const handleDownloadConfig = useCallback(() => {
-    const config = buildVlessConfig(uuid, effectiveNode)
-    if (!config) {
-      return
-    }
 
-    const contents = serializeConfigForDownload(config)
-    const blob = new Blob([contents], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `xray-client-${effectiveNode?.name || 'config'}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    URL.revokeObjectURL(url)
-  }, [uuid, effectiveNode])
 
   const isReady = Boolean(vlessUri && qrDataUrl && !generationError)
   const isDisabled = !vlessUri
@@ -302,17 +282,6 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
               >
                 <QrCode className="h-3.5 w-3.5" />
                 {copy.downloadQr}
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadConfig}
-                disabled={isDisabled}
-                className="inline-flex items-center gap-2 rounded-md border border-[color:var(--color-surface-border)] px-3 py-2 text-xs font-medium text-[var(--color-text)] transition-colors hover:border-[color:var(--color-primary-border)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
-                title={copy.downloadTooltip}
-                aria-label={copy.downloadTooltip}
-              >
-                <Download className="h-3.5 w-3.5" />
-                {copy.downloadConfig}
               </button>
             </div>
           </>
