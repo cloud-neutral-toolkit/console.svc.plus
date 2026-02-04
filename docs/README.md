@@ -46,6 +46,7 @@ This directory follows a standard open-source documentation layout and mirrors t
 - Integrations
   - `integrations/databases.md`
   - `integrations/cloud.md`
+  - `integrations/cloudflare-web-analytics.md`
   - `integrations/ai-providers.md`
 - Advanced
   - `advanced/performance.md`
