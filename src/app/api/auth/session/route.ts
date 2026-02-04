@@ -37,6 +37,20 @@ type SessionResponse = {
   error?: string
 }
 
+function normalizeRole(role: unknown): string {
+  if (typeof role !== 'string') {
+    return 'user'
+  }
+  const normalized = role.trim().toLowerCase()
+  if (!normalized) {
+    return 'user'
+  }
+  if (normalized === 'root' || normalized === 'super_admin') {
+    return 'admin'
+  }
+  return normalized
+}
+
 async function fetchSession(token: string) {
   try {
     const response = await fetch(`${ACCOUNT_API_BASE}/session`, {
@@ -86,10 +100,7 @@ export async function GET(request: NextRequest) {
         : false
   const derivedMfaPending = derivedMfaPendingSource && !derivedMfaEnabled
 
-  const normalizedRole =
-    typeof rawUser.role === 'string' && rawUser.role.trim().length > 0
-      ? rawUser.role.trim().toLowerCase()
-      : 'user'
+  const normalizedRole = normalizeRole(rawUser.role)
   const normalizedGroups = Array.isArray(rawUser.groups)
     ? rawUser.groups
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
