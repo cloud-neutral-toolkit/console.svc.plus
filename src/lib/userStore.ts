@@ -141,26 +141,26 @@ async function fetchSessionUser(): Promise<User | null> {
 
     const normalizedMfa = mfa
       ? {
-          ...mfa,
-          totpEnabled: Boolean(mfa.totpEnabled ?? mfaEnabled),
-          totpPending: Boolean(mfa.totpPending ?? mfaPending) && !Boolean(mfa.totpEnabled ?? mfaEnabled),
-        }
+        ...mfa,
+        totpEnabled: Boolean(mfa.totpEnabled ?? mfaEnabled),
+        totpPending: Boolean(mfa.totpPending ?? mfaPending) && !Boolean(mfa.totpEnabled ?? mfaEnabled),
+      }
       : {
-          totpEnabled: Boolean(mfaEnabled),
-          totpPending: Boolean(mfaPending) && !Boolean(mfaEnabled),
-        }
+        totpEnabled: Boolean(mfaEnabled),
+        totpPending: Boolean(mfaPending) && !Boolean(mfaEnabled),
+      }
 
     const normalizedRole = normalizeRole(role)
     const rawRole = typeof role === 'string' ? role.trim().toLowerCase() : ''
     const normalizedGroups = Array.isArray(groups)
       ? groups
-          .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-          .map((value) => value.trim())
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .map((value) => value.trim())
       : []
     const normalizedPermissions = Array.isArray(permissions)
       ? permissions
-          .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-          .map((value) => value.trim())
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .map((value) => value.trim())
       : []
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
     const normalizedUsernameLower = normalizedUsername?.trim().toLowerCase() ?? ''
@@ -179,7 +179,7 @@ async function fetchSessionUser(): Promise<User | null> {
       normalizedEmail === 'demo@svc.plus' ||
       isNamedDemo ||
       normalizedGroups.some((value) => value.toLowerCase() === 'readonly role')
-    const normalizedReadOnly = Boolean(sessionUser.readOnly ?? inferredReadOnly)
+    const normalizedReadOnly = Boolean(sessionUser.readOnly) || inferredReadOnly
     const normalizedProxyUuid =
       typeof sessionUser.proxyUuid === 'string' && sessionUser.proxyUuid.trim().length > 0
         ? sessionUser.proxyUuid.trim()
@@ -195,33 +195,33 @@ async function fetchSessionUser(): Promise<User | null> {
         : undefined
     const normalizedTenants = Array.isArray(sessionUser.tenants)
       ? sessionUser.tenants
-          .map((tenant) => {
-            if (!tenant || typeof tenant !== 'object') {
-              return null
-            }
-            const identifier =
-              typeof tenant.id === 'string' && tenant.id.trim().length > 0
-                ? tenant.id.trim()
-                : undefined
-            if (!identifier) {
-              return null
-            }
+        .map((tenant) => {
+          if (!tenant || typeof tenant !== 'object') {
+            return null
+          }
+          const identifier =
+            typeof tenant.id === 'string' && tenant.id.trim().length > 0
+              ? tenant.id.trim()
+              : undefined
+          if (!identifier) {
+            return null
+          }
 
-            const normalizedTenant: TenantMembership = {
-              id: identifier,
-            }
+          const normalizedTenant: TenantMembership = {
+            id: identifier,
+          }
 
-            if (typeof tenant.name === 'string' && tenant.name.trim().length > 0) {
-              normalizedTenant.name = tenant.name.trim()
-            }
+          if (typeof tenant.name === 'string' && tenant.name.trim().length > 0) {
+            normalizedTenant.name = tenant.name.trim()
+          }
 
-            if (typeof tenant.role === 'string' && tenant.role.trim().length > 0) {
-              normalizedTenant.role = normalizeRole(tenant.role)
-            }
+          if (typeof tenant.role === 'string' && tenant.role.trim().length > 0) {
+            normalizedTenant.role = normalizeRole(tenant.role)
+          }
 
-            return normalizedTenant
-          })
-          .filter((tenant): tenant is TenantMembership => Boolean(tenant))
+          return normalizedTenant
+        })
+        .filter((tenant): tenant is TenantMembership => Boolean(tenant))
       : undefined
 
     return {
