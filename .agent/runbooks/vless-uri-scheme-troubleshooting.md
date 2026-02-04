@@ -97,6 +97,198 @@ This runbook helps diagnose and fix issues with VLESS QR code generation, copy l
 
 ## Common Issues
 
+### Issue 0: `/api/agent/nodes` Returns 500 Internal Server Error
+
+**Symptoms:**
+- Browser console shows: `GET /api/agent/nodes 500 (Internal Server Error)`
+- VLESS QR card displays: "❌ 节点数据缺失 / 无法从服务器获取代理节点列表"
+- Frontend error: `[VLESS] Cannot build URI: node is undefined`
+
+**Root Cause:**
+
+The `agentRegistry` in `accounts.svc.plus` is not properly initialized, causing `h.agentStatusReader` to be `nil` when `/api/agent/nodes` is called.
+
+**Architecture:**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  hk-xhttp.svc.plus (VM)                                  │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │  agent.svc.plus                                    │  │
+│  │  Config: /etc/agent/account-agent.yaml             │  │
+│  │  - agent.id: "hk-xhttp.svc.plus"                   │  │
+│  │  - apiToken: "uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I="  │
+│  │  - controllerUrl: "https://accounts-svc-plus-...run.app"    │
+│  └──────────────────┬─────────────────────────────────┘  │
+└─────────────────────┼─────────────────────────────────────┘
+                      │ POST /api/agent-server/v1/status
+                      │ Authorization: Bearer <apiToken>
+                      ▼
+┌──────────────────────────────────────────────────────────┐
+│  Cloud Run: accounts-svc-plus                            │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │  Environment Variables (REQUIRED):                 │  │
+│  │  - INTERNAL_SERVICE_TOKEN=uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I=  │
+│  │  - AGENT_ID=hk-xhttp.svc.plus                      │  │
+│  └────────────────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │  agentRegistry Initialization (main.go:659-673)    │  │
+│  │  if INTERNAL_SERVICE_TOKEN is set:                 │  │
+│  │    agentID = AGENT_ID (or "internal-agent")        │  │
+│  │    registry = NewRegistry({                        │  │
+│  │      ID: agentID,                                  │  │
+│  │      Token: INTERNAL_SERVICE_TOKEN                 │  │
+│  │    })                                              │  │
+│  └────────────────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │  agentAuthMiddleware (main.go:1002-1021)           │  │
+│  │  1. Extract Bearer token from Authorization header│  │
+│  │  2. registry.Authenticate(token)                   │  │
+│  │  3. If valid, set agent identity in context        │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Configuration Mapping:**
+
+| Component | Variable | Value | Purpose |
+|-----------|----------|-------|---------|
+| agent.svc.plus | `agent.id` | `hk-xhttp.svc.plus` | Agent's self-reported ID |
+| agent.svc.plus | `agent.apiToken` | `uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I=` | Authentication token |
+| accounts.svc.plus | `INTERNAL_SERVICE_TOKEN` | `uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I=` | **Must match** agent.apiToken |
+| accounts.svc.plus | `AGENT_ID` | `hk-xhttp.svc.plus` | **Must match** agent.id |
+
+**Diagnosis Steps:**
+
+1. **Check Cloud Run environment variables:**
+   ```bash
+   gcloud run services describe accounts-svc-plus \
+     --region=asia-northeast1 \
+     --format="value(spec.template.spec.containers[0].env)" | \
+     grep -E "INTERNAL_SERVICE_TOKEN|AGENT_ID"
+   ```
+   
+   Expected output:
+   ```
+   {'name': 'INTERNAL_SERVICE_TOKEN', 'value': 'uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I='}
+   {'name': 'AGENT_ID', 'value': 'hk-xhttp.svc.plus'}
+   ```
+
+2. **Check agent heartbeat logs:**
+   ```bash
+   gcloud logging read 'resource.type=cloud_run_revision AND resource.labels.service_name=accounts-svc-plus AND textPayload:"agent status"' \
+     --limit=10 \
+     --format="value(textPayload)" \
+     --project=xzerolab-480008
+   ```
+   
+   ✅ **Good** (agent authenticated):
+   ```
+   time=2026-02-04T15:42:35.158Z level=INFO msg="agent status updated" agent=hk-xhttp.svc.plus healthy=true clients=7
+   time=2026-02-04T15:42:35.158Z level=INFO msg=request method=POST path=/api/agent-server/v1/status status=204 latency=142.949µs
+   ```
+   
+   ❌ **Bad** (authentication failed):
+   ```
+   time=2026-02-04T15:46:35.098Z level=INFO msg=request method=POST path=/api/agent-server/v1/status status=401 latency=48.72µs
+   ```
+
+3. **Check agent configuration on VM:**
+   ```bash
+   ssh root@hk-xhttp.svc.plus
+   cat /etc/agent/account-agent.yaml | grep -A 5 "agent:"
+   ```
+   
+   Expected:
+   ```yaml
+   agent:
+     id: "hk-xhttp.svc.plus"
+     controllerUrl: "https://accounts-svc-plus-266500572462.asia-northeast1.run.app"
+     apiToken: "uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I="
+     statusInterval: 1m
+   ```
+
+**Fix:**
+
+1. **Set Cloud Run environment variables:**
+   ```bash
+   gcloud run services update accounts-svc-plus \
+     --region=asia-northeast1 \
+     --set-env-vars="INTERNAL_SERVICE_TOKEN=uTvryFvAbz6M5sRtmTaSTQY6otLZ95hneBsWqXu+35I=,AGENT_ID=hk-xhttp.svc.plus"
+   ```
+
+2. **Verify deployment:**
+   ```bash
+   # Wait for deployment to complete
+   gcloud run services describe accounts-svc-plus \
+     --region=asia-northeast1 \
+     --format="value(status.url)"
+   ```
+
+3. **Wait for agent heartbeat (1 minute):**
+   ```bash
+   # Agent sends heartbeat every 1 minute (statusInterval: 1m)
+   sleep 65
+   ```
+
+4. **Verify agent registration:**
+   ```bash
+   gcloud logging read 'resource.type=cloud_run_revision AND resource.labels.service_name=accounts-svc-plus AND textPayload:"agent status updated"' \
+     --limit=1 \
+     --format="value(textPayload)" \
+     --project=xzerolab-480008
+   ```
+   
+   Should show:
+   ```
+   level=INFO msg="agent status updated" agent=hk-xhttp.svc.plus healthy=true clients=X
+   ```
+
+5. **Test API:**
+   ```bash
+   curl -H "Cookie: xc_session=$TOKEN" \
+     https://console.svc.plus/api/agent/nodes | jq '.'
+   ```
+   
+   Expected: Array with node data (not 500 error)
+
+**Code Changes Required:**
+
+Modified `accounts.svc.plus/cmd/accountsvc/main.go` (lines 659-673):
+
+```go
+} else if token := os.Getenv("INTERNAL_SERVICE_TOKEN"); token != "" {
+	// Fallback: if no credentials configured but we have an internal token,
+	// accept any agent that presents this token (ID will be taken from agent's self-reported ID)
+	// This allows the agent to use its configured ID (e.g., "hk-xhttp.svc.plus")
+	agentID := strings.TrimSpace(os.Getenv("AGENT_ID"))
+	if agentID == "" {
+		agentID = "internal-agent" // fallback ID if not specified
+	}
+	agentRegistry, err = agentserver.NewRegistry(agentserver.Config{
+		Credentials: []agentserver.Credential{{
+			ID:     agentID,
+			Name:   "Internal Agent",
+			Token:  token,
+			Groups: []string{"internal"},
+		}},
+	})
+	if err != nil {
+		return err
+	}
+}
+```
+
+**Verification:**
+
+After fix, you should see:
+- ✅ Agent heartbeat logs show `status=204` (success) instead of `status=401`
+- ✅ `/api/agent/nodes` returns `200` with node data
+- ✅ VLESS QR code displays correctly in UI
+- ✅ No `[VLESS] Cannot build URI` errors in browser console
+
+---
+
 ### Issue 1: No Nodes Displayed / Empty Node List
 
 **Symptoms:**
