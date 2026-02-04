@@ -165,7 +165,14 @@ async function fetchSessionUser(): Promise<User | null> {
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
     const normalizedUsernameLower = normalizedUsername?.trim().toLowerCase() ?? ''
     const normalizedNameLower = normalizedName?.trim().toLowerCase() ?? ''
-    const isNamedDemo = normalizedUsernameLower === 'demo' || normalizedNameLower === 'demo'
+    const identifierLower = identifier.toLowerCase()
+    const isNamedDemo =
+      normalizedUsernameLower === 'demo' ||
+      normalizedUsernameLower.startsWith('demo-') ||
+      normalizedNameLower === 'demo' ||
+      normalizedNameLower.startsWith('demo-') ||
+      identifierLower === 'demo' ||
+      identifierLower.startsWith('demo-')
     const inferredReadOnly =
       rawRole === 'readonly' ||
       rawRole === 'read_only' ||

@@ -110,20 +110,32 @@ export async function GET(request: NextRequest) {
   const rawRole = typeof rawUser.role === 'string' ? rawUser.role.trim().toLowerCase() : ''
   const normalizedGroups = Array.isArray(rawUser.groups)
     ? rawUser.groups
-        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-        .map((value) => value.trim())
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map((value) => value.trim())
     : []
   const normalizedPermissions = Array.isArray(rawUser.permissions)
     ? rawUser.permissions
-        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-        .map((value) => value.trim())
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map((value) => value.trim())
     : []
+  const normalizedUsernameLower = String(rawUser.username ?? '').trim().toLowerCase()
+  const normalizedNameLower = String(rawUser.name ?? '').trim().toLowerCase()
+  const identifierLower = (identifier ?? '').toLowerCase()
+  const isNamedDemo =
+    normalizedUsernameLower === 'demo' ||
+    normalizedUsernameLower.startsWith('demo-') ||
+    normalizedNameLower === 'demo' ||
+    normalizedNameLower.startsWith('demo-') ||
+    identifierLower === 'demo' ||
+    identifierLower.startsWith('demo-')
+
   const normalizedReadOnly =
     Boolean(rawUser.readOnly) ||
     normalizedGroups.some((group) => group.toLowerCase() === 'readonly role') ||
     rawRole === 'readonly' ||
     rawRole === 'read_only' ||
-    String(rawUser.email ?? '').trim().toLowerCase() === 'demo@svc.plus'
+    String(rawUser.email ?? '').trim().toLowerCase() === 'demo@svc.plus' ||
+    isNamedDemo
   const normalizedProxyUuid =
     typeof rawUser.proxyUuid === 'string' && rawUser.proxyUuid.trim().length > 0
       ? rawUser.proxyUuid.trim()
@@ -139,46 +151,46 @@ export async function GET(request: NextRequest) {
       : undefined
   const normalizedTenants = Array.isArray(rawUser.tenants)
     ? rawUser.tenants
-        .map((tenant) => {
-          if (!tenant || typeof tenant !== 'object') {
-            return null
-          }
+      .map((tenant) => {
+        if (!tenant || typeof tenant !== 'object') {
+          return null
+        }
 
-          const identifier =
-            typeof tenant.id === 'string' && tenant.id.trim().length > 0
-              ? tenant.id.trim()
-              : undefined
-          if (!identifier) {
-            return null
-          }
+        const identifier =
+          typeof tenant.id === 'string' && tenant.id.trim().length > 0
+            ? tenant.id.trim()
+            : undefined
+        if (!identifier) {
+          return null
+        }
 
-          const normalizedTenant: { id: string; name?: string; role?: string } = {
-            id: identifier,
-          }
+        const normalizedTenant: { id: string; name?: string; role?: string } = {
+          id: identifier,
+        }
 
-          if (typeof tenant.name === 'string' && tenant.name.trim().length > 0) {
-            normalizedTenant.name = tenant.name.trim()
-          }
+        if (typeof tenant.name === 'string' && tenant.name.trim().length > 0) {
+          normalizedTenant.name = tenant.name.trim()
+        }
 
-          if (typeof tenant.role === 'string' && tenant.role.trim().length > 0) {
-            normalizedTenant.role = tenant.role.trim().toLowerCase()
-          }
+        if (typeof tenant.role === 'string' && tenant.role.trim().length > 0) {
+          normalizedTenant.role = tenant.role.trim().toLowerCase()
+        }
 
-          return normalizedTenant
-        })
-        .filter((tenant): tenant is { id: string; name?: string; role?: string } => Boolean(tenant))
+        return normalizedTenant
+      })
+      .filter((tenant): tenant is { id: string; name?: string; role?: string } => Boolean(tenant))
     : undefined
 
   const normalizedMfa = Object.keys(rawMfa).length
     ? {
-        ...rawMfa,
-        totpEnabled: Boolean(rawMfa.totpEnabled ?? derivedMfaEnabled),
-        totpPending: Boolean(rawMfa.totpPending ?? derivedMfaPending),
-      }
+      ...rawMfa,
+      totpEnabled: Boolean(rawMfa.totpEnabled ?? derivedMfaEnabled),
+      totpPending: Boolean(rawMfa.totpPending ?? derivedMfaPending),
+    }
     : {
-        totpEnabled: derivedMfaEnabled,
-        totpPending: derivedMfaPending,
-      }
+      totpEnabled: derivedMfaEnabled,
+      totpPending: derivedMfaPending,
+    }
 
   const normalizedUser = identifier ? { ...rawUser, id: identifier, uuid: identifier } : rawUser
 
