@@ -58,6 +58,8 @@ type AccountSessionResponse = {
 }
 
 const KNOWN_ROLE_MAP: Record<string, AccountUserRole> = {
+  root: 'admin',
+  super_admin: 'admin',
   admin: 'admin',
   administrator: 'admin',
   operator: 'operator',
@@ -246,4 +248,3 @@ export async function getAccountSession(request?: NextRequest): Promise<AccountS
     return { token, user: null }
   }
 }
-

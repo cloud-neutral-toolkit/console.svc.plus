@@ -50,6 +50,8 @@ type UserStore = {
 }
 
 const KNOWN_ROLE_MAP: Record<string, UserRole> = {
+  root: 'admin',
+  super_admin: 'admin',
   admin: 'admin',
   administrator: 'admin',
   operator: 'operator',
