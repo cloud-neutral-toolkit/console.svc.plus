@@ -92,14 +92,14 @@ type CloudflareGraphqlPayload = {
   data?: {
     viewer?: {
       accounts?: Array<{
-        daily?: Array<{ sum?: { visits?: number; uniq?: number } }>;
-        weekly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
-        monthly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        rumPageloadEventsAdaptiveGroups?: Array<{ sum?: { visits?: number } }>;
       }>;
       zones?: Array<{
-        daily?: Array<{ sum?: { visits?: number; uniq?: number } }>;
-        weekly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
-        monthly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        httpRequests1dGroups?: Array<{
+          dimensions?: { date?: string };
+          sum?: { requests?: number; pageViews?: number };
+          uniq?: { uniques?: number };
+        }>;
       }>;
     };
   };
@@ -108,22 +108,6 @@ type CloudflareGraphqlPayload = {
 
 function escapeGraphqlString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-function extractVisits(payload: CloudflareGraphqlPayload | null): VisitsSummary {
-  const account =
-    payload?.data?.viewer?.accounts?.[0] ?? payload?.data?.viewer?.zones?.[0] ?? null;
-  return {
-    daily: asNumber(
-      account?.daily?.[0]?.sum?.uniq ?? account?.daily?.[0]?.sum?.visits ?? null,
-    ),
-    weekly: asNumber(
-      account?.weekly?.[0]?.sum?.uniq ?? account?.weekly?.[0]?.sum?.visits ?? null,
-    ),
-    monthly: asNumber(
-      account?.monthly?.[0]?.sum?.uniq ?? account?.monthly?.[0]?.sum?.visits ?? null,
-    ),
-  };
 }
 
 async function queryCloudflareGraphql(
@@ -157,132 +141,71 @@ async function queryCloudflareGraphql(
   return payload;
 }
 
-async function resolveZoneTagFromSiteTag(
-  apiToken: string,
-  accountId: string,
-  siteTag: string,
-): Promise<string | null> {
-  const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/rum/site_info/list?page=1&per_page=100`;
-  try {
-    const response = await fetch(endpoint, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${apiToken}`,
-      },
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      return null;
-    }
-    const payload = (await response.json().catch(() => null)) as
-      | {
-        result?: Array<{
-          siteTag?: string;
-          site_tag?: string;
-          zoneTag?: string;
-          zone_tag?: string;
-        }>;
-      }
-      | null;
-    const sites = payload?.result ?? [];
-    const match = sites.find((entry) => {
-      const currentSiteTag = entry.siteTag ?? entry.site_tag;
-      return typeof currentSiteTag === "string" && currentSiteTag === siteTag;
-    });
-    const zoneTag = match?.zoneTag ?? match?.zone_tag;
-    return typeof zoneTag === "string" && zoneTag.trim().length > 0
-      ? zoneTag.trim()
-      : null;
-  } catch (error) {
-    console.warn("Failed to resolve Cloudflare zone tag from site tag", error);
-    return null;
-  }
-}
-
 async function fetchCloudflareVisits(): Promise<VisitsSummary> {
   const apiToken = process.env.CLOUDFLARE_API_TOKEN?.trim();
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
-  const siteTag = process.env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG?.trim();
+  const zoneTag = process.env.CLOUDFLARE_ZONE_TAG?.trim();
 
-  if (!apiToken || !accountId || !siteTag) {
+  // If we don't have the zone tag, we can't query zone analytics
+  if (!apiToken || !zoneTag) {
     return { daily: null, weekly: null, monthly: null };
   }
 
   const now = new Date();
-  const dailySince = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const weeklySince = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const monthlySince = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const accountTag = escapeGraphqlString(accountId);
-  const escapedSiteTag = escapeGraphqlString(siteTag);
-  const until = now.toISOString();
-  const dailyFrom = dailySince.toISOString();
-  const weeklyFrom = weeklySince.toISOString();
-  const monthlyFrom = monthlySince.toISOString();
+  const today = now.toISOString().split("T")[0];
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
 
-  const rumQuery = `
+  const query = `
     query {
       viewer {
-        accounts(filter: { accountTag: "${accountTag}" }) {
-          daily: rumPageloadEventsAdaptiveGroups(
-            limit: 1
-            filter: { siteTag: "${escapedSiteTag}", datetime_geq: "${dailyFrom}", datetime_lt: "${until}" }
-          ) { sum { visits } }
-          weekly: rumPageloadEventsAdaptiveGroups(
-            limit: 1
-            filter: { siteTag: "${escapedSiteTag}", datetime_geq: "${weeklyFrom}", datetime_lt: "${until}" }
-          ) { sum { visits } }
-          monthly: rumPageloadEventsAdaptiveGroups(
-            limit: 1
-            filter: { siteTag: "${escapedSiteTag}", datetime_geq: "${monthlyFrom}", datetime_lt: "${until}" }
-          ) { sum { visits } }
+        zones(filter: { zoneTag: "${escapeGraphqlString(zoneTag)}" }) {
+          httpRequests1dGroups(
+            limit: 30
+            filter: { date_geq: "${thirtyDaysAgo}", date_lt: "${today}" }
+            orderBy: [date_ASC]
+          ) {
+            dimensions { date }
+            uniq { uniques }
+          }
         }
       }
     }
   `;
 
   try {
-    const rumPayload = await queryCloudflareGraphql(apiToken, rumQuery);
-    const rumVisits = extractVisits(rumPayload);
-    if (hasAnyVisits(rumVisits)) {
-      return rumVisits;
+    const payload = await queryCloudflareGraphql(apiToken, query);
+    const groups = payload?.data?.viewer?.zones?.[0]?.httpRequests1dGroups ?? [];
+
+    // Sort groups just in case
+    groups.sort((a, b) =>
+      (a.dimensions?.date ?? "").localeCompare(b.dimensions?.date ?? "")
+    );
+
+    let daily = null;
+    let weekly = 0;
+    let monthly = 0;
+
+    if (groups.length > 0) {
+      // The last complete day data (yesterday)
+      const lastEntry = groups[groups.length - 1];
+      daily = asNumber(lastEntry?.uniq?.uniques);
     }
 
-    const zoneTag =
-      process.env.CLOUDFLARE_ZONE_TAG?.trim() ??
-      (await resolveZoneTagFromSiteTag(apiToken, accountId, siteTag));
+    const reverseGroups = [...groups].reverse();
+    // Summing uniques is an approximation for longer periods as distinct counts over larger windows aren't strictly additive
+    // But it's usually "good enough" for marketing stats if true unique data isn't available
+    monthly = reverseGroups.reduce((acc, entry) => acc + (entry?.uniq?.uniques ?? 0), 0);
+    // Weekly: last 7 days
+    weekly = reverseGroups.slice(0, 7).reduce((acc, entry) => acc + (entry?.uniq?.uniques ?? 0), 0);
 
-    if (!zoneTag) {
-      return rumVisits;
-    }
-
-    const escapedZoneTag = escapeGraphqlString(zoneTag);
-    const zoneQuery = `
-      query {
-        viewer {
-          zones(filter: { zoneTag: "${escapedZoneTag}" }) {
-            daily: httpRequests1hGroups(
-              limit: 1
-              filter: { datetime_geq: "${dailyFrom}", datetime_lt: "${until}" }
-            ) { sum { uniq: uniqueVisitors } }
-            weekly: httpRequests1hGroups(
-              limit: 1
-              filter: { datetime_geq: "${weeklyFrom}", datetime_lt: "${until}" }
-            ) { sum { uniq: uniqueVisitors } }
-            monthly: httpRequests1hGroups(
-              limit: 1
-              filter: { datetime_geq: "${monthlyFrom}", datetime_lt: "${until}" }
-            ) { sum { uniq: uniqueVisitors } }
-          }
-        }
-      }
-    `;
-
-    const zonePayload = await queryCloudflareGraphql(apiToken, zoneQuery);
-    const zoneVisits = extractVisits(zonePayload);
-    return hasAnyVisits(zoneVisits) ? zoneVisits : rumVisits;
+    return {
+      daily: daily ?? null,
+      weekly: weekly > 0 ? weekly : null,
+      monthly: monthly > 0 ? monthly : null,
+    };
   } catch (error) {
-    console.error("Failed to fetch Cloudflare web analytics", error);
+    console.error("Failed to fetch Cloudflare zone analytics", error);
     return { daily: null, weekly: null, monthly: null };
   }
 }
