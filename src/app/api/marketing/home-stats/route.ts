@@ -38,9 +38,9 @@ function shouldUseLongCache(payload: HomeStatsPayload): boolean {
 }
 
 function jsonResponse(payload: HomeStatsPayload): NextResponse<HomeStatsPayload> {
-  const isComplete = shouldUseLongCache(payload);
-  const sMaxAge = isComplete ? 3600 : 300;
-  const staleWhileRevalidate = isComplete ? 300 : 60;
+  // Cache for 1 hour (3600s) as requested for hourly updates on users/daily visits.
+  const sMaxAge = 3600;
+  const staleWhileRevalidate = 600;
 
   return NextResponse.json(payload, {
     headers: {
@@ -212,7 +212,9 @@ async function fetchCloudflareVisits(): Promise<VisitsSummary> {
 
 export async function GET() {
   const now = Date.now();
-  if (cachedPayload && now - cachedAt < cachedTtlMs) {
+  // User requested hourly updates for registered users and daily visits.
+  // We set the cache TTL to 1 hour to satisfy the most frequent update requirement.
+  if (cachedPayload && now - cachedAt < ONE_HOUR_MS) {
     return jsonResponse(cachedPayload);
   }
 
@@ -229,7 +231,8 @@ export async function GET() {
 
   cachedPayload = payload;
   cachedAt = now;
-  cachedTtlMs = shouldUseLongCache(payload) ? ONE_HOUR_MS : FIVE_MINUTES_MS;
+  // Set cache TTL to 1 hour
+  cachedTtlMs = ONE_HOUR_MS;
 
   return jsonResponse(payload);
 }
