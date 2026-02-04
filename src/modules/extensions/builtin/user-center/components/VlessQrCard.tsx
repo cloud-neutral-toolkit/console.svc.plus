@@ -232,7 +232,35 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
           ))}
         </div>
 
-        {vlessUri ? (
+        {!uuid ? (
+          <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
+            <p className="font-semibold">❌ UUID 缺失</p>
+            <p className="mt-1">{copy.missingUuid}</p>
+          </div>
+        ) : !nodes || nodes.length === 0 ? (
+          <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
+            <p className="font-semibold">❌ 节点数据缺失</p>
+            <p className="mt-1">无法从服务器获取代理节点列表。请检查 /api/agent/nodes 接口是否正常。</p>
+          </div>
+        ) : !effectiveNode ? (
+          <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
+            <p className="font-semibold">❌ 有效节点缺失</p>
+            <p className="mt-1">节点数据存在但无法解析。请联系管理员。</p>
+          </div>
+        ) : !effectiveNode.transport ? (
+          <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
+            <p className="font-semibold">❌ Transport 类型缺失</p>
+            <p className="mt-1">节点 {effectiveNode.name || effectiveNode.address} 缺少 transport 字段。</p>
+          </div>
+        ) : !vlessUri ? (
+          <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
+            <p className="font-semibold">❌ URI Scheme 缺失</p>
+            <p className="mt-1">
+              节点 {effectiveNode.name || effectiveNode.address} 缺少 {preferredTransport === 'tcp' ? 'uri_scheme_tcp' : 'uri_scheme_xhttp'} 字段。
+              请确保 accounts.svc.plus 正确返回 URI scheme 模板。
+            </p>
+          </div>
+        ) : (
           <>
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-lg border border-[color:var(--color-surface-border)] bg-[var(--color-surface)]">
@@ -263,29 +291,28 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={handleCopyLink}
                 disabled={isDisabled}
-                className="inline-flex items-center gap-2 rounded-md border border-[color:var(--color-primary-border)] px-3 py-2 text-xs font-medium text-[var(--color-primary)] transition-colors hover:border-[color:var(--color-primary)] hover:bg-[var(--color-primary-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-[color:var(--color-primary-border)] px-4 py-2 text-sm font-medium text-[var(--color-primary)] transition-colors hover:border-[color:var(--color-primary)] hover:bg-[var(--color-primary-muted)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Copy className="h-3.5 w-3.5" />
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? copy.copied : copy.copyLink}
               </button>
+
               <button
                 type="button"
                 onClick={handleDownloadQr}
                 disabled={!isReady}
-                className="inline-flex items-center gap-2 rounded-md border border-[color:var(--color-surface-border)] px-3 py-2 text-xs font-medium text-[var(--color-text)] transition-colors hover:border-[color:var(--color-primary-border)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <QrCode className="h-3.5 w-3.5" />
+                <Download className="h-4 w-4" />
                 {copy.downloadQr}
               </button>
             </div>
           </>
-        ) : (
-          <p className="text-xs text-[var(--color-text-subtle)]">{copy.missingUuid}</p>
         )}
       </div>
     </Card>
