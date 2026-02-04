@@ -92,14 +92,14 @@ type CloudflareGraphqlPayload = {
   data?: {
     viewer?: {
       accounts?: Array<{
-        daily?: Array<{ sum?: { visits?: number } }>;
-        weekly?: Array<{ sum?: { visits?: number } }>;
-        monthly?: Array<{ sum?: { visits?: number } }>;
+        daily?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        weekly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        monthly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
       }>;
       zones?: Array<{
-        daily?: Array<{ sum?: { visits?: number } }>;
-        weekly?: Array<{ sum?: { visits?: number } }>;
-        monthly?: Array<{ sum?: { visits?: number } }>;
+        daily?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        weekly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
+        monthly?: Array<{ sum?: { visits?: number; uniq?: number } }>;
       }>;
     };
   };
@@ -114,9 +114,15 @@ function extractVisits(payload: CloudflareGraphqlPayload | null): VisitsSummary 
   const account =
     payload?.data?.viewer?.accounts?.[0] ?? payload?.data?.viewer?.zones?.[0] ?? null;
   return {
-    daily: asNumber(account?.daily?.[0]?.sum?.visits ?? null),
-    weekly: asNumber(account?.weekly?.[0]?.sum?.visits ?? null),
-    monthly: asNumber(account?.monthly?.[0]?.sum?.visits ?? null),
+    daily: asNumber(
+      account?.daily?.[0]?.sum?.uniq ?? account?.daily?.[0]?.sum?.visits ?? null,
+    ),
+    weekly: asNumber(
+      account?.weekly?.[0]?.sum?.uniq ?? account?.weekly?.[0]?.sum?.visits ?? null,
+    ),
+    monthly: asNumber(
+      account?.monthly?.[0]?.sum?.uniq ?? account?.monthly?.[0]?.sum?.visits ?? null,
+    ),
   };
 }
 
@@ -171,13 +177,13 @@ async function resolveZoneTagFromSiteTag(
     }
     const payload = (await response.json().catch(() => null)) as
       | {
-          result?: Array<{
-            siteTag?: string;
-            site_tag?: string;
-            zoneTag?: string;
-            zone_tag?: string;
-          }>;
-        }
+        result?: Array<{
+          siteTag?: string;
+          site_tag?: string;
+          zoneTag?: string;
+          zone_tag?: string;
+        }>;
+      }
       | null;
     const sites = payload?.result ?? [];
     const match = sites.find((entry) => {
@@ -255,18 +261,18 @@ async function fetchCloudflareVisits(): Promise<VisitsSummary> {
       query {
         viewer {
           zones(filter: { zoneTag: "${escapedZoneTag}" }) {
-            daily: httpRequestsAdaptiveGroups(
+            daily: httpRequests1hGroups(
               limit: 1
               filter: { datetime_geq: "${dailyFrom}", datetime_lt: "${until}" }
-            ) { sum { visits } }
-            weekly: httpRequestsAdaptiveGroups(
+            ) { sum { uniq: uniqueVisitors } }
+            weekly: httpRequests1hGroups(
               limit: 1
               filter: { datetime_geq: "${weeklyFrom}", datetime_lt: "${until}" }
-            ) { sum { visits } }
-            monthly: httpRequestsAdaptiveGroups(
+            ) { sum { uniq: uniqueVisitors } }
+            monthly: httpRequests1hGroups(
               limit: 1
               filter: { datetime_geq: "${monthlyFrom}", datetime_lt: "${until}" }
-            ) { sum { visits } }
+            ) { sum { uniq: uniqueVisitors } }
           }
         }
       }
