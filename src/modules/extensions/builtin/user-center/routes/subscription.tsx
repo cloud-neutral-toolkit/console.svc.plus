@@ -1,8 +1,27 @@
+'use client'
+
 import Card from '../components/Card'
 import BillingOptionsPanel from '../account/BillingOptionsPanel'
 import SubscriptionPanel from '../account/SubscriptionPanel'
+import { useUserStore } from '@lib/userStore'
 
 export default function UserCenterSubscriptionRoute() {
+  const user = useUserStore((state) => state.user)
+  const isDemoReadOnly = Boolean(user?.isReadOnly && user?.email?.toLowerCase() === 'demo@svc.plus')
+
+  if (isDemoReadOnly) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <h1 className="text-2xl font-semibold text-gray-900">支付与订阅</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Demo 体验账号为只读模式，无需订阅或付费。你可以继续浏览控制台并体验核心功能。
+          </p>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <Card>
