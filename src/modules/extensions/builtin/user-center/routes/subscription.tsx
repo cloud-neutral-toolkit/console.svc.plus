@@ -7,9 +7,9 @@ import { useUserStore } from '@lib/userStore'
 
 export default function UserCenterSubscriptionRoute() {
   const user = useUserStore((state) => state.user)
-  const isDemoReadOnly = Boolean(user?.isReadOnly && user?.email?.toLowerCase() === 'demo@svc.plus')
+  const isReadOnlyRole = Boolean(user?.isReadOnly)
 
-  if (isDemoReadOnly) {
+  if (isReadOnlyRole) {
     return (
       <div className="space-y-4">
         <Card>
