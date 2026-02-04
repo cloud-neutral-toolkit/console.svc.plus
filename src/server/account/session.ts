@@ -60,6 +60,8 @@ type AccountSessionResponse = {
 const KNOWN_ROLE_MAP: Record<string, AccountUserRole> = {
   root: 'admin',
   super_admin: 'admin',
+  readonly: 'user',
+  read_only: 'user',
   admin: 'admin',
   administrator: 'admin',
   operator: 'operator',
