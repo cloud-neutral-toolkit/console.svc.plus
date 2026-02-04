@@ -247,9 +247,18 @@ export function StatsSection() {
       ? numberFormatter.format(data.registeredUsers)
       : t.stats[0]?.value ?? "0+";
 
-  const visitsValue =
+  const visitsCount =
     typeof data?.visits?.daily === "number"
-      ? compactFormatter.format(data.visits.daily)
+      ? data.visits.daily
+      : typeof data?.visits?.weekly === "number"
+        ? data.visits.weekly
+        : typeof data?.visits?.monthly === "number"
+          ? data.visits.monthly
+          : null;
+
+  const visitsValue =
+    typeof visitsCount === "number"
+      ? compactFormatter.format(visitsCount)
       : t.stats[1]?.value ?? "0+";
 
   const displayStats = [

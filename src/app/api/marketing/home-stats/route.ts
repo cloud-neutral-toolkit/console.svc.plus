@@ -86,8 +86,8 @@ async function fetchCloudflareVisits(): Promise<VisitsSummary> {
 
   const query = `
     query GetWebAnalyticsVisits(
-      $accountTag: string!,
-      $siteTag: string!,
+      $accountTag: String!,
+      $siteTag: String!,
       $dailySince: Time!,
       $weeklySince: Time!,
       $monthlySince: Time!,
@@ -161,6 +161,12 @@ async function fetchCloudflareVisits(): Promise<VisitsSummary> {
       | null;
 
     if (!response.ok || !payload || payload.errors?.length) {
+      if (payload?.errors?.length) {
+        console.warn(
+          "Cloudflare web analytics graphql errors",
+          payload.errors.map((error) => error.message).filter(Boolean),
+        );
+      }
       return { daily: null, weekly: null, monthly: null };
     }
 
@@ -198,4 +204,3 @@ export async function GET() {
 
   return jsonResponse(payload);
 }
-
