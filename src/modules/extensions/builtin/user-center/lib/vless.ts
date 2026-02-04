@@ -1,34 +1,8 @@
-export type VlessEndpoint = {
-  host: string
-  port: number
-  type: string
-  security: string
-  flow: string
-  encryption: string
-  serverName: string
-  fingerprint: string
-  allowInsecure: boolean
-  label: string
-}
-
-export type VlessTemplate = {
-  endpoint: VlessEndpoint
-}
-
-const DEFAULT_VLESS_TEMPLATE: VlessTemplate = {
-  endpoint: {
-    host: 'ha-proxy-jp.svc.plus',
-    port: 1443,
-    type: 'tcp',
-    security: 'tls',
-    flow: 'xtls-rprx-vision',
-    encryption: 'none',
-    serverName: 'ha-proxy-jp.svc.plus',
-    fingerprint: 'chrome',
-    allowInsecure: false,
-    label: 'TOKYO-NODE',
-  },
-}
+// Technical constants for VLESS protocol
+const VLESS_DEFAULTS = {
+  fingerprint: 'chrome',
+  tcpFlow: 'xtls-rprx-vision',
+} as const
 
 const DEFAULT_XRAY_CONFIG = {
   log: {
@@ -169,58 +143,49 @@ export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNo
     return null
   }
 
-  const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
-
-  const host = node?.address ?? defaultEndpoint.host
-  const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
-  const label = node?.name ?? defaultEndpoint.label
-  const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
-  const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
-  const port = resolveTransportPort(node, transport, transport === 'xhttp' ? 443 : defaultEndpoint.port)
-
-  const schemeTemplate = transport === 'xhttp' ? node?.uri_scheme_xhttp : node?.uri_scheme_tcp
-  if (schemeTemplate) {
-    const rendered = renderVlessUriFromScheme(schemeTemplate, {
-      UUID: uuid,
-      DOMAIN: host,
-      NODE: host,
-      PATH: encodeURIComponent(node?.path ?? '/split'),
-      MODE: encodeURIComponent(node?.mode ?? 'auto'),
-      SNI: serverName,
-      FP: defaultEndpoint.fingerprint,
-      FLOW: flow || defaultEndpoint.flow,
-      TAG: encodeURIComponent(label),
-    })
-    if (rendered) {
-      return rendered
-    }
+  if (!node) {
+    console.error('[VLESS] Cannot build URI: node is undefined')
+    return null
   }
 
-  const params = new URLSearchParams({
-    type: transport,
-    security: defaultEndpoint.security,
-    encryption: defaultEndpoint.encryption,
-    sni: serverName,
-    fp: defaultEndpoint.fingerprint,
-    allowInsecure: defaultEndpoint.allowInsecure ? '1' : '0',
+  if (!node.transport) {
+    console.error('[VLESS] Missing transport type from node:', node.name || node.address)
+    return null
+  }
+
+  const transport = node.transport
+  const schemeTemplate = transport === 'xhttp' ? node.uri_scheme_xhttp : node.uri_scheme_tcp
+
+  if (!schemeTemplate) {
+    console.error(
+      `[VLESS] Missing URI scheme template from server for transport: ${transport}. ` +
+      `Node: ${node.name || node.address}. ` +
+      `Please ensure accounts.svc.plus is returning uri_scheme_tcp and uri_scheme_xhttp fields.`
+    )
+    return null
+  }
+
+  const host = node.address
+  const serverName = node.server_name ?? node.address
+  const label = node.name || node.address
+  const flow = node.flow ?? (transport === 'tcp' ? VLESS_DEFAULTS.tcpFlow : '')
+
+  return renderVlessUriFromScheme(schemeTemplate, {
+    UUID: uuid,
+    DOMAIN: host,
+    NODE: host,
+    PATH: encodeURIComponent(node.path ?? '/split'),
+    MODE: encodeURIComponent(node.mode ?? 'auto'),
+    SNI: serverName,
+    FP: VLESS_DEFAULTS.fingerprint,
+    FLOW: flow || VLESS_DEFAULTS.tcpFlow,
+    TAG: encodeURIComponent(label),
   })
-
-  if (flow) {
-    params.set('flow', flow)
-  }
-
-  if (transport === 'xhttp') {
-    params.set('host', host)
-    params.set('path', node?.path ?? '/split')
-    params.set('mode', node?.mode ?? 'auto')
-  }
-
-  return `vless://${uuid}@${host}:${port}?${params.toString()}#${encodeURIComponent(label)}`
 }
 
 export function buildVlessConfig(rawUuid: string | null | undefined, node?: VlessNode): XrayConfig | null {
   const uuid = (rawUuid ?? '').trim()
-  if (!uuid) {
+  if (!uuid || !node) {
     return null
   }
 
@@ -229,12 +194,11 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
   const vnext = outbound?.settings?.vnext?.[0]
   const user = vnext?.users?.[0]
 
-  const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
-  const address = node?.address ?? defaultEndpoint.host
-  const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
-  const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
-  const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
-  const port = resolveTransportPort(node, transport, transport === 'xhttp' ? 443 : defaultEndpoint.port)
+  const address = node.address
+  const serverName = node.server_name ?? node.address
+  const transport = node.transport ?? 'tcp'
+  const flow = node.flow ?? (transport === 'tcp' ? VLESS_DEFAULTS.tcpFlow : '')
+  const port = resolveTransportPort(node, transport, transport === 'xhttp' ? 443 : 1443)
 
   if (vnext) {
     vnext.address = address
@@ -271,4 +235,4 @@ export function serializeConfigForDownload(config: XrayConfig): string {
   return `${JSON.stringify(config, null, 2)}\n`
 }
 
-export const DEFAULT_VLESS_LABEL = DEFAULT_VLESS_TEMPLATE.endpoint.label
+

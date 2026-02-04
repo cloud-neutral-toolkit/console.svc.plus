@@ -10,7 +10,6 @@ import Card from './Card'
 import {
   buildVlessConfig,
   buildVlessUri,
-  DEFAULT_VLESS_LABEL,
   serializeConfigForDownload,
   VlessNode,
   VlessTransport,
@@ -175,7 +174,7 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
             <div className="flex items-center gap-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.label}</p>
               <span className="rounded-full bg-[var(--color-primary-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-primary)]">
-                {effectiveNode?.name || DEFAULT_VLESS_LABEL}
+                {effectiveNode?.name || effectiveNode?.address || 'Node'}
               </span>
             </div>
             <p className="mt-2 text-xs text-[var(--color-text-subtle)]">{copy.description}</p>
