@@ -26,6 +26,7 @@ import { translations } from "../i18n/translations";
 import { useMoltbotStore } from "../lib/moltbotStore";
 import { cn } from "../lib/utils";
 import { AskAIDialog } from "../components/AskAIDialog";
+import useSWR from "swr";
 
 const iconMap: Record<string, any> = {
   // English keys
@@ -218,11 +219,58 @@ export function NextStepsSection() {
 export function StatsSection() {
   const { language } = useLanguage();
   const t = translations[language].marketing.home;
+  const { data } = useSWR<HomeStatsResponse>(
+    "/api/marketing/home-stats",
+    async (url: string) => {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load home stats: ${response.status}`);
+      }
+      return (await response.json()) as HomeStatsResponse;
+    },
+    {
+      refreshInterval: 60 * 60 * 1000,
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    }
+  );
+
+  const locale = language === "zh" ? "zh-CN" : "en-US";
+  const numberFormatter = new Intl.NumberFormat(locale);
+  const compactFormatter = new Intl.NumberFormat(locale, {
+    notation: "compact",
+    maximumFractionDigits: 2,
+  });
+
+  const registeredUsersValue =
+    typeof data?.registeredUsers === "number"
+      ? numberFormatter.format(data.registeredUsers)
+      : t.stats[0]?.value ?? "0+";
+
+  const visitsValue =
+    typeof data?.visits?.daily === "number"
+      ? compactFormatter.format(data.visits.daily)
+      : t.stats[1]?.value ?? "0+";
+
+  const displayStats = [
+    {
+      value: registeredUsersValue,
+      label:
+        language === "zh"
+          ? "当前注册用户数量"
+          : "Registered users",
+    },
+    {
+      value: visitsValue,
+      label: language === "zh" ? "访问量" : "Visits",
+    },
+    t.stats[2],
+  ];
 
   return (
     <section className="rounded-2xl border border-surface-border bg-gradient-to-r from-surface-muted via-surface/0 to-surface-muted p-6 shadow-inner shadow-shadow-sm">
       <div className="grid gap-6 md:grid-cols-3">
-        {t.stats.map((stat, index: number) => (
+        {displayStats.map((stat, index: number) => (
           <div key={index} className="space-y-1 text-center md:text-left">
             <div className="text-3xl font-semibold text-heading">
               {stat.value}
@@ -234,6 +282,16 @@ export function StatsSection() {
     </section>
   );
 }
+
+type HomeStatsResponse = {
+  registeredUsers: number | null;
+  visits: {
+    daily: number | null;
+    weekly: number | null;
+    monthly: number | null;
+  };
+  updatedAt: string;
+};
 
 export function ShortcutsSection() {
   const { language } = useLanguage();
