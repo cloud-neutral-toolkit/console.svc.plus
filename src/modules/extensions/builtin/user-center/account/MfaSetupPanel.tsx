@@ -314,16 +314,16 @@ export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps
         const responseStatus = payload?.data?.mfa ?? payload?.data?.user?.mfa ?? null
         const normalizedStatus: TotpStatus = responseStatus
           ? {
-              ...responseStatus,
-              totpEnabled: Boolean(
+            ...responseStatus,
+            totpEnabled: Boolean(
+              responseStatus.totpEnabled ?? payload?.data?.user?.mfaEnabled ?? true,
+            ),
+            totpPending:
+              Boolean(responseStatus.totpPending ?? payload?.data?.user?.mfaPending) &&
+              !Boolean(
                 responseStatus.totpEnabled ?? payload?.data?.user?.mfaEnabled ?? true,
               ),
-              totpPending:
-                Boolean(responseStatus.totpPending ?? payload?.data?.user?.mfaPending) &&
-                !Boolean(
-                  responseStatus.totpEnabled ?? payload?.data?.user?.mfaEnabled ?? true,
-                ),
-            }
+          }
           : { totpEnabled: true, totpPending: false }
         setStatus(normalizedStatus)
         setSecret('')
@@ -453,16 +453,7 @@ export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps
   }
 
   if (isReadOnlyAccount) {
-    return (
-      <Card>
-        <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
-        <p className="mt-2 text-sm text-[var(--color-text-subtle)]">
-          {language === 'zh'
-            ? 'Demo 体验账号已关闭 MFA，且账号为只读模式。你可以浏览控制台与使用二维码，但不能执行修改操作。'
-            : 'MFA is disabled for the Demo account and the account is read-only. You can browse and use the QR code, but changes are blocked.'}
-        </p>
-      </Card>
-    )
+    return null
   }
 
   const statusLabel = displayStatus?.totpEnabled
