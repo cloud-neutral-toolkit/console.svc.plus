@@ -1942,15 +1942,15 @@ export const translations: Record<'en' | 'zh', Translation> = {
           ],
         },
         stats: [
-          { value: '0+', label: 'Integration of Cloud-Neutral Toolkit applications' },
-          { value: '0+', label: 'Recent 24h Visits' },
-          { value: '7', label: 'View our examples and guides' },
+          { value: '0+', label: '集成 Cloud-Neutral Toolkit 的应用程序' },
+          { value: '0+', label: '最近24小时访量' },
+          { value: '7', label: '查看我们的示例和指南' },
         ],
         statsLabels: {
-          registeredUsers: 'Registered Users',
-          dailyVisits: 'Recent 24h Visits',
-          weeklyVisits: 'Weekly Visits',
-          monthlyVisits: 'Monthly Visits',
+          registeredUsers: '当前注册用户数量',
+          dailyVisits: '最近24小时访量',
+          weeklyVisits: '周访量',
+          monthlyVisits: '月访量',
         },
         shortcuts: {
           title: '更多快捷方式',
