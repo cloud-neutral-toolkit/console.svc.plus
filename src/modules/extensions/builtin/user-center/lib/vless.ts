@@ -131,6 +131,36 @@ export type VlessNode = {
   path?: string
   mode?: string
   flow?: string
+  xhttp_port?: number
+  tcp_port?: number
+  uri_scheme_xhttp?: string
+  uri_scheme_tcp?: string
+}
+
+function resolveTransportPort(node: VlessNode | undefined, transport: VlessTransport, fallback: number): number {
+  const byTransport = transport === 'xhttp' ? node?.xhttp_port : node?.tcp_port
+  const byNodePort = node?.transport === transport ? node?.port : undefined
+  const port = byTransport ?? byNodePort
+
+  if (typeof port === 'number' && Number.isFinite(port) && port > 0) {
+    return port
+  }
+
+  return fallback
+}
+
+function renderVlessUriFromScheme(scheme: string, values: Record<string, string>): string | null {
+  const template = scheme.trim()
+  if (!template || !template.toLowerCase().startsWith('vless://')) {
+    return null
+  }
+
+  let rendered = template
+  for (const [key, value] of Object.entries(values)) {
+    rendered = rendered.split('${' + key + '}').join(value)
+  }
+
+  return rendered
 }
 
 export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNode): string | null {
@@ -142,13 +172,29 @@ export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNo
   const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
 
   const host = node?.address ?? defaultEndpoint.host
-  const port = node?.port ?? defaultEndpoint.port
   const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
   const label = node?.name ?? defaultEndpoint.label
   const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
-
-  // Use node's flow if provided, otherwise default. For xhttp, flow is typically not used/empty.
   const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
+  const port = resolveTransportPort(node, transport, transport === 'xhttp' ? 443 : defaultEndpoint.port)
+
+  const schemeTemplate = transport === 'xhttp' ? node?.uri_scheme_xhttp : node?.uri_scheme_tcp
+  if (schemeTemplate) {
+    const rendered = renderVlessUriFromScheme(schemeTemplate, {
+      UUID: uuid,
+      DOMAIN: host,
+      NODE: host,
+      PATH: encodeURIComponent(node?.path ?? '/split'),
+      MODE: encodeURIComponent(node?.mode ?? 'auto'),
+      SNI: serverName,
+      FP: defaultEndpoint.fingerprint,
+      FLOW: flow || defaultEndpoint.flow,
+      TAG: encodeURIComponent(label),
+    })
+    if (rendered) {
+      return rendered
+    }
+  }
 
   const params = new URLSearchParams({
     type: transport,
@@ -159,12 +205,12 @@ export function buildVlessUri(rawUuid: string | null | undefined, node?: VlessNo
     allowInsecure: defaultEndpoint.allowInsecure ? '1' : '0',
   })
 
-  // Only add flow if it's not empty (e.g. for TCP vision)
   if (flow) {
     params.set('flow', flow)
   }
 
   if (transport === 'xhttp') {
+    params.set('host', host)
     params.set('path', node?.path ?? '/split')
     params.set('mode', node?.mode ?? 'auto')
   }
@@ -185,10 +231,10 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
 
   const { endpoint: defaultEndpoint } = DEFAULT_VLESS_TEMPLATE
   const address = node?.address ?? defaultEndpoint.host
-  const port = node?.port ?? defaultEndpoint.port
   const serverName = node?.server_name ?? node?.address ?? defaultEndpoint.serverName
   const transport = node?.transport ?? (defaultEndpoint.type as VlessTransport)
   const flow = node?.flow ?? (transport === 'tcp' ? defaultEndpoint.flow : '')
+  const port = resolveTransportPort(node, transport, transport === 'xhttp' ? 443 : defaultEndpoint.port)
 
   if (vnext) {
     vnext.address = address
@@ -199,7 +245,6 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
     if (flow) {
       user.flow = flow
     } else {
-      // Remove flow if not applicable (e.g. xhttp) or empty
       delete (user as any).flow
     }
   }
@@ -214,7 +259,7 @@ export function buildVlessConfig(rawUuid: string | null | undefined, node?: Vles
       // @ts-ignore - Adding xhttpSettings to outbounds[0].streamSettings
       outbound.streamSettings.xhttpSettings = {
         mode: node?.mode ?? 'auto',
-        path: node?.path ?? '/split'
+        path: node?.path ?? '/split',
       }
     }
   }

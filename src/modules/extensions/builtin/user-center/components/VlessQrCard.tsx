@@ -56,14 +56,29 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
     if (!rawNode) return undefined
 
     const isXhttp = preferredTransport === 'xhttp'
+    const xhttpPort =
+      (typeof rawNode.xhttp_port === 'number' && rawNode.xhttp_port > 0
+        ? rawNode.xhttp_port
+        : rawNode.transport === 'xhttp' && typeof rawNode.port === 'number' && rawNode.port > 0
+          ? rawNode.port
+          : 443)
+    const tcpPort =
+      (typeof rawNode.tcp_port === 'number' && rawNode.tcp_port > 0
+        ? rawNode.tcp_port
+        : rawNode.transport === 'tcp' && typeof rawNode.port === 'number' && rawNode.port > 0
+          ? rawNode.port
+          : 1443)
+
     return {
       ...rawNode,
       transport: preferredTransport,
-      port: isXhttp ? 443 : 1443, // Japan node specific defaults if not provided by backend
+      port: isXhttp ? xhttpPort : tcpPort,
+      xhttp_port: xhttpPort,
+      tcp_port: tcpPort,
       server_name: rawNode.server_name || rawNode.address,
       path: isXhttp ? (rawNode.path || '/split') : undefined,
       mode: isXhttp ? (rawNode.mode || 'auto') : undefined,
-      flow: rawNode.flow
+      flow: rawNode.flow || 'xtls-rprx-vision',
     }
   }, [rawNode, preferredTransport])
 
