@@ -163,10 +163,14 @@ async function fetchSessionUser(): Promise<User | null> {
           .map((value) => value.trim())
       : []
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+    const normalizedUsernameLower = normalizedUsername?.trim().toLowerCase() ?? ''
+    const normalizedNameLower = normalizedName?.trim().toLowerCase() ?? ''
+    const isNamedDemo = normalizedUsernameLower === 'demo' || normalizedNameLower === 'demo'
     const inferredReadOnly =
       rawRole === 'readonly' ||
       rawRole === 'read_only' ||
       normalizedEmail === 'demo@svc.plus' ||
+      isNamedDemo ||
       normalizedGroups.some((value) => value.toLowerCase() === 'readonly role')
     const normalizedReadOnly = Boolean(sessionUser.readOnly ?? inferredReadOnly)
     const normalizedProxyUuid =
