@@ -77,7 +77,8 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
     return mfaCopy.state.disabled
   }, [mfaCopy.state.disabled, mfaCopy.state.enabled, mfaCopy.state.pending, user?.mfaEnabled, user?.mfaPending])
 
-  const requiresSetup = Boolean(user && (!user.mfaEnabled || user.mfaPending))
+  const requiresSetup = Boolean(user && !user.isReadOnly && (!user.mfaEnabled || user.mfaPending))
+  const shouldShowMfaMainPrompt = !hideMfaMainPrompt && !user?.isReadOnly
 
   const handleCopy = useCallback(async () => {
     const identifier = user?.proxyUuid ?? user?.uuid ?? user?.id
@@ -146,7 +147,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
         ) : null}
       </div>
 
-      {!hideMfaMainPrompt && requiresSetup ? (
+      {shouldShowMfaMainPrompt && requiresSetup ? (
         <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning-foreground)] transition-colors">
           <p className="text-base font-semibold">{copy.lockBanner.title}</p>
           <p className="mt-1 text-sm">{copy.lockBanner.body}</p>
@@ -212,7 +213,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
           <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.email.description}</p>
         </Card>
 
-        {!hideMfaMainPrompt ? (
+        {shouldShowMfaMainPrompt ? (
           <Card>
             <div className="flex items-start justify-between gap-4">
               <div>
