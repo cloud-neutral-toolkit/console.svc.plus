@@ -9,6 +9,8 @@ const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 type AccountUser = {
   id?: string
   uuid?: string
+  proxyUuid?: string
+  proxyUuidExpiresAt?: string
   name?: string
   username?: string
   email: string
@@ -24,6 +26,7 @@ type AccountUser = {
   role?: string
   groups?: string[]
   permissions?: string[]
+  readOnly?: boolean
   tenantId?: string
   tenants?: Array<{
     id?: string
@@ -35,6 +38,23 @@ type AccountUser = {
 type SessionResponse = {
   user?: AccountUser | null
   error?: string
+}
+
+function normalizeRole(role: unknown): string {
+  if (typeof role !== 'string') {
+    return 'user'
+  }
+  const normalized = role.trim().toLowerCase()
+  if (!normalized) {
+    return 'user'
+  }
+  if (normalized === 'root' || normalized === 'super_admin') {
+    return 'admin'
+  }
+  if (normalized === 'readonly' || normalized === 'read_only') {
+    return 'user'
+  }
+  return normalized
 }
 
 async function fetchSession(token: string) {
@@ -86,10 +106,8 @@ export async function GET(request: NextRequest) {
         : false
   const derivedMfaPending = derivedMfaPendingSource && !derivedMfaEnabled
 
-  const normalizedRole =
-    typeof rawUser.role === 'string' && rawUser.role.trim().length > 0
-      ? rawUser.role.trim().toLowerCase()
-      : 'user'
+  const normalizedRole = normalizeRole(rawUser.role)
+  const rawRole = typeof rawUser.role === 'string' ? rawUser.role.trim().toLowerCase() : ''
   const normalizedGroups = Array.isArray(rawUser.groups)
     ? rawUser.groups
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
@@ -100,6 +118,21 @@ export async function GET(request: NextRequest) {
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         .map((value) => value.trim())
     : []
+  const normalizedReadOnly =
+    Boolean(rawUser.readOnly) ||
+    normalizedGroups.some((group) => group.toLowerCase() === 'readonly role') ||
+    rawRole === 'readonly' ||
+    rawRole === 'read_only' ||
+    String(rawUser.email ?? '').trim().toLowerCase() === 'demo@svc.plus'
+  const normalizedProxyUuid =
+    typeof rawUser.proxyUuid === 'string' && rawUser.proxyUuid.trim().length > 0
+      ? rawUser.proxyUuid.trim()
+      : undefined
+  const normalizedProxyUuidExpiresAt =
+    typeof rawUser.proxyUuidExpiresAt === 'string' && rawUser.proxyUuidExpiresAt.trim().length > 0
+      ? rawUser.proxyUuidExpiresAt.trim()
+      : undefined
+
   const normalizedTenantId =
     typeof rawUser.tenantId === 'string' && rawUser.tenantId.trim().length > 0
       ? rawUser.tenantId.trim()
@@ -158,6 +191,9 @@ export async function GET(request: NextRequest) {
       role: normalizedRole,
       groups: normalizedGroups,
       permissions: normalizedPermissions,
+      readOnly: normalizedReadOnly,
+      proxyUuid: normalizedProxyUuid,
+      proxyUuidExpiresAt: normalizedProxyUuidExpiresAt,
       tenantId: normalizedTenantId,
       tenants: normalizedTenants,
     },

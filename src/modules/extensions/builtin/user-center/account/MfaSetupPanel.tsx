@@ -126,6 +126,7 @@ export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps
   const setupRequested = searchParams.get('setupMfa') === '1'
   const hasPendingMfa = Boolean(status?.totpPending && !status?.totpEnabled)
   const requiresSetup = Boolean(user && (!user.mfaEnabled || user.mfaPending))
+  const isReadOnlyAccount = Boolean(user?.isReadOnly)
 
   const resolveErrorMessage = useCallback(
     (code?: string | null) => {
@@ -146,6 +147,7 @@ export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps
         'mfa_challenge_creation_failed': copy.errors.provisioningFailed,
         'mfa_status_failed': copy.errors.network,
         'account_service_unreachable': copy.errors.network,
+        'read_only_account': copy.errors.disableFailed,
         'mfa_disable_failed': copy.errors.disableFailed,
         'mfa_not_enabled': copy.errors.disableFailed,
         'mfa_code_required': copy.errors.missingCode,
@@ -446,6 +448,19 @@ export default function MfaSetupPanel({ showSummary = true }: MfaSetupPanelProps
       <Card>
         <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
         <p className="mt-2 text-sm text-[var(--color-text-subtle)]">{copy.subtitle}</p>
+      </Card>
+    )
+  }
+
+  if (isReadOnlyAccount) {
+    return (
+      <Card>
+        <h2 className="text-xl font-semibold text-[var(--color-text)]">{copy.title}</h2>
+        <p className="mt-2 text-sm text-[var(--color-text-subtle)]">
+          {language === 'zh'
+            ? 'Demo 体验账号已关闭 MFA，且账号为只读模式。你可以浏览控制台与使用二维码，但不能执行修改操作。'
+            : 'MFA is disabled for the Demo account and the account is read-only. You can browse and use the QR code, but changes are blocked.'}
+        </p>
       </Card>
     )
   }
