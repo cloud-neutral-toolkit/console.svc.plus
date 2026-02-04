@@ -591,6 +591,12 @@ export type Translation = {
         items: { title: string; status: string }[]
       }
       stats: { value: string; label: string }[]
+      statsLabels: {
+        registeredUsers: string
+        dailyVisits: string
+        weeklyVisits: string
+        monthlyVisits: string
+      }
       shortcuts: {
         title: string
         subtitle: string
@@ -1165,10 +1171,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
           ],
         },
         stats: [
-          { value: '0+', label: 'Applications integrated with Cloud-Neutral Toolkit' },
-          { value: '0+', label: 'Daily active users' },
-          { value: '7', label: 'Go check out our examples & guides' },
+          { value: '0+', label: 'Integration of Cloud-Neutral Toolkit applications' },
+          { value: '0+', label: 'Recent 24h Visits' },
+          { value: '7', label: 'View our examples and guides' },
         ],
+        statsLabels: {
+          registeredUsers: 'Registered Users',
+          dailyVisits: 'Recent 24h Visits',
+          weeklyVisits: 'Weekly Visits',
+          monthlyVisits: 'Monthly Visits',
+        },
         shortcuts: {
           title: 'More shortcuts',
           subtitle: 'Save time when integrating Cloud-Neutral Toolkit',
@@ -1930,10 +1942,16 @@ export const translations: Record<'en' | 'zh', Translation> = {
           ],
         },
         stats: [
-          { value: '0+', label: '集成 Cloud-Neutral Toolkit 的应用程序' },
-          { value: '0+', label: '日活跃用户' },
-          { value: '7', label: '查看我们的示例和指南' },
+          { value: '0+', label: 'Integration of Cloud-Neutral Toolkit applications' },
+          { value: '0+', label: 'Recent 24h Visits' },
+          { value: '7', label: 'View our examples and guides' },
         ],
+        statsLabels: {
+          registeredUsers: 'Registered Users',
+          dailyVisits: 'Recent 24h Visits',
+          weeklyVisits: 'Weekly Visits',
+          monthlyVisits: 'Monthly Visits',
+        },
         shortcuts: {
           title: '更多快捷方式',
           subtitle: '在集成 Cloud-Neutral Toolkit 时节省时间',

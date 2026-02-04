@@ -254,22 +254,19 @@ export function StatsSection() {
   const displayStats = [
     {
       value: registeredUsersValue,
-      label:
-        language === "zh"
-          ? "当前注册用户数量"
-          : "Registered users",
+      label: t.statsLabels.registeredUsers,
     },
     {
       value: typeof dailyVisits === "number" ? compactFormatter.format(dailyVisits) : (t.stats[1]?.value ?? "0+"),
-      label: language === "zh" ? "最近24小时访量" : "Recent 24h Visits",
+      label: t.statsLabels.dailyVisits,
     },
     {
       value: typeof weeklyVisits === "number" ? compactFormatter.format(weeklyVisits) : "0+",
-      label: language === "zh" ? "周访量" : "Weekly Visits",
+      label: t.statsLabels.weeklyVisits,
     },
     {
       value: typeof monthlyVisits === "number" ? compactFormatter.format(monthlyVisits) : "0+",
-      label: language === "zh" ? "月访量" : "Monthly Visits",
+      label: t.statsLabels.monthlyVisits,
     },
     t.stats[2],
   ];
