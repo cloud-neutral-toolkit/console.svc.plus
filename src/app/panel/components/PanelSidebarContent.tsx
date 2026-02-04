@@ -48,7 +48,7 @@ export function PanelSidebarContent({ onNavigate, collapsed = false }: PanelSide
     const { language } = useLanguage()
     const copy = translations[language].userCenter.mfa
     const user = useUserStore((state) => state.user)
-    const requiresSetup = Boolean(user && (!user.mfaEnabled || user.mfaPending))
+    const requiresSetup = Boolean(user && !user.isReadOnly && (!user.mfaEnabled || user.mfaPending))
 
     const navSections = useMemo<NavSection[]>(() => {
         return registry.sidebar

@@ -34,7 +34,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   const user = useUserStore((state) => state.user)
   const isLoading = useUserStore((state) => state.isLoading)
   const logout = useUserStore((state) => state.logout)
-  const requiresSetup = Boolean(user && (!user.mfaEnabled || user.mfaPending))
+  const requiresSetup = Boolean(user && !user.isReadOnly && (!user.mfaEnabled || user.mfaPending))
 
   const routeGuards = useMemo<RouteGuard[]>(() => {
     return registry.routes
