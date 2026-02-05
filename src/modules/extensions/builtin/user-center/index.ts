@@ -50,7 +50,7 @@ export const userCenterExtension: DashboardExtension = {
         title: 'Agent 管理',
         description: '启用代理节点管理页面。',
         envVar: 'NEXT_PUBLIC_FEATURE_AGENT_MODULE',
-        defaultEnabled: false,
+        defaultEnabled: true,
       },
     },
     {
