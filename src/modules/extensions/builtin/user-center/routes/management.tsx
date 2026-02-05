@@ -14,8 +14,11 @@ import UserGroupManagement, {
   type CreateManagedUserInput,
 } from '../management/components/UserGroupManagement'
 import { EmailBlacklist } from '../management/components/EmailBlacklist'
+import Breadcrumbs from '@/app/panel/components/Breadcrumbs'
 import { resolveAccess } from '@lib/accessControl'
 import { useUserStore } from '@lib/userStore'
+import { useLanguage } from '@i18n/LanguageProvider'
+import { translations } from '@i18n/translations'
 
 type UserMetricsResponse = {
   overview: MetricsOverview
@@ -61,6 +64,8 @@ async function jsonFetcher<T>(input: RequestInfo, init?: RequestInit): Promise<T
 }
 
 export default function UserCenterManagementRoute() {
+  const { language } = useLanguage()
+  const t = translations[language].userCenter
   const user = useUserStore((state) => state.user)
   const isUserLoading = useUserStore((state) => state.isLoading)
   const accessDecision = useMemo(() => resolveAccess(user, { requireLogin: true, roles: ['admin', 'operator'] }), [user])
@@ -325,6 +330,12 @@ export default function UserCenterManagementRoute() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: t.items.dashboard, href: '/panel' },
+          { label: translations[language].nav.account.management, href: '/panel/management' },
+        ]}
+      />
       <OverviewCards overview={metricsSWR.data?.overview} isLoading={metricsLoading} lastUpdatedLabel={lastUpdatedLabel} />
       <TrendChart series={metricsSWR.data?.series} isLoading={metricsLoading} />
       <PermissionMatrixEditor
