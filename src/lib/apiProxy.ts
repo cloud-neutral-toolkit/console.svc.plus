@@ -20,6 +20,7 @@ type ProxyOptions = {
   upstreamBaseUrl: string
   upstreamPathPrefix: string
   allowedHeaders?: readonly string[]
+  getAdditionalHeaders?: (request: NextRequest) => Promise<Record<string, string> | undefined> | Record<string, string> | undefined
 }
 
 function stripTrailingSlash(value: string): string {
@@ -35,7 +36,11 @@ function buildTargetUrl(request: NextRequest, { upstreamBaseUrl, upstreamPathPre
   return `${normalizedBase}${normalizedPrefix}${normalizedSuffix}${search}`
 }
 
-function buildForwardHeaders(request: NextRequest, allowedHeaders: readonly string[] = DEFAULT_FORWARD_HEADERS) {
+function buildForwardHeaders(
+  request: NextRequest,
+  allowedHeaders: readonly string[] = DEFAULT_FORWARD_HEADERS,
+  additionalHeaders?: Record<string, string>
+) {
   const headers = new Headers()
   for (const name of allowedHeaders) {
     const value = request.headers.get(name)
@@ -48,6 +53,14 @@ function buildForwardHeaders(request: NextRequest, allowedHeaders: readonly stri
   const serviceToken = process.env.INTERNAL_SERVICE_TOKEN
   if (serviceToken && serviceToken.trim().length > 0) {
     headers.set('X-Service-Token', serviceToken.trim())
+  }
+
+  if (additionalHeaders) {
+    for (const [name, value] of Object.entries(additionalHeaders)) {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        headers.set(name, value)
+      }
+    }
   }
 
   return headers
@@ -70,7 +83,8 @@ function applySetCookieHeaders(source: Headers, target: Headers) {
 
 export async function proxyRequestToUpstream(request: NextRequest, options: ProxyOptions): Promise<Response> {
   const targetUrl = buildTargetUrl(request, options)
-  const forwardHeaders = buildForwardHeaders(request, options.allowedHeaders)
+  const additionalHeaders = await options.getAdditionalHeaders?.(request)
+  const forwardHeaders = buildForwardHeaders(request, options.allowedHeaders, additionalHeaders)
 
   let body: ArrayBuffer | undefined
   if (!BODYLESS_METHODS.has(request.method.toUpperCase())) {
