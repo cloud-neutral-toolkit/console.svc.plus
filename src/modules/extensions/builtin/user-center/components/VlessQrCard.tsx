@@ -57,7 +57,7 @@ interface VlessQrCardProps {
 }
 
 export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
-  const { data: nodes } = useSWR<VlessNode[]>('/api/agent/nodes', fetcher)
+  const { data: nodes } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
   const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
   const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
   const [isSelectorOpen, setIsSelectorOpen] = useState(false)
@@ -260,7 +260,7 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
         ) : !nodes || nodes.length === 0 ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
             <p className="font-semibold">❌ 节点数据缺失</p>
-            <p className="mt-1">无法从服务器获取代理节点列表。请检查 /api/agent/nodes 接口是否正常。</p>
+            <p className="mt-1">无法从服务器获取代理节点列表。请检查 /api/agent-server/v1/nodes 接口是否正常。</p>
           </div>
         ) : !effectiveNode ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">

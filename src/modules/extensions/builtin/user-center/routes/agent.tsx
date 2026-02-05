@@ -45,7 +45,7 @@ async function fetcher(url: string): Promise<VlessNode[]> {
 export default function UserCenterAgentRoute() {
   const { language } = useLanguage()
   const t = translations[language].userCenter
-  const { data: nodes, error, isLoading, mutate } = useSWR<VlessNode[]>('/api/agent/nodes', fetcher)
+  const { data: nodes, error, isLoading, mutate } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {
