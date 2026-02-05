@@ -48,8 +48,8 @@ function normalizeGroups(value: unknown): string[] | null {
   return Array.from(new Set(result))
 }
 
-function isRootUser(username?: string): boolean {
-  return username?.trim().toLowerCase() === 'root'
+function isAllowedRootEmail(email?: string): boolean {
+  return email?.trim().toLowerCase() === 'admin@svc.plus'
 }
 
 export async function POST(request: NextRequest) {
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ErrorPayload>({ error: 'forbidden' }, { status: 403 })
   }
 
-  if (!isRootUser(user.username)) {
+  if (!isAllowedRootEmail(user.email)) {
     return NextResponse.json<ErrorPayload>({ error: 'root_only' }, { status: 403 })
   }
 

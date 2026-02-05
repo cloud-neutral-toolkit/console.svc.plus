@@ -67,7 +67,7 @@ export default function UserCenterManagementRoute() {
   const canAccess = accessDecision.allowed
   const canEditPermissions = Boolean(user?.isAdmin)
   const canEditRoles = Boolean(user?.isAdmin)
-  const canCreateCustomUser = Boolean(user?.isAdmin && user?.username?.trim().toLowerCase() === 'root')
+  const canCreateCustomUser = Boolean(user?.isAdmin && user?.email?.trim().toLowerCase() === 'admin@svc.plus')
 
   const [matrixDraft, setMatrixDraft] = useState<PermissionMatrix>({})
   const [matrixVersion, setMatrixVersion] = useState<number>(0)
