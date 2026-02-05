@@ -55,6 +55,7 @@ interface VlessQrCardProps {
   uuid: string | null | undefined
   copy: VlessQrCopy
   allowSandboxFallbackNode?: boolean
+  boundNodeAddress?: string | null
 }
 
 function buildSandboxFallbackNode(): VlessNode {
@@ -76,7 +77,12 @@ function buildSandboxFallbackNode(): VlessNode {
   }
 }
 
-export default function VlessQrCard({ uuid, copy, allowSandboxFallbackNode = false }: VlessQrCardProps) {
+export default function VlessQrCard({
+  uuid,
+  copy,
+  allowSandboxFallbackNode = false,
+  boundNodeAddress,
+}: VlessQrCardProps) {
   const { data: nodes, error: nodesError } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
   const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
   const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
@@ -89,10 +95,16 @@ export default function VlessQrCard({ uuid, copy, allowSandboxFallbackNode = fal
 
   const rawNode = useMemo(() => {
     if (selectedNode) return selectedNode
+    if (boundNodeAddress && nodes?.length) {
+      const matched = nodes.find((node) => node.address === boundNodeAddress)
+      if (matched) {
+        return matched
+      }
+    }
     if (nodes && nodes[0]) return nodes[0]
     if (allowSandboxFallbackNode && uuid) return buildSandboxFallbackNode()
     return undefined
-  }, [allowSandboxFallbackNode, nodes, selectedNode, uuid])
+  }, [allowSandboxFallbackNode, boundNodeAddress, nodes, selectedNode, uuid])
 
   const effectiveNode = useMemo((): VlessNode | undefined => {
     if (!rawNode) return undefined

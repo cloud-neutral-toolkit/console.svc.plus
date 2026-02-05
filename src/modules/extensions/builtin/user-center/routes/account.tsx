@@ -1,5 +1,6 @@
 'use client'
 
+import Breadcrumbs from '@/app/panel/components/Breadcrumbs'
 import MfaSetupPanel from '../account/MfaSetupPanel'
 import SubscriptionPanel from '../account/SubscriptionPanel'
 import UserOverview from '../components/UserOverview'
@@ -11,6 +12,12 @@ export default function UserCenterAccountRoute() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/panel' },
+          { label: 'Account', href: '/panel/account' },
+        ]}
+      />
       <UserOverview hideMfaMainPrompt />
       {!isReadOnlyRole ? <MfaSetupPanel showSummary={false} /> : null}
       {!isReadOnlyRole ? <SubscriptionPanel /> : null}

@@ -1,5 +1,6 @@
 'use client'
 
+import Breadcrumbs from '@/app/panel/components/Breadcrumbs'
 import Card from '../components/Card'
 import BillingOptionsPanel from '../account/BillingOptionsPanel'
 import SubscriptionPanel from '../account/SubscriptionPanel'
@@ -12,6 +13,12 @@ export default function UserCenterSubscriptionRoute() {
   if (isReadOnlyRole) {
     return (
       <div className="space-y-4">
+        <Breadcrumbs
+          items={[
+            { label: 'Dashboard', href: '/panel' },
+            { label: 'Subscription', href: '/panel/subscription' },
+          ]}
+        />
         <Card>
           <h1 className="text-2xl font-semibold text-gray-900">支付与订阅</h1>
           <p className="mt-2 text-sm text-gray-600">
@@ -24,6 +31,12 @@ export default function UserCenterSubscriptionRoute() {
 
   return (
     <div className="space-y-4">
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/panel' },
+          { label: 'Subscription', href: '/panel/subscription' },
+        ]}
+      />
       <Card>
         <h1 className="text-2xl font-semibold text-gray-900">支付与订阅</h1>
         <p className="mt-2 text-sm text-gray-600">

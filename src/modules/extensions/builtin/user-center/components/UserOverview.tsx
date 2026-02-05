@@ -8,6 +8,7 @@ import { Copy } from 'lucide-react'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { useUserStore } from '@lib/userStore'
+import { getSandboxNodeBinding } from '../lib/sandboxNodeBinding'
 
 import Card from './Card'
 import VlessQrCard from './VlessQrCard'
@@ -48,6 +49,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   const refresh = useUserStore((state) => state.refresh)
   const logout = useUserStore((state) => state.logout)
   const [copied, setCopied] = useState(false)
+  const [sandboxBoundNodeAddress, setSandboxBoundNodeAddress] = useState<string | null>(null)
 
   const displayName = useMemo(() => resolveDisplayName(user), [user])
   const uuid = user?.proxyUuid ?? user?.uuid ?? user?.id ?? '—'
@@ -119,6 +121,15 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
     router.replace('/login')
     router.refresh()
   }, [logout, router])
+
+  useEffect(() => {
+    if (!isGuestSandboxReadOnly) {
+      setSandboxBoundNodeAddress(null)
+      return
+    }
+    const binding = getSandboxNodeBinding()
+    setSandboxBoundNodeAddress(binding?.address ?? null)
+  }, [isGuestSandboxReadOnly])
 
   useEffect(() => {
     if (!isGuestSandboxReadOnly || !user?.proxyUuidExpiresAt) {
@@ -202,7 +213,12 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
           <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.uuid.description}</p>
         </Card>
 
-        <VlessQrCard uuid={vlessUuid} copy={copy.cards.vless} allowSandboxFallbackNode={isGuestSandboxReadOnly} />
+        <VlessQrCard
+          uuid={vlessUuid}
+          copy={copy.cards.vless}
+          allowSandboxFallbackNode={isGuestSandboxReadOnly}
+          boundNodeAddress={sandboxBoundNodeAddress}
+        />
 
         <Card>
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.cards.username.label}</p>
