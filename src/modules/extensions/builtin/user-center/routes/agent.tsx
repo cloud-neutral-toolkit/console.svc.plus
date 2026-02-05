@@ -20,10 +20,26 @@ interface VlessNode {
   uri_scheme_tcp?: string
 }
 
-async function fetcher(url: string) {
-  const res = await fetch(url, { credentials: 'include' })
-  if (!res.ok) throw new Error('Failed to fetch')
-  return res.json()
+async function fetcher(url: string): Promise<VlessNode[]> {
+  const res = await fetch(url, { credentials: 'include', cache: 'no-store' })
+
+  const payload = await res.json().catch(() => null)
+  if (!res.ok) {
+    const message =
+      (payload && typeof payload.message === 'string' && payload.message) ||
+      (payload && typeof payload.error === 'string' && payload.error) ||
+      `Request failed (${res.status})`
+    throw new Error(message)
+  }
+
+  if (Array.isArray(payload)) {
+    return payload as VlessNode[]
+  }
+  if (payload && Array.isArray((payload as { nodes?: unknown }).nodes)) {
+    return (payload as { nodes: VlessNode[] }).nodes
+  }
+
+  return []
 }
 
 export default function UserCenterAgentRoute() {
@@ -85,6 +101,15 @@ export default function UserCenterAgentRoute() {
       </div>
 
       <div className="grid gap-6">
+
+        {error && (
+          <div className="rounded-xl border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/30 px-4 py-3 text-sm text-[var(--color-danger-foreground)]">
+            {language === 'zh'
+              ? `节点列表加载失败：${error.message}`
+              : `Failed to load agent nodes: ${error.message}`}
+          </div>
+        )}
+
         {Object.entries(groupedNodes).map(([region, regionNodes]) => (
           regionNodes.length > 0 && (
             <section key={region} className="space-y-4">
