@@ -2,7 +2,6 @@ import type { MetadataRoute } from 'next'
 
 import { getBlogPosts } from '@/lib/blogContent'
 import { getDocCollections } from '@/lib/docContent'
-import { allWorkshops } from 'contentlayer/generated'
 import { PRODUCT_LIST } from '@/modules/products/registry'
 
 const baseUrl = 'https://console.svc.plus'
@@ -44,11 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
-    {
-      url: `${baseUrl}/workshop`,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
+
     {
       url: `${baseUrl}/cloud_iac`,
       changeFrequency: 'monthly',
@@ -88,12 +83,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   )
 
-  const workshopEntries: MetadataRoute.Sitemap = allWorkshops.map((workshop) => ({
-    url: `${baseUrl}/workshop/${workshop.slug}`,
-    lastModified: workshop.updatedAt ? new Date(workshop.updatedAt) : undefined,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }))
-
-  return [...staticEntries, ...productEntries, ...blogEntries, ...docsEntries, ...workshopEntries]
+  return [...staticEntries, ...productEntries, ...blogEntries, ...docsEntries]
 }

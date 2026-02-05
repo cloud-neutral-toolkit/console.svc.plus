@@ -1,4 +1,4 @@
-import { Code, CreditCard, Home, Mail, Palette, Server, Settings, Shield, User } from 'lucide-react'
+import { Code, CreditCard, Home, Palette, Server, Settings, Shield, User } from 'lucide-react'
 
 import type { DashboardExtension } from '../../types'
 
@@ -23,17 +23,6 @@ export const userCenterExtension: DashboardExtension = {
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
       sidebar: { section: 'workspace', order: 0 },
-    },
-    {
-      id: 'mail',
-      path: '/panel/mail',
-      label: 'Mail',
-      description: '租户邮件与 AI 助理',
-      icon: Mail,
-      loader: () => import('./routes/mail'),
-      guard: { requireLogin: true },
-      redirect: { unauthenticated: '/login' },
-      sidebar: { section: 'workspace', order: 1 },
     },
     {
       id: 'agents',

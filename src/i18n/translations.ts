@@ -482,7 +482,6 @@ type UserCenterTranslation = {
   }
   items: {
     dashboard: string
-    mail: string
     agents: string
     apis: string
     accounts: string
@@ -977,7 +976,6 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       items: {
         dashboard: 'Dashboard',
-        mail: 'Mail',
         agents: 'Agents',
         apis: 'APIs',
         accounts: 'Accounts',
@@ -1749,7 +1747,6 @@ export const translations: Record<'en' | 'zh', Translation> = {
       },
       items: {
         dashboard: '仪表盘',
-        mail: '邮箱服务',
         agents: '运行节点',
         apis: '接口集成',
         accounts: '账户中心',

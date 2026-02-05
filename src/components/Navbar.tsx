@@ -165,12 +165,6 @@ export default function Navbar() {
         href: "/login",
         togglePath: "/login",
       },
-      {
-        key: "demo",
-        label: nav.account.demo,
-        href: "/demo",
-        togglePath: "/demo",
-      },
     ];
 
   const accountLabel = nav.account.title;
@@ -423,8 +417,8 @@ export default function Navbar() {
                 key={tab.key}
                 href={tab.href}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${tab.active
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "text-text-muted hover:text-text hover:bg-surface-muted border border-transparent"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "text-text-muted hover:text-text hover:bg-surface-muted border border-transparent"
                   }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -663,8 +657,8 @@ export default function Navbar() {
                     <Link
                       href="/services/openclaw/chats"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith("/services/openclaw")
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -674,8 +668,8 @@ export default function Navbar() {
                     <Link
                       href="/"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/"
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -692,8 +686,8 @@ export default function Navbar() {
                     <Link
                       href="/panel"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/panel"
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -703,8 +697,8 @@ export default function Navbar() {
                     <Link
                       href="/docs"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname?.startsWith("/docs")
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -726,8 +720,8 @@ export default function Navbar() {
                     <Link
                       href="/about"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/about"
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -749,8 +743,8 @@ export default function Navbar() {
                     <Link
                       href="/services"
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/services"
-                          ? "bg-primary/10 text-primary"
-                          : "text-text hover:bg-surface-muted"
+                        ? "bg-primary/10 text-primary"
+                        : "text-text hover:bg-surface-muted"
                         }`}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -761,8 +755,8 @@ export default function Navbar() {
                       <Link
                         href="/panel/management"
                         className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === "/panel/management"
-                            ? "bg-primary/10 text-primary"
-                            : "text-text hover:bg-surface-muted"
+                          ? "bg-primary/10 text-primary"
+                          : "text-text hover:bg-surface-muted"
                           }`}
                         onClick={() => setMenuOpen(false)}
                       >

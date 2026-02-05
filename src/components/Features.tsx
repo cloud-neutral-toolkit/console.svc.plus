@@ -88,7 +88,7 @@ const productCards: Record<'zh' | 'en', FeatureCard[]> = {
     {
       title: 'XCloudFlow',
       description: 'Pulumi 引擎驱动的多云 IaC，统一 DevOps 与合规审计。',
-      href: '/demo?product=xcloudflow',
+      href: '/xcloudflow',
       badge: 'IaC + GitOps',
     },
     {
@@ -108,7 +108,7 @@ const productCards: Record<'zh' | 'en', FeatureCard[]> = {
     {
       title: 'XCloudFlow',
       description: 'Multi-cloud IaC powered by Pulumi with built-in compliance guardrails.',
-      href: '/demo?product=xcloudflow',
+      href: '/xcloudflow',
       badge: 'IaC + GitOps',
     },
     {

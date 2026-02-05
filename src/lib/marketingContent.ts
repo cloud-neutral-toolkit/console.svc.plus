@@ -105,7 +105,7 @@ const HERO_SOLUTIONS: HeroSolution[] = [
     bodyHtml:
       '<p>XCloudFlow 将 Terraform、Pulumi 等主流 IaC 模型统一到一个工作台，为多云环境提供自助式交付与集中治理。</p>',
     primaryCtaLabel: '立刻体验',
-    primaryCtaHref: '/demo?product=xcloudflow',
+    primaryCtaHref: '/xcloudflow',
     secondaryCtaLabel: '下载链接',
     secondaryCtaHref: '/download?product=xcloudflow',
     tertiaryCtaLabel: '文档链接',
@@ -120,7 +120,7 @@ const HERO_SOLUTIONS: HeroSolution[] = [
     bodyHtml:
       '<p>XScopeHub 通过语义化检索与时序分析，实现跨环境的可观察性汇聚与智能洞察。</p>',
     primaryCtaLabel: '立刻体验',
-    primaryCtaHref: '/demo?product=xscopehub',
+    primaryCtaHref: '/xscopehub',
     secondaryCtaLabel: '下载链接',
     secondaryCtaHref: '/download?product=xscopehub',
     tertiaryCtaLabel: '文档链接',
@@ -135,7 +135,7 @@ const HERO_SOLUTIONS: HeroSolution[] = [
     bodyHtml:
       '<p>XStream 通过软件定义的网络加速技术，为实时互动、音视频与数据分发提供稳定的全球链路。</p>',
     primaryCtaLabel: '立刻体验',
-    primaryCtaHref: '/demo?product=xstream',
+    primaryCtaHref: '/xstream',
     secondaryCtaLabel: '下载链接',
     secondaryCtaHref: '/download?product=xstream',
     tertiaryCtaLabel: '文档链接',
