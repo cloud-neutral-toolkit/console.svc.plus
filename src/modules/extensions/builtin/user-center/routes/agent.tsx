@@ -20,6 +20,18 @@ interface VlessNode {
   uri_scheme_tcp?: string
 }
 
+function isDisplayableNode(node: VlessNode): boolean {
+  const name = (node.name || '').trim().toLowerCase()
+  const address = (node.address || '').trim()
+  if (!address || address === '*') {
+    return false
+  }
+  if (name.includes('internal agents') && name.includes('shared token')) {
+    return false
+  }
+  return true
+}
+
 async function fetcher(url: string): Promise<VlessNode[]> {
   const res = await fetch(url, { credentials: 'include', cache: 'no-store' })
 
@@ -46,6 +58,7 @@ export default function UserCenterAgentRoute() {
   const { language } = useLanguage()
   const t = translations[language].userCenter
   const { data: nodes, error, isLoading, mutate } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
+  const visibleNodes = useMemo(() => (nodes ?? []).filter(isDisplayableNode), [nodes])
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {
@@ -55,9 +68,9 @@ export default function UserCenterAgentRoute() {
       Other: [],
     }
 
-    if (!nodes) return groups
+    if (!visibleNodes.length) return groups
 
-    nodes.forEach((node) => {
+    visibleNodes.forEach((node) => {
       const name = node.name.toLowerCase()
       if (name.includes('hk')) groups.HK.push(node)
       else if (name.includes('jp')) groups.JP.push(node)
@@ -66,7 +79,7 @@ export default function UserCenterAgentRoute() {
     })
 
     return groups
-  }, [nodes])
+  }, [visibleNodes])
 
   return (
     <div className="space-y-6">
@@ -159,7 +172,7 @@ export default function UserCenterAgentRoute() {
           )
         ))}
 
-        {!isLoading && nodes?.length === 0 && (
+        {!isLoading && visibleNodes.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/20 py-20 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)]">
               <Server className="h-8 w-8" />
