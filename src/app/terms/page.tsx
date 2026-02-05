@@ -80,7 +80,7 @@ export default function TermsPage() {
                             <>
                                 <section>
                                     <h3 className="text-xl font-semibold text-heading mb-3">1. Acceptance of Terms</h3>
-                                    <p>By accessing or using the services provided by svc.plus (the "Service"), you agree to be bound by these terms. If you are using the Service on behalf of an entity, you represent that you have the legal authority to bind that entity to these terms.</p>
+                                    <p>By accessing or using the services provided by svc.plus (the &quot;Service&quot;), you agree to be bound by these terms. If you are using the Service on behalf of an entity, you represent that you have the legal authority to bind that entity to these terms.</p>
                                 </section>
 
                                 <section>
@@ -114,7 +114,7 @@ export default function TermsPage() {
 
                                 <section>
                                     <h3 className="text-xl font-semibold text-heading mb-3">6. Limitation of Liability</h3>
-                                    <p>The Service is provided "as is" without warranties of any kind. To the maximum extent permitted by law, svc.plus shall not be liable for any indirect, incidental, or special damages (including loss of profits or data).</p>
+                                    <p>The Service is provided &quot;as is&quot; without warranties of any kind. To the maximum extent permitted by law, svc.plus shall not be liable for any indirect, incidental, or special damages (including loss of profits or data).</p>
                                 </section>
 
                                 <section>

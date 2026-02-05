@@ -34,6 +34,13 @@ export const userCenterExtension: DashboardExtension = {
       guard: { requireLogin: true },
       redirect: { unauthenticated: '/login' },
       sidebar: { section: 'productivity', order: 10 },
+      featureFlag: {
+        id: 'user-center.agent',
+        title: 'Agent 节点管理',
+        description: '启用运行节点管理页面。',
+        envVar: 'NEXT_PUBLIC_FEATURE_AGENT_MODULE',
+        defaultEnabled: true,
+      },
     },
     {
       id: 'apis',
