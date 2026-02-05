@@ -1,12 +1,14 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Server, MapPin, Plus, ExternalLink, RefreshCw } from 'lucide-react'
 
 import Breadcrumbs from '@/app/panel/components/Breadcrumbs'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
+import { useUserStore } from '@lib/userStore'
+import { getSandboxNodeBinding } from '../lib/sandboxNodeBinding'
 
 interface VlessNode {
   name: string
@@ -57,8 +59,43 @@ async function fetcher(url: string): Promise<VlessNode[]> {
 export default function UserCenterAgentRoute() {
   const { language } = useLanguage()
   const t = translations[language].userCenter
+  const user = useUserStore((state) => state.user)
   const { data: nodes, error, isLoading, mutate } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
   const visibleNodes = useMemo(() => (nodes ?? []).filter(isDisplayableNode), [nodes])
+  const [boundNode, setBoundNode] = useState<VlessNode | null>(null)
+  const normalizedEmail = user?.email?.toLowerCase() ?? ''
+  const isGuestSandboxReadOnly = Boolean(
+    user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus' || normalizedEmail === 'demo@svc.plus'),
+  )
+
+  useEffect(() => {
+    if (!isGuestSandboxReadOnly) {
+      setBoundNode(null)
+      return
+    }
+    const binding = getSandboxNodeBinding()
+    if (!binding) {
+      setBoundNode(null)
+      return
+    }
+    setBoundNode({
+      name: binding.name || 'Sandbox Node',
+      address: binding.address,
+      port: 443,
+      transport: 'tcp',
+      security: 'tls',
+    })
+  }, [isGuestSandboxReadOnly])
+
+  const effectiveNodes = useMemo(() => {
+    if (visibleNodes.length > 0) {
+      return visibleNodes
+    }
+    if (isGuestSandboxReadOnly && boundNode) {
+      return [boundNode]
+    }
+    return []
+  }, [boundNode, isGuestSandboxReadOnly, visibleNodes])
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {
@@ -68,9 +105,9 @@ export default function UserCenterAgentRoute() {
       Other: [],
     }
 
-    if (!visibleNodes.length) return groups
+    if (!effectiveNodes.length) return groups
 
-    visibleNodes.forEach((node) => {
+    effectiveNodes.forEach((node) => {
       const name = node.name.toLowerCase()
       if (name.includes('hk')) groups.HK.push(node)
       else if (name.includes('jp')) groups.JP.push(node)
@@ -79,7 +116,7 @@ export default function UserCenterAgentRoute() {
     })
 
     return groups
-  }, [visibleNodes])
+  }, [effectiveNodes])
 
   return (
     <div className="space-y-6">
@@ -115,7 +152,7 @@ export default function UserCenterAgentRoute() {
 
       <div className="grid gap-6">
 
-        {error && (
+        {error && !(isGuestSandboxReadOnly && boundNode) && (
           <div className="rounded-xl border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/30 px-4 py-3 text-sm text-[var(--color-danger-foreground)]">
             {language === 'zh'
               ? `节点列表加载失败：${error.message}`
@@ -172,7 +209,7 @@ export default function UserCenterAgentRoute() {
           )
         ))}
 
-        {!isLoading && visibleNodes.length === 0 && (
+        {!isLoading && effectiveNodes.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/20 py-20 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)]">
               <Server className="h-8 w-8" />
