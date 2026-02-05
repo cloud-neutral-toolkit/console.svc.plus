@@ -9,7 +9,10 @@ import OverviewCards, { type MetricsOverview } from '../management/components/Ov
 import PermissionMatrixEditor, {
   type PermissionMatrix,
 } from '../management/components/PermissionMatrixEditor'
-import UserGroupManagement, { type ManagedUser } from '../management/components/UserGroupManagement'
+import UserGroupManagement, {
+  type ManagedUser,
+  type CreateManagedUserInput,
+} from '../management/components/UserGroupManagement'
 import { EmailBlacklist } from '../management/components/EmailBlacklist'
 import { resolveAccess } from '@lib/accessControl'
 import { useUserStore } from '@lib/userStore'
@@ -64,6 +67,7 @@ export default function UserCenterManagementRoute() {
   const canAccess = accessDecision.allowed
   const canEditPermissions = Boolean(user?.isAdmin)
   const canEditRoles = Boolean(user?.isAdmin)
+  const canCreateCustomUser = Boolean(user?.isAdmin && user?.username?.trim().toLowerCase() === 'root')
 
   const [matrixDraft, setMatrixDraft] = useState<PermissionMatrix>({})
   const [matrixVersion, setMatrixVersion] = useState<number>(0)
@@ -288,6 +292,23 @@ export default function UserCenterManagementRoute() {
     }
   }, [usersSWR])
 
+  const handleCreateCustomUser = useCallback(async (input: CreateManagedUserInput) => {
+    if (!canCreateCustomUser) {
+      throw new Error('仅 root 管理员可创建自定义 UUID 用户')
+    }
+
+    await jsonFetcher('/api/admin/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: input.email,
+        uuid: input.uuid,
+        groups: input.groups,
+      }),
+    })
+
+    await usersSWR.mutate()
+  }, [canCreateCustomUser, usersSWR])
+
   const matrixPending = matrixSaving || isUserLoading
   const metricsLoading = metricsSWR.isLoading
   const settingsLoading = settingsSWR.isLoading
@@ -323,11 +344,13 @@ export default function UserCenterManagementRoute() {
         isLoading={usersLoading}
         onRoleChange={handleRoleChange}
         canEditRoles={canEditRoles}
+        canCreateCustomUser={canCreateCustomUser}
         pendingUserIds={pendingRoleUpdates}
         onPauseUser={handlePauseUser}
         onResumeUser={handleResumeUser}
         onDeleteUser={handleDeleteUser}
         onRenewUuid={handleRenewUuid}
+        onCreateCustomUser={handleCreateCustomUser}
         onManageBlacklist={() => setIsBlacklistOpen(true)}
       />
       <EmailBlacklist isOpen={isBlacklistOpen} onClose={() => setIsBlacklistOpen(false)} />

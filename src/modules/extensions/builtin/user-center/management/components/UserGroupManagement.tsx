@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { type FormEvent, useMemo, useState } from 'react'
 import Card from '../../components/Card'
 
 export type ManagedUser = {
@@ -12,11 +12,18 @@ export type ManagedUser = {
   created_at?: string
 }
 
+export type CreateManagedUserInput = {
+  email: string
+  uuid: string
+  groups: string[]
+}
+
 type UserGroupManagementProps = {
   users?: ManagedUser[]
   isLoading?: boolean
   pendingUserIds?: Set<string>
   canEditRoles: boolean
+  canCreateCustomUser?: boolean
   onRoleChange?: (userId: string, role: string) => void
   onInvite?: () => void
   onImport?: () => void
@@ -25,6 +32,7 @@ type UserGroupManagementProps = {
   onDeleteUser?: (userId: string) => void
   onRenewUuid?: (userId: string) => void
   onManageBlacklist?: () => void
+  onCreateCustomUser?: (input: CreateManagedUserInput) => Promise<void> | void
 }
 
 const ROLE_OPTIONS = [
@@ -33,11 +41,22 @@ const ROLE_OPTIONS = [
   { value: 'user', label: '用户' },
 ]
 
+function parseGroupList(input: string): string[] {
+  const values = input
+    .split(/[\n,，]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+
+  return Array.from(new Set(values))
+}
+
+
 export function UserGroupManagement({
   users,
   isLoading = false,
   pendingUserIds,
   canEditRoles,
+  canCreateCustomUser = false,
   onRoleChange,
   onInvite,
   onImport,
@@ -46,9 +65,55 @@ export function UserGroupManagement({
   onDeleteUser,
   onRenewUuid,
   onManageBlacklist,
+  onCreateCustomUser,
 }: UserGroupManagementProps) {
   const data = useMemo(() => users ?? [], [users])
   const pendingSet = pendingUserIds ?? new Set<string>()
+
+  const [customEmail, setCustomEmail] = useState('')
+  const [customUuid, setCustomUuid] = useState('')
+  const [customGroups, setCustomGroups] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
+  const [createMessage, setCreateMessage] = useState<string | undefined>()
+  const [createError, setCreateError] = useState<string | undefined>()
+
+  const parsedCustomGroups = useMemo(() => parseGroupList(customGroups), [customGroups])
+
+  const handleCreateCustomUser = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!onCreateCustomUser) {
+      return
+    }
+
+    const email = customEmail.trim()
+    const uuid = customUuid.trim()
+    if (!email || !uuid) {
+      setCreateError('请填写邮箱与 UUID')
+      return
+    }
+
+    const groups = parsedCustomGroups
+    if (groups.length === 0) {
+      setCreateError('请至少填写一个用户组')
+      return
+    }
+
+    setIsCreating(true)
+    setCreateError(undefined)
+    setCreateMessage(undefined)
+
+    try {
+      await onCreateCustomUser({ email, uuid, groups })
+      setCreateMessage('用户创建成功')
+      setCustomEmail('')
+      setCustomUuid('')
+      setCustomGroups('')
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : '创建失败')
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   return (
     <Card>
@@ -82,6 +147,56 @@ export function UserGroupManagement({
             </button>
           </div>
         </header>
+
+        {canCreateCustomUser ? (
+          <form onSubmit={handleCreateCustomUser} className="rounded-xl border border-purple-100 bg-purple-50/60 p-4">
+            <h3 className="text-sm font-semibold text-purple-800">Root 管理员专用：创建自定义 UUID 用户</h3>
+            <p className="mt-1 text-xs text-purple-700">支持一次配置多个分组（逗号或换行分隔）。</p>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                邮箱
+                <input
+                  type="email"
+                  value={customEmail}
+                  onChange={(event) => setCustomEmail(event.target.value)}
+                  placeholder="user@example.com"
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                自定义 UUID
+                <input
+                  type="text"
+                  value={customUuid}
+                  onChange={(event) => setCustomUuid(event.target.value)}
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-gray-600 md:col-span-2">
+                分组列表
+                <textarea
+                  value={customGroups}
+                  onChange={(event) => setCustomGroups(event.target.value)}
+                  placeholder="group-a,group-b"
+                  rows={3}
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                />
+              </label>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                disabled={isCreating}
+                className="inline-flex items-center rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isCreating ? '创建中…' : '创建用户'}
+              </button>
+              {createMessage ? <span className="text-xs text-green-700">{createMessage}</span> : null}
+              {createError ? <span className="text-xs text-red-600">{createError}</span> : null}
+            </div>
+          </form>
+        ) : null}
 
         <div className="overflow-x-auto" aria-busy={isLoading} aria-live="polite">
           <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
@@ -139,8 +254,7 @@ export function UserGroupManagement({
                       <td className="px-4 py-3 text-gray-600">{user.groups?.join('、') || '—'}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }`}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
                         >
                           {user.active ? '活跃' : '已暂停'}
                         </span>
