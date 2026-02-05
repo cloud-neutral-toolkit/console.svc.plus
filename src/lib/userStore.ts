@@ -385,8 +385,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
     } catch (error) {
       console.warn('Failed to clear user session', error)
     }
-
-    await get().hydrateFromAPI()
+    set({ user: null, isLoading: false })
   },
 }))
 

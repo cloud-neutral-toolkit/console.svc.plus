@@ -22,7 +22,7 @@ export function LogoutClient() {
         await logout()
       } finally {
         if (!cancelled) {
-          router.replace('/')
+          router.replace('/login?switch=1')
           router.refresh()
         }
       }
