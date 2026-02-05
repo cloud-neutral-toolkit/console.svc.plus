@@ -15,7 +15,27 @@ import {
   VlessTransport,
 } from '../lib/vless'
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+async function fetcher(url: string): Promise<VlessNode[]> {
+  const res = await fetch(url, { credentials: 'include', cache: 'no-store' })
+  const payload = await res.json().catch(() => null)
+
+  if (!res.ok) {
+    const message =
+      (payload && typeof payload.message === 'string' && payload.message) ||
+      (payload && typeof payload.error === 'string' && payload.error) ||
+      `Request failed (${res.status})`
+    throw new Error(message)
+  }
+
+  if (Array.isArray(payload)) {
+    return payload as VlessNode[]
+  }
+  if (payload && Array.isArray((payload as { nodes?: unknown }).nodes)) {
+    return (payload as { nodes: VlessNode[] }).nodes
+  }
+
+  return []
+}
 
 export type VlessQrCopy = {
   label: string
