@@ -135,6 +135,7 @@ export async function GET(request: NextRequest) {
     rawRole === 'readonly' ||
     rawRole === 'read_only' ||
     String(rawUser.email ?? '').trim().toLowerCase() === 'demo@svc.plus' ||
+    String(rawUser.email ?? '').trim().toLowerCase() === 'sandbox@svc.plus' ||
     isNamedDemo
   const normalizedProxyUuid =
     typeof rawUser.proxyUuid === 'string' && rawUser.proxyUuid.trim().length > 0

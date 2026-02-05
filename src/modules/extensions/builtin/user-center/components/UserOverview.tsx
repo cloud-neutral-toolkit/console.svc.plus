@@ -55,9 +55,12 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   const username = user?.username ?? '—'
   const email = user?.email ?? '—'
   const docsUrl = mfaCopy.actions.docsUrl
-  const isDemoReadOnly = Boolean(user?.isReadOnly && user?.email?.toLowerCase() === 'demo@svc.plus')
-  const demoUuidExpiresAtText = useMemo(() => {
-    if (!isDemoReadOnly || !user?.proxyUuidExpiresAt) {
+  const normalizedEmail = user?.email?.toLowerCase() ?? ''
+  const isGuestSandboxReadOnly = Boolean(
+    user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus' || normalizedEmail === 'demo@svc.plus'),
+  )
+  const guestUuidExpiresAtText = useMemo(() => {
+    if (!isGuestSandboxReadOnly || !user?.proxyUuidExpiresAt) {
       return null
     }
     const date = new Date(user.proxyUuidExpiresAt)
@@ -65,7 +68,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
       return null
     }
     return date.toLocaleString()
-  }, [isDemoReadOnly, user?.proxyUuidExpiresAt])
+  }, [isGuestSandboxReadOnly, user?.proxyUuidExpiresAt])
 
   const mfaStatusLabel = useMemo(() => {
     if (user?.mfaEnabled) {
@@ -118,7 +121,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   }, [logout, router])
 
   useEffect(() => {
-    if (!isDemoReadOnly || !user?.proxyUuidExpiresAt) {
+    if (!isGuestSandboxReadOnly || !user?.proxyUuidExpiresAt) {
       return
     }
     const expiresAt = new Date(user.proxyUuidExpiresAt).getTime()
@@ -132,17 +135,17 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
     return () => {
       window.clearTimeout(timer)
     }
-  }, [isDemoReadOnly, refresh, user?.proxyUuidExpiresAt])
+  }, [isGuestSandboxReadOnly, refresh, user?.proxyUuidExpiresAt])
 
   return (
     <div className="space-y-6 text-[var(--color-text)] transition-colors">
       <div>
         <p className="text-sm text-[var(--color-text-subtle)] opacity-90">{copy.uuidNote}</p>
-        {isDemoReadOnly ? (
+        {isGuestSandboxReadOnly ? (
           <p className="mt-2 rounded-[var(--radius-md)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-2 text-xs text-[var(--color-warning-foreground)]">
             {language === 'zh'
-              ? `Demo 体验账号为只读模式：可浏览控制台、可使用 VLESS 二维码，但不能修改任何配置。UUID 每 1 小时自动刷新${demoUuidExpiresAtText ? `（下次刷新约 ${demoUuidExpiresAtText}）` : ''}。`
-              : `Demo account runs in read-only mode: browse safely and use the VLESS QR code, but no configuration changes are allowed. UUID rotates every hour${demoUuidExpiresAtText ? ` (next refresh around ${demoUuidExpiresAtText})` : ''}.`}
+              ? `Guest user（演示模式）为只读模式：可浏览控制台、可使用 VLESS 二维码，但不能修改任何配置。UUID 每 1 小时自动刷新${guestUuidExpiresAtText ? `（下次刷新约 ${guestUuidExpiresAtText}）` : ''}。`
+              : `Guest user (demo mode) runs in read-only mode: browse safely and use the VLESS QR code, but no configuration changes are allowed. UUID rotates every hour${guestUuidExpiresAtText ? ` (next refresh around ${guestUuidExpiresAtText})` : ''}.`}
           </p>
         ) : null}
       </div>
@@ -199,7 +202,7 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
           <p className="mt-3 text-xs text-[var(--color-text-subtle)]">{copy.cards.uuid.description}</p>
         </Card>
 
-        <VlessQrCard uuid={vlessUuid} copy={copy.cards.vless} />
+        <VlessQrCard uuid={vlessUuid} copy={copy.cards.vless} allowSandboxFallbackNode={isGuestSandboxReadOnly} />
 
         <Card>
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]">{copy.cards.username.label}</p>

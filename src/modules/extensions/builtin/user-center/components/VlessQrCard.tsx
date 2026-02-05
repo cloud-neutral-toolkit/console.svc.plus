@@ -54,10 +54,30 @@ export type VlessQrCopy = {
 interface VlessQrCardProps {
   uuid: string | null | undefined
   copy: VlessQrCopy
+  allowSandboxFallbackNode?: boolean
 }
 
-export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
-  const { data: nodes } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
+function buildSandboxFallbackNode(): VlessNode {
+  return {
+    name: 'Sandbox Node',
+    address: 'ha-proxy-jp.svc.plus',
+    port: 1443,
+    server_name: 'ha-proxy-jp.svc.plus',
+    transport: 'tcp',
+    tcp_port: 1443,
+    xhttp_port: 443,
+    path: '/split',
+    mode: 'auto',
+    flow: 'xtls-rprx-vision',
+    uri_scheme_tcp:
+      'vless://${UUID}@${DOMAIN}:1443?encryption=none&flow=${FLOW}&security=tls&sni=${SNI}&fp=${FP}&type=tcp#${TAG}',
+    uri_scheme_xhttp:
+      'vless://${UUID}@${DOMAIN}:443?encryption=none&security=tls&sni=${SNI}&fp=${FP}&type=xhttp&path=${PATH}&mode=${MODE}#${TAG}',
+  }
+}
+
+export default function VlessQrCard({ uuid, copy, allowSandboxFallbackNode = false }: VlessQrCardProps) {
+  const { data: nodes, error: nodesError } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
   const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
   const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
   const [isSelectorOpen, setIsSelectorOpen] = useState(false)
@@ -67,7 +87,12 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
   const [generationError, setGenerationError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const rawNode = useMemo(() => selectedNode || (nodes && nodes[0]) || undefined, [selectedNode, nodes])
+  const rawNode = useMemo(() => {
+    if (selectedNode) return selectedNode
+    if (nodes && nodes[0]) return nodes[0]
+    if (allowSandboxFallbackNode && uuid) return buildSandboxFallbackNode()
+    return undefined
+  }, [allowSandboxFallbackNode, nodes, selectedNode, uuid])
 
   const effectiveNode = useMemo((): VlessNode | undefined => {
     if (!rawNode) return undefined
@@ -257,10 +282,12 @@ export default function VlessQrCard({ uuid, copy }: VlessQrCardProps) {
             <p className="font-semibold">❌ UUID 缺失</p>
             <p className="mt-1">{copy.missingUuid}</p>
           </div>
-        ) : !nodes || nodes.length === 0 ? (
+        ) : (!nodes || nodes.length === 0) && !rawNode ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
             <p className="font-semibold">❌ 节点数据缺失</p>
-            <p className="mt-1">无法从服务器获取代理节点列表。请检查 /api/agent-server/v1/nodes 接口是否正常。</p>
+            <p className="mt-1">
+              无法从服务器获取代理节点列表{nodesError ? `（${nodesError.message}）` : ''}。请检查 /api/agent-server/v1/nodes 接口是否正常。
+            </p>
           </div>
         ) : !effectiveNode ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">

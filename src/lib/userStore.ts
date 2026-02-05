@@ -146,7 +146,7 @@ function buildGuestUser(): User {
   return {
     id: identifier,
     uuid: identifier,
-    email: 'guest@sandbox.local',
+    email: 'Sandbox@svc.plus',
     name: 'Guest user',
     username: 'guest',
     mfaEnabled: false,
@@ -273,6 +273,7 @@ async function fetchSessionUser(): Promise<User | null> {
       rawRole === 'readonly' ||
       rawRole === 'read_only' ||
       normalizedEmail === 'demo@svc.plus' ||
+      normalizedEmail === 'sandbox@svc.plus' ||
       isNamedDemo ||
       normalizedGroups.some((value) => value.toLowerCase() === 'readonly role')
     const normalizedReadOnly = Boolean(sessionUser.readOnly) || inferredReadOnly
