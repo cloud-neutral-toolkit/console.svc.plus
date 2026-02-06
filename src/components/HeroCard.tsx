@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowRight, X, QrCode } from 'lucide-react';
 import { cn } from '../lib/utils';
 import Link from 'next/link';
@@ -25,87 +25,138 @@ interface HeroCardProps {
 
 export function HeroCard({ icon: Icon, title, description, guide }: HeroCardProps) {
     const [showGuide, setShowGuide] = useState(false);
+    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleMouseEnter = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+        if (guide) setShowGuide(true);
+    };
+
+    const handleMouseLeave = () => {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = setTimeout(() => {
+            setShowGuide(false);
+        }, 300); // 300ms grace period to move mouse to sidebar
+    };
+
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        };
+    }, []);
 
     return (
-        <div
-            className={cn(
-                "group relative flex items-start gap-4 rounded-2xl border border-surface-border bg-surface p-6 transition-all duration-300",
-                showGuide ? "border-primary/50 shadow-lg ring-1 ring-primary/20" : "hover:border-primary/50 hover:bg-surface-hover"
-            )}
-            onMouseEnter={() => guide && setShowGuide(true)}
-            onMouseLeave={() => setShowGuide(false)}
-        >
-            <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2 group-hover:border-primary/50 group-hover:text-primary">
-                <Icon className="h-5 w-5" />
+        <>
+            <div
+                className={cn(
+                    "group relative flex items-start gap-4 rounded-2xl border border-surface-border bg-surface p-6 transition-all duration-300",
+                    showGuide ? "border-primary/50 shadow-lg" : "hover:border-primary/50 hover:bg-surface-hover"
+                )}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2 group-hover:border-primary/50 group-hover:text-primary">
+                    <Icon className="h-5 w-5" />
+                </div>
+                <div className="space-y-1 w-full">
+                    <h3 className="font-semibold text-heading">{title}</h3>
+                    <p className="text-sm text-text-muted">{description}</p>
+                </div>
             </div>
-            <div className="space-y-1 w-full">
-                <h3 className="font-semibold text-heading">{title}</h3>
-                <p className="text-sm text-text-muted transition-opacity duration-200" style={{ opacity: showGuide ? 0.3 : 1 }}>
-                    {description}
-                </p>
 
-                {/* Guide Content Overlay */}
-                {guide && (
-                    <div
-                        className={cn(
-                            "absolute inset-x-0 top-16 mx-4 z-50 transition-all duration-300 ease-out origin-top",
-                            showGuide
-                                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-                                : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
-                        )}
-                    >
-                        <div className="rounded-xl border border-surface-border/50 bg-background/80 backdrop-blur-xl shadow-2xl p-5 space-y-4 ring-1 ring-black/5 dark:ring-white/10">
-                            <div className="flex items-center justify-between border-b border-surface-border/50 pb-3">
-                                <h4 className="font-semibold text-primary flex items-center gap-2 text-sm">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            {/* Right Sidebar Guide Drawer */}
+            {guide && (
+                <div
+                    className={cn(
+                        "fixed top-0 right-0 h-full w-[400px] z-[100] bg-surface border-l border-surface-border shadow-2xl transition-transform duration-300 ease-in-out transform",
+                        showGuide ? "translate-x-0" : "translate-x-full"
+                    )}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <div className="h-full flex flex-col p-8 overflow-y-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <h4 className="text-xl font-bold text-heading flex items-center gap-3">
+                                <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                </span>
+                                {guide.title}
+                            </h4>
+                            <button
+                                onClick={() => setShowGuide(false)}
+                                className="rounded-full p-2 hover:bg-surface-muted text-text-muted hover:text-text transition-colors"
+                            >
+                                <X className="h-5 w-5" />
+                                <span className="sr-only">{guide.dismiss}</span>
+                            </button>
+                        </div>
+
+                        <div className="space-y-8 flex-1">
+                            {guide.steps.map((step, idx) => (
+                                <div key={idx} className="relative pl-8 group/step">
+                                    {/* Timeline line */}
+                                    {idx !== guide.steps.length - 1 && (
+                                        <div className="absolute left-[11px] top-8 bottom-[-2rem] w-[2px] bg-surface-border group-hover/step:bg-primary/20 transition-colors" />
+                                    )}
+
+                                    <span className={cn(
+                                        "absolute left-0 top-0 flex items-center justify-center h-6 w-6 rounded-full text-xs font-bold ring-4 ring-surface transition-all duration-300",
+                                        "bg-surface-muted text-text-muted group-hover/step:bg-primary group-hover/step:text-white group-hover/step:scale-110"
+                                    )}>
+                                        {idx + 1}
                                     </span>
-                                    {guide.title}
-                                </h4>
-                            </div>
 
-                            <div className="space-y-4">
-                                {guide.steps.map((step, idx) => (
-                                    <div key={idx} className="flex gap-3 text-sm text-text-subtle group/step">
-                                        <span className={cn(
-                                            "flex-none flex items-center justify-center h-5 w-5 rounded-full text-xs font-bold transition-colors",
-                                            "bg-surface-muted text-text-muted group-hover/step:bg-primary/10 group-hover/step:text-primary"
-                                        )}>
-                                            {idx + 1}
-                                        </span>
-                                        <div className="space-y-1.5 flex-1">
-                                            <p className="leading-snug text-xs">{step.text}</p>
-                                            {step.link && (
-                                                <Link
-                                                    href={step.link.url}
-                                                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover hover:underline underline-offset-2 transition-colors"
-                                                >
-                                                    {step.link.label}
-                                                    <ArrowRight className="h-3 w-3" />
-                                                </Link>
-                                            )}
+                                    <div className="space-y-3">
+                                        <p className="text-base text-text leading-relaxed">{step.text}</p>
 
-                                            {/* Special handling for VLESS QR code hint */}
-                                            {idx === 2 && (
-                                                <div className="mt-2 flex items-center gap-3 rounded-lg border border-dashed border-surface-border bg-surface-muted/50 p-2 transition-colors hover:border-primary/30 hover:bg-surface-muted">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded bg-white p-0.5">
-                                                        <QrCode className="h-full w-full text-black" />
+                                        {step.link && (
+                                            <Link
+                                                href={step.link.url}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                                            >
+                                                {step.link.label}
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Link>
+                                        )}
+
+                                        {/* Special handling for VLESS QR code hint */}
+                                        {idx === 2 && (
+                                            <div className="mt-4 p-4 rounded-xl border border-dashed border-surface-border bg-surface-muted/30 hover:border-primary/30 hover:bg-primary/5 transition-all cursor-crosshair group/qr">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                        <QrCode className="h-12 w-12 text-black" />
                                                     </div>
-                                                    <div className="text-[10px] text-text-muted leading-tight">
-                                                        <p className="font-medium text-text">VLESS Protocol Ready</p>
-                                                        <p>Scan main panel QR code</p>
+                                                    <div className="space-y-1">
+                                                        <p className="font-semibold text-heading text-sm">VLESS Protocol Ready</p>
+                                                        <p className="text-xs text-text-muted leading-relaxed">
+                                                            {/* English fallback if not found in props (though guide steps usually text) */}
+                                                            Scan the QR code in the control panel to connect automatically.
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-auto pt-6 border-t border-surface-border">
+                            <button
+                                onClick={() => setShowGuide(false)}
+                                className="w-full py-3 rounded-xl border border-surface-border text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text transition-all"
+                            >
+                                {guide.dismiss}
+                            </button>
                         </div>
                     </div>
-                )}
-            </div>
-        </div>
+                </div>
+            )}
+        </>
     );
 }
