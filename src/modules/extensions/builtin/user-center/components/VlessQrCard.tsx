@@ -291,11 +291,11 @@ export default function VlessQrCard({
           </div>
         ) : (!nodes || nodes.length === 0) && !rawNode ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
-            <p className="font-semibold">❌ {allowSandboxFallbackNode ? '由于演示模式限制，请联系管理员或 Root 用户完成节点绑定' : '节点数据缺失'}</p>
+            <p className="font-semibold">❌ 运行节点配置缺失</p>
             <p className="mt-1">
               {allowSandboxFallbackNode
-                ? '演示模式账号未在本地存储发现有效节点绑定，请使用 root 账号在此浏览器完成一次 Sandbox 节点绑定逻辑。'
-                : `无法从服务器获取代理节点列表${nodesError ? `（${nodesError.message}）` : ''}。请检查 /api/agent-server/v1/nodes 接口是否正常。`
+                ? '演示模式账号未发现有效的节点映射。请确认后端已完成 Sandbox 节点绑定逻辑。'
+                : `无法从服务器获取代理节点列表${nodesError ? `（${nodesError.message}）` : ''}。请检查 API 接口是否正常。`
               }
             </p>
           </div>
