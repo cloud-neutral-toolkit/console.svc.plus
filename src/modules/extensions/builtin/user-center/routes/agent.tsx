@@ -8,7 +8,7 @@ import Breadcrumbs from '@/app/panel/components/Breadcrumbs'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { useUserStore } from '@lib/userStore'
-import { getSandboxNodeBinding } from '../lib/sandboxNodeBinding'
+import { fetchSandboxNodeBinding } from '../lib/sandboxNodeBinding'
 
 interface VlessNode {
   name: string
@@ -67,32 +67,43 @@ export default function UserCenterAgentRoute() {
   const isGuestSandboxReadOnly = Boolean(
     user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus' || normalizedEmail === 'demo@svc.plus'),
   )
+  const [boundAddress, setBoundAddress] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isGuestSandboxReadOnly) {
       setBoundNode(null)
+      setBoundAddress(null)
       return
     }
-    const binding = getSandboxNodeBinding()
-    if (!binding) {
-      setBoundNode(null)
-      return
+    let cancelled = false
+    void (async () => {
+      const binding = await fetchSandboxNodeBinding()
+      if (cancelled) {
+        return
+      }
+      setBoundAddress(binding?.address ?? null)
+      if (!binding?.address) {
+        setBoundNode(null)
+        return
+      }
+      setBoundNode({
+        name: binding.name || 'Sandbox Node',
+        address: binding.address,
+        port: 443,
+        transport: 'tcp',
+        security: 'tls',
+      } as any)
+    })()
+    return () => {
+      cancelled = true
     }
-    setBoundNode({
-      name: binding.name || 'Sandbox Node',
-      address: binding.address,
-      port: 443,
-      transport: 'tcp',
-      security: 'tls',
-    } as any)
   }, [isGuestSandboxReadOnly])
 
   const effectiveNodes = useMemo(() => {
     // 1. If we have a bound node address (from root management), try to find it in the full list
     if (isGuestSandboxReadOnly && normalizedEmail) {
-      const binding = getSandboxNodeBinding()
-      if (binding?.address && nodes?.length) {
-        const matched = nodes.find((n) => n.address === binding.address)
+      if (boundAddress && nodes?.length) {
+        const matched = nodes.find((n) => n.address === boundAddress)
         if (matched) {
           return [matched]
         }
@@ -106,7 +117,7 @@ export default function UserCenterAgentRoute() {
 
     // 3. No fallback logic
     return []
-  }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail])
+  }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail, boundAddress])
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {

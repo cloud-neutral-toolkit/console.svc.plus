@@ -8,7 +8,7 @@ import { Copy } from 'lucide-react'
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { useUserStore } from '@lib/userStore'
-import { getSandboxNodeBinding } from '../lib/sandboxNodeBinding'
+import { fetchSandboxNodeBinding } from '../lib/sandboxNodeBinding'
 
 import Card from './Card'
 import VlessQrCard from './VlessQrCard'
@@ -127,8 +127,17 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
       setSandboxBoundNodeAddress(null)
       return
     }
-    const binding = getSandboxNodeBinding()
-    setSandboxBoundNodeAddress(binding?.address ?? null)
+    let cancelled = false
+    void (async () => {
+      const binding = await fetchSandboxNodeBinding()
+      if (cancelled) {
+        return
+      }
+      setSandboxBoundNodeAddress(binding?.address ?? null)
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [isGuestSandboxReadOnly])
 
   useEffect(() => {

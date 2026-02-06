@@ -5,11 +5,6 @@ import useSWR from 'swr'
 
 import Card from '../../components/Card'
 import type { VlessNode } from '../../lib/vless'
-import {
-  clearSandboxNodeBinding,
-  getSandboxNodeBinding,
-  setSandboxNodeBinding,
-} from '../../lib/sandboxNodeBinding'
 
 async function fetcher(url: string): Promise<VlessNode[]> {
   const response = await fetch(url, {
@@ -44,8 +39,8 @@ export default function SandboxNodeBindingPanel() {
   })
   const [message, setMessage] = useState<string | null>(null)
 
-  const currentBinding = useMemo(() => getSandboxNodeBinding(), [])
-  const [draftAddress, setDraftAddress] = useState<string>(currentBinding?.address ?? '')
+  const [activeBinding, setActiveBinding] = useState<{ address: string; updatedAt?: number } | null>(null)
+  const [draftAddress, setDraftAddress] = useState<string>('')
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
@@ -55,23 +50,18 @@ export default function SandboxNodeBindingPanel() {
       .then(data => {
         if (data && typeof data.address === 'string') {
           setDraftAddress(data.address)
-          if (data.address) {
-            setSandboxNodeBinding({
-              address: data.address,
-              updatedBy: 'server'
-            })
-          } else {
-            clearSandboxNodeBinding()
-          }
+          setActiveBinding({
+            address: data.address,
+            updatedAt: typeof data.updatedAt === 'number' ? data.updatedAt : undefined,
+          })
         }
       })
       .catch(err => console.error('Failed to fetch binding from server', err))
   }, [])
 
   const isChanged = useMemo(() => {
-    const current = getSandboxNodeBinding()
-    return (current?.address ?? '') !== draftAddress
-  }, [draftAddress])
+    return (activeBinding?.address ?? '') !== draftAddress
+  }, [activeBinding?.address, draftAddress])
 
   const handleApply = async (rawAddress: string) => {
     const address = rawAddress.trim()
@@ -92,15 +82,11 @@ export default function SandboxNodeBindingPanel() {
       }
 
       if (!address) {
-        clearSandboxNodeBinding()
+        setActiveBinding({ address: '', updatedAt: Date.now() })
         setMessage('已成功清空绑定节点 (已同步至服务器)')
       } else {
         const node = nodes?.find((item) => item.address === address)
-        setSandboxNodeBinding({
-          address: address,
-          name: node?.name || address,
-          updatedBy: 'root',
-        })
+        setActiveBinding({ address, updatedAt: Date.now() })
         setMessage(`应用成功：已绑定至 ${node?.name || address} (已同步至服务器)`)
       }
 
@@ -112,7 +98,7 @@ export default function SandboxNodeBindingPanel() {
     }
   }
 
-  const currentActive = getSandboxNodeBinding()
+  const currentActive = activeBinding?.address ? activeBinding : null
 
   return (
     <Card>
@@ -163,7 +149,7 @@ export default function SandboxNodeBindingPanel() {
           {currentActive ? (
             <div className="flex items-center gap-2 text-xs text-gray-700">
               <div className="h-2 w-2 rounded-full bg-green-500" />
-              当前活跃绑定：<span className="font-bold">{currentActive.name || currentActive.address}</span>
+              当前活跃绑定：<span className="font-bold">{currentActive.address}</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -171,11 +157,11 @@ export default function SandboxNodeBindingPanel() {
               当前未绑定任何节点
             </div>
           )}
-          {currentActive?.updatedAt && (
+          {currentActive?.updatedAt ? (
             <p className="pl-4 text-[10px] text-gray-400">
               最后更新时间：{new Date(currentActive.updatedAt).toLocaleString()}
             </p>
-          )}
+          ) : null}
         </div>
 
         {error && <p className="text-xs text-red-600">⚠️ 节点列表加载失败：{error.message}</p>}
