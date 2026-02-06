@@ -46,6 +46,7 @@ export default function SandboxNodeBindingPanel() {
 
   const currentBinding = useMemo(() => getSandboxNodeBinding(), [])
   const [draftAddress, setDraftAddress] = useState<string>(currentBinding?.address ?? '')
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     // Initial load from server to stay in sync
@@ -72,9 +73,11 @@ export default function SandboxNodeBindingPanel() {
     return (current?.address ?? '') !== draftAddress
   }, [draftAddress])
 
-  const handleApply = async () => {
-    const address = draftAddress.trim()
+  const handleApply = async (rawAddress: string) => {
+    const address = rawAddress.trim()
     try {
+      setIsSaving(true)
+      setMessage(null)
       const response = await fetch('/api/admin/sandbox/bind', {
         method: 'POST',
         headers: {
@@ -104,6 +107,8 @@ export default function SandboxNodeBindingPanel() {
       // Refresh local state if needed (though we already updated it)
     } catch (err: any) {
       setMessage(`错误：${err.message}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -124,8 +129,10 @@ export default function SandboxNodeBindingPanel() {
               value={draftAddress}
               disabled={isLoading || !nodes}
               onChange={(e) => {
-                setDraftAddress(e.target.value)
-                setMessage(null)
+                const next = e.target.value
+                setDraftAddress(next)
+                // 自动确认：选择后立即提交到服务器
+                void handleApply(next)
               }}
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
             >
@@ -139,14 +146,14 @@ export default function SandboxNodeBindingPanel() {
           </label>
 
           <button
-            onClick={handleApply}
-            disabled={!isChanged}
+            onClick={() => void handleApply(draftAddress)}
+            disabled={!isChanged || isSaving}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isChanged
               ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
           >
-            确认应用
+            {isSaving ? '保存中…' : '确认应用'}
           </button>
         </div>
 
@@ -179,4 +186,3 @@ export default function SandboxNodeBindingPanel() {
     </Card>
   )
 }
-
