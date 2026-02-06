@@ -111,24 +111,22 @@ export default function UserCenterAgentRoute() {
   }, [isGuestSandboxReadOnly])
 
   const effectiveNodes = useMemo(() => {
-    // 1. If we have a bound node address (from root management), try to find it in the full list
-    if (isGuestSandboxReadOnly && normalizedEmail) {
-      if (boundAddress && nodes?.length) {
-        const matched = nodes.find((n) => n.address === boundAddress)
-        if (matched) {
-          return [matched]
-        }
+    // Default behavior: show all displayable nodes.
+    const base = visibleNodes.length > 0 ? [...visibleNodes] : []
+
+    // Guest sandbox behavior: if root has bound a preferred node, ensure it is first,
+    // but still show all regions/nodes to keep the demo experience useful.
+    if (isGuestSandboxReadOnly && normalizedEmail && boundAddress) {
+      const matched = nodes?.find((n) => n.address === boundAddress)
+      const preferred = matched ?? boundNode ?? null
+      if (preferred) {
+        const rest = base.filter((n) => n.address !== preferred.address)
+        return [preferred, ...rest]
       }
     }
 
-    // 2. Otherwise, use all displayable nodes
-    if (visibleNodes.length > 0) {
-      return visibleNodes
-    }
-
-    // 3. No fallback logic
-    return []
-  }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail, boundAddress])
+    return base
+  }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail, boundAddress, boundNode])
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {
