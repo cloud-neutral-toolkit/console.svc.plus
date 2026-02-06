@@ -26,6 +26,7 @@ import { translations } from "../i18n/translations";
 import { useMoltbotStore } from "../lib/moltbotStore";
 import { cn } from "../lib/utils";
 import { AskAIDialog } from "../components/AskAIDialog";
+import { HeroCard } from "../components/HeroCard";
 import useSWR from "swr";
 
 const iconMap: Record<string, any> = {
@@ -147,23 +148,20 @@ export function HeroSection() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        {t.heroCards.map((card) => {
-          const Icon = getIcon(card.title, PlusCircle);
-          return (
-            <div
-              key={card.title}
-              className="group flex items-start gap-4 rounded-2xl border border-surface-border bg-surface p-6 transition hover:border-primary/50 hover:bg-surface-hover"
-            >
-              <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2 group-hover:border-primary/50 group-hover:text-primary">
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-heading">{card.title}</h3>
-                <p className="text-sm text-text-muted">{card.description}</p>
-              </div>
-            </div>
-          );
-        })}
+        <div className="flex flex-col gap-4 relative">
+          {t.heroCards.map((card) => {
+            const Icon = getIcon(card.title, PlusCircle);
+            return (
+              <HeroCard
+                key={card.title}
+                icon={Icon}
+                title={card.title}
+                description={card.description}
+                guide={card.guide}
+              />
+            );
+          })}
+        </div>
       </div>
     </section>
   );

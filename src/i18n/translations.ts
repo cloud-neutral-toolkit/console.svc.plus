@@ -580,7 +580,20 @@ export type Translation = {
   userCenter: UserCenterTranslation
   marketing: {
     home: MarketingHomeTranslation & {
-      heroCards: { title: string; description: string }[]
+      heroCards: {
+        title: string
+        description: string
+        guide?: {
+          title: string
+          steps: {
+            text: string
+            link?: { url: string; label: string }
+            code?: string // For VLESS link/QR or command
+            image?: string // For QR code placeholder if needed
+          }[]
+          dismiss: string
+        }
+      }[]
       nextSteps: {
         title: string
         badge: string
@@ -1142,6 +1155,15 @@ export const translations: Record<'en' | 'zh', Translation> = {
           {
             title: 'Global Acceleration Network',
             description: 'Leverage globally distributed edge nodes to achieve high-speed application distribution and stable connections, ensuring users enjoy an ultra-fast access experience.',
+            guide: {
+              title: 'Global Acceleration Guide',
+              dismiss: 'Exit Guide',
+              steps: [
+                { text: 'svc.plus provides underlying overseas acceleration solutions to solve the last-mile barrier for you.' },
+                { text: 'Enter the panel to configure your node.', link: { url: '/panel', label: 'Go to Panel' } },
+                { text: 'Scan to join via VLESS protocol (clients supported: OneXray, etc.).', link: { url: 'https://github.com/OneXray/OneXray', label: 'Client Download' } },
+              ],
+            },
           },
           {
             title: 'Full-link SaaS Hosting',
@@ -1909,6 +1931,15 @@ export const translations: Record<'en' | 'zh', Translation> = {
           {
             title: '全球加速网络',
             description: '依托全球分布的边缘节点，实现应用的高速分发与稳定连接，确保用户享受极速的访问体验。',
+            guide: {
+              title: '全球加速接入向导',
+              dismiss: '退出向导',
+              steps: [
+                { text: 'svc.plus 提供的底层海外加速方案将为你解决最后 1 公里的障碍。' },
+                { text: '点击下方按钮进入控制台配置节点。', link: { url: '/panel', label: '进入控制台' } },
+                { text: '支持 Vless 协议的客户端都可以扫码加入，例如 OneXray。', link: { url: 'https://github.com/OneXray/OneXray', label: '客户端下载' } },
+              ],
+            },
           },
           {
             title: '全链路 SaaS 托管',
