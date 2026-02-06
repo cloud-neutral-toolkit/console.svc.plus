@@ -146,7 +146,7 @@ function buildGuestUser(): User {
   return {
     id: identifier,
     uuid: identifier,
-    email: 'Sandbox@svc.plus',
+    email: 'sandbox@svc.plus',
     name: 'Guest user',
     username: 'guest',
     mfaEnabled: false,

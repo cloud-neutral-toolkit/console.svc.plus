@@ -96,12 +96,25 @@ export function applySessionCookie(response: NextResponse, token: string, maxAge
 }
 
 export function clearSessionCookie(response: NextResponse) {
+  const domain = resolveCookieDomain()
+  // Always clear the host-only cookie.
   response.cookies.set({
     name: SESSION_COOKIE_NAME,
     value: '',
     ...secureCookieBase,
     maxAge: 0,
   })
+
+  // Also clear the domain-scoped cookie if we can resolve the domain.
+  if (domain) {
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: '',
+      ...secureCookieBase,
+      maxAge: 0,
+      domain,
+    })
+  }
 }
 
 export function applyMfaCookie(response: NextResponse, token: string, maxAge?: number) {
@@ -115,12 +128,24 @@ export function applyMfaCookie(response: NextResponse, token: string, maxAge?: n
 }
 
 export function clearMfaCookie(response: NextResponse) {
+  // Clear host-only
   response.cookies.set({
     name: MFA_COOKIE_NAME,
     value: '',
     ...secureCookieBase,
     maxAge: 0,
   })
+  // Clear domain-scoped if resolved
+  const domain = resolveCookieDomain()
+  if (domain) {
+    response.cookies.set({
+      name: MFA_COOKIE_NAME,
+      value: '',
+      ...secureCookieBase,
+      maxAge: 0,
+      domain,
+    })
+  }
 }
 
 export function deriveMaxAgeFromExpires(expiresAt?: string | number | Date | null, fallback = SESSION_DEFAULT_MAX_AGE) {

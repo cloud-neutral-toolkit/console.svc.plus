@@ -73,16 +73,19 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ ok: true, assumed: SANDBOX_EMAIL })
 
-    // Backup current root session token as a host-only cookie (do NOT set domain).
-    response.cookies.set({
-      name: ROOT_BACKUP_COOKIE,
-      value: session.token,
-      httpOnly: true,
-      secure: secureCookies(),
-      sameSite: 'lax',
-      path: '/',
-      maxAge: deriveMaxAgeFromExpires(payload.expiresAt),
-    })
+    // Backup current root session token only if it's NOT already an assumed session.
+    // Check if the current user is NOT the sandbox user.
+    if (user.email.toLowerCase() !== SANDBOX_EMAIL) {
+      response.cookies.set({
+        name: ROOT_BACKUP_COOKIE,
+        value: session.token,
+        httpOnly: true,
+        secure: secureCookies(),
+        sameSite: 'lax',
+        path: '/',
+        maxAge: deriveMaxAgeFromExpires(payload.expiresAt),
+      })
+    }
 
     // Switch main session to sandbox token.
     applySessionCookie(response, payload.token, deriveMaxAgeFromExpires(payload.expiresAt))
