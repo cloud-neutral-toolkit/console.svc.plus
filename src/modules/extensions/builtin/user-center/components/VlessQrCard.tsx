@@ -70,10 +70,19 @@ export default function VlessQrCard({
   const nodes = useMemo(() => {
     return (allNodes ?? []).filter((node) => {
       const name = (node.name || '').toLowerCase()
+      const address = (node.address || '').trim()
+      if (!address || address === '*') return false
+
+      if (allowSandboxFallbackNode) {
+        // In sandbox mode, allow internal agents so the user can see their bound node
+        // even if it belongs to the shared token bucket.
+        return true
+      }
+
       // Skip the redundant Internal Agents (Shared Token) node
       return !(name.includes('internal agents') && name.includes('shared token'))
     })
-  }, [allNodes])
+  }, [allNodes, allowSandboxFallbackNode])
   const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
   const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
   const [isSelectorOpen, setIsSelectorOpen] = useState(false)

@@ -10,6 +10,7 @@ import { translations } from '@i18n/translations'
 import { useUserStore } from '@lib/userStore'
 import { fetchSandboxNodeBinding } from '../lib/sandboxNodeBinding'
 
+
 interface VlessNode {
   name: string
   address: string
@@ -61,12 +62,22 @@ export default function UserCenterAgentRoute() {
   const t = translations[language].userCenter
   const user = useUserStore((state) => state.user)
   const { data: nodes, error, isLoading, mutate } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
-  const visibleNodes = useMemo(() => (nodes ?? []).filter(isDisplayableNode), [nodes])
   const [boundNode, setBoundNode] = useState<VlessNode | null>(null)
   const normalizedEmail = user?.email?.toLowerCase() ?? ''
   const isGuestSandboxReadOnly = Boolean(
     user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus' || normalizedEmail === 'demo@svc.plus'),
   )
+  const visibleNodes = useMemo(() => {
+    return (nodes ?? []).filter((node) => {
+      if (isGuestSandboxReadOnly) {
+        // In sandbox mode, allow internal agents so the user can see their bound node
+        // even if it belongs to the shared token bucket.
+        const address = (node.address || '').trim()
+        return address && address !== '*'
+      }
+      return isDisplayableNode(node)
+    })
+  }, [nodes, isGuestSandboxReadOnly])
   const [boundAddress, setBoundAddress] = useState<string | null>(null)
 
   useEffect(() => {
