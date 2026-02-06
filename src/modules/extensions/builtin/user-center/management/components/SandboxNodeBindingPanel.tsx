@@ -137,11 +137,13 @@ export default function SandboxNodeBindingPanel() {
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
             >
               <option value="">不绑定（清空）</option>
-              {(nodes ?? []).map((node) => (
-                <option key={node.address} value={node.address}>
-                  {node.name} ({node.address})
-                </option>
-              ))}
+              {(nodes ?? [])
+                .filter((node) => node.address !== '*')
+                .map((node) => (
+                  <option key={node.address} value={node.address}>
+                    {node.name} ({node.address})
+                  </option>
+                ))}
             </select>
           </label>
 
