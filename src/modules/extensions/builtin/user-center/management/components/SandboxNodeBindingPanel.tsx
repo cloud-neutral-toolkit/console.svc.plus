@@ -131,8 +131,8 @@ export default function SandboxNodeBindingPanel() {
               onChange={(e) => {
                 const next = e.target.value
                 setDraftAddress(next)
-                // 自动确认：选择后立即提交到服务器
-                void handleApply(next)
+                // 两段式：先选择，再点“确认应用”提交到服务器
+                setMessage(null)
               }}
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
             >
