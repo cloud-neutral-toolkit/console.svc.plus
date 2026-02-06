@@ -57,7 +57,7 @@ const DEFAULT_XRAY_CONFIG = {
       settings: {
         vnext: [
           {
-            address: 'ha-proxy-jp.svc.plus',
+            address: 'your-node.svc.plus',
             port: 1443,
             users: [
               {
@@ -73,7 +73,7 @@ const DEFAULT_XRAY_CONFIG = {
         network: 'tcp',
         security: 'tls',
         tlsSettings: {
-          serverName: 'ha-proxy-jp.svc.plus',
+          serverName: 'your-node.svc.plus',
           allowInsecure: false,
           fingerprint: 'chrome',
         },

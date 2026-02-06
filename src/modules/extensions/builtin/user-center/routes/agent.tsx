@@ -84,18 +84,29 @@ export default function UserCenterAgentRoute() {
       port: 443,
       transport: 'tcp',
       security: 'tls',
-    })
+    } as any)
   }, [isGuestSandboxReadOnly])
 
   const effectiveNodes = useMemo(() => {
+    // 1. If we have a bound node address (from root management), try to find it in the full list
+    if (isGuestSandboxReadOnly && normalizedEmail) {
+      const binding = getSandboxNodeBinding()
+      if (binding?.address && nodes?.length) {
+        const matched = nodes.find((n) => n.address === binding.address)
+        if (matched) {
+          return [matched]
+        }
+      }
+    }
+
+    // 2. Otherwise, use all displayable nodes
     if (visibleNodes.length > 0) {
       return visibleNodes
     }
-    if (isGuestSandboxReadOnly && boundNode) {
-      return [boundNode]
-    }
+
+    // 3. No fallback logic
     return []
-  }, [boundNode, isGuestSandboxReadOnly, visibleNodes])
+  }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail])
 
   const groupedNodes = useMemo(() => {
     const groups: Record<string, VlessNode[]> = {

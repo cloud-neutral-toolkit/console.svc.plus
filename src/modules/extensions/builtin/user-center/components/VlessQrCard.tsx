@@ -58,24 +58,6 @@ interface VlessQrCardProps {
   boundNodeAddress?: string | null
 }
 
-function buildSandboxFallbackNode(): VlessNode {
-  return {
-    name: 'Sandbox Node',
-    address: 'ha-proxy-jp.svc.plus',
-    port: 1443,
-    server_name: 'ha-proxy-jp.svc.plus',
-    transport: 'tcp',
-    tcp_port: 1443,
-    xhttp_port: 443,
-    path: '/split',
-    mode: 'auto',
-    flow: 'xtls-rprx-vision',
-    uri_scheme_tcp:
-      'vless://${UUID}@${DOMAIN}:1443?encryption=none&flow=${FLOW}&security=tls&sni=${SNI}&fp=${FP}&type=tcp#${TAG}',
-    uri_scheme_xhttp:
-      'vless://${UUID}@${DOMAIN}:443?encryption=none&security=tls&sni=${SNI}&fp=${FP}&type=xhttp&path=${PATH}&mode=${MODE}#${TAG}',
-  }
-}
 
 export default function VlessQrCard({
   uuid,
@@ -83,7 +65,15 @@ export default function VlessQrCard({
   allowSandboxFallbackNode = false,
   boundNodeAddress,
 }: VlessQrCardProps) {
-  const { data: nodes, error: nodesError } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
+  const { data: allNodes, error: nodesError } = useSWR<VlessNode[]>('/api/agent-server/v1/nodes', fetcher)
+
+  const nodes = useMemo(() => {
+    return (allNodes ?? []).filter((node) => {
+      const name = (node.name || '').toLowerCase()
+      // Skip the redundant Internal Agents (Shared Token) node
+      return !(name.includes('internal agents') && name.includes('shared token'))
+    })
+  }, [allNodes])
   const [selectedNode, setSelectedNode] = useState<VlessNode | null>(null)
   const [preferredTransport, setPreferredTransport] = useState<VlessTransport>('tcp')
   const [isSelectorOpen, setIsSelectorOpen] = useState(false)
@@ -95,16 +85,21 @@ export default function VlessQrCard({
 
   const rawNode = useMemo(() => {
     if (selectedNode) return selectedNode
-    if (boundNodeAddress && nodes?.length) {
-      const matched = nodes.find((node) => node.address === boundNodeAddress)
+
+    // 1. Try to use the node bound by root management (search in all nodes, including filtered ones)
+    if (boundNodeAddress && allNodes?.length) {
+      const matched = allNodes.find((node) => node.address === boundNodeAddress)
       if (matched) {
         return matched
       }
     }
+
+    // 2. Default to the first visible (non-filtered) node
     if (nodes && nodes[0]) return nodes[0]
-    if (allowSandboxFallbackNode && uuid) return buildSandboxFallbackNode()
+
+    // 3. No fallback node
     return undefined
-  }, [allowSandboxFallbackNode, boundNodeAddress, nodes, selectedNode, uuid])
+  }, [allNodes, allowSandboxFallbackNode, boundNodeAddress, nodes, selectedNode])
 
   const effectiveNode = useMemo((): VlessNode | undefined => {
     if (!rawNode) return undefined
@@ -296,9 +291,12 @@ export default function VlessQrCard({
           </div>
         ) : (!nodes || nodes.length === 0) && !rawNode ? (
           <div className="rounded-md border border-[color:var(--color-warning-border)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning-foreground)]">
-            <p className="font-semibold">❌ 节点数据缺失</p>
+            <p className="font-semibold">❌ {allowSandboxFallbackNode ? '由于演示模式限制，请联系管理员或 Root 用户完成节点绑定' : '节点数据缺失'}</p>
             <p className="mt-1">
-              无法从服务器获取代理节点列表{nodesError ? `（${nodesError.message}）` : ''}。请检查 /api/agent-server/v1/nodes 接口是否正常。
+              {allowSandboxFallbackNode
+                ? '演示模式账号未在本地存储发现有效节点绑定，请使用 root 账号在此浏览器完成一次 Sandbox 节点绑定逻辑。'
+                : `无法从服务器获取代理节点列表${nodesError ? `（${nodesError.message}）` : ''}。请检查 /api/agent-server/v1/nodes 接口是否正常。`
+              }
             </p>
           </div>
         ) : !effectiveNode ? (
