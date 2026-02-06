@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 
 import Card from '../../components/Card'
@@ -47,28 +47,63 @@ export default function SandboxNodeBindingPanel() {
   const currentBinding = useMemo(() => getSandboxNodeBinding(), [])
   const [draftAddress, setDraftAddress] = useState<string>(currentBinding?.address ?? '')
 
+  useEffect(() => {
+    // Initial load from server to stay in sync
+    fetch('/api/admin/sandbox/binding')
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.address === 'string') {
+          setDraftAddress(data.address)
+          if (data.address) {
+            setSandboxNodeBinding({
+              address: data.address,
+              updatedBy: 'server'
+            })
+          } else {
+            clearSandboxNodeBinding()
+          }
+        }
+      })
+      .catch(err => console.error('Failed to fetch binding from server', err))
+  }, [])
+
   const isChanged = useMemo(() => {
     const current = getSandboxNodeBinding()
     return (current?.address ?? '') !== draftAddress
   }, [draftAddress])
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const address = draftAddress.trim()
-    if (!address) {
-      clearSandboxNodeBinding()
-      setMessage('已成功清空绑定节点')
-    } else {
-      const node = nodes?.find((item) => item.address === address)
-      if (!node) {
-        setMessage('错误：选择的节点不存在')
-        return
-      }
-      setSandboxNodeBinding({
-        address: node.address,
-        name: node.name,
-        updatedBy: 'root',
+    try {
+      const response = await fetch('/api/admin/sandbox/bind', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address }),
       })
-      setMessage(`应用成功：已绑定至 ${node.name || node.address}`)
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.message || `Failed to save binding (${response.status})`)
+      }
+
+      if (!address) {
+        clearSandboxNodeBinding()
+        setMessage('已成功清空绑定节点 (已同步至服务器)')
+      } else {
+        const node = nodes?.find((item) => item.address === address)
+        setSandboxNodeBinding({
+          address: address,
+          name: node?.name || address,
+          updatedBy: 'root',
+        })
+        setMessage(`应用成功：已绑定至 ${node?.name || address} (已同步至服务器)`)
+      }
+
+      // Refresh local state if needed (though we already updated it)
+    } catch (err: any) {
+      setMessage(`错误：${err.message}`)
     }
   }
 
@@ -107,8 +142,8 @@ export default function SandboxNodeBindingPanel() {
             onClick={handleApply}
             disabled={!isChanged}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isChanged
-                ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
           >
             确认应用
