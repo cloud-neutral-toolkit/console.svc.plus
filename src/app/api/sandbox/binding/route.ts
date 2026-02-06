@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { getAccountServiceApiBaseUrl } from '@server/serviceConfig'
 import { getAccountSession } from '@server/account/session'
+import { buildInternalServiceHeaders, isServiceTokenConfigured } from '@server/internalServiceAuth'
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 
@@ -13,17 +14,24 @@ type ErrorPayload = {
 
 export async function GET(request: NextRequest) {
   const session = await getAccountSession(request)
-  if (!session.token) {
+  const canUseInternalToken = isServiceTokenConfigured()
+  if (!session.token && !canUseInternalToken) {
     return NextResponse.json<ErrorPayload>({ error: 'unauthenticated' }, { status: 401 })
   }
 
   try {
+    const headers = session.token
+      ? new Headers({
+          Authorization: `Bearer ${session.token}`,
+          Accept: 'application/json',
+        })
+      : buildInternalServiceHeaders({
+          Accept: 'application/json',
+        })
+
     const response = await fetch(`${ACCOUNT_API_BASE}/sandbox/binding`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        Accept: 'application/json',
-      },
+      headers,
       cache: 'no-store',
     })
 
@@ -46,4 +54,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json<ErrorPayload>({ error: 'upstream_unreachable' }, { status: 502 })
   }
 }
-
