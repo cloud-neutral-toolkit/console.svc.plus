@@ -16,6 +16,14 @@
 
 > **console.svc.plus** is the **Open Cloud Control Panel** for the Cloud Neutral Toolkit.
 
+## 核心特性 (Key Features)
+
+*   统一控制面：汇聚 Cloud Neutral Toolkit 各微服务的可视化入口。
+*   文档与内容系统：基于 Contentlayer 的文档/内容工作流。
+*   可扩展集成：支持 OIDC、Cloudflare Web Analytics 等集成能力。
+
+> A unified dashboard for Cloud Neutral Toolkit services, with extensible integrations and a docs/content pipeline.
+
 ## 项目简介 (About The Project)
 
 本项目是 Cloud Neutral 生态系统的核心可视化界面（前端仪表盘）。它连接各个微服务，为管理云中立基础设施提供统一的控制平面。
@@ -106,6 +114,14 @@ yarn build
 
 - EN: `docs/` (see `docs/README.md`)
 - ZH: `docs/zh/` (see `docs/zh/README.md`)
+
+## 安全与密钥 (Security & Secrets)
+
+本项目会使用环境变量/Secrets，但**不要**提交真实值到 Git。所有变量名在 `.env.example` 中定义（本地开发使用 `.env`，已被 `.gitignore` 排除）。
+
+常见变量（仅列名，不含真实值）：
+*   `INTERNAL_SERVICE_TOKEN`
+*   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`
 
 ## 脚本 (Scripts)
 
