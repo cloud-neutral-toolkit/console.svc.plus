@@ -164,8 +164,22 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
         {isGuestSandboxReadOnly ? (
           <p className="mt-2 rounded-[var(--radius-md)] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-2 text-xs text-[var(--color-warning-foreground)]">
             {language === 'zh'
-              ? `Guest user（演示模式）为只读模式：可浏览控制台、可使用 VLESS 二维码，但不能修改任何配置。UUID 每 1 小时自动刷新${guestUuidExpiresAtText ? `（下次刷新约 ${guestUuidExpiresAtText}）` : ''}。`
-              : `Guest user (demo mode) runs in read-only mode: browse safely and use the VLESS QR code, but no configuration changes are allowed. UUID rotates every hour${guestUuidExpiresAtText ? ` (next refresh around ${guestUuidExpiresAtText})` : ''}.`}
+              ? (
+                <>
+                  Guest user（演示模式）为只读模式：可浏览控制台、可使用 VLESS 二维码，但不能修改任何配置。UUID 每 1 小时自动刷新{guestUuidExpiresAtText ? `（下次刷新约 ${guestUuidExpiresAtText}）` : ''}。
+                  <Link href="/register" className="ml-1 text-[var(--color-primary)] hover:underline">
+                    立即注册账号以获得持久访问权限 &rarr;
+                  </Link>
+                </>
+              )
+              : (
+                <>
+                  Guest user (demo mode) runs in read-only mode: browse safely and use the VLESS QR code, but no configuration changes are allowed. UUID rotates every hour{guestUuidExpiresAtText ? ` (next refresh around ${guestUuidExpiresAtText})` : ''}.
+                  <Link href="/register" className="ml-1 text-[var(--color-primary)] hover:underline">
+                    Register for persistent access &rarr;
+                  </Link>
+                </>
+              )}
           </p>
         ) : null}
       </div>
