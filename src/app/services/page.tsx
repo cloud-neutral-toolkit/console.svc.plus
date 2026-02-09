@@ -274,6 +274,16 @@ export default function ServicesPage() {
       icon: BookText,
     },
     {
+      key: "x-scope-hub",
+      name: isChinese ? "XScopeHub MCP" : "XScopeHub MCP",
+      description: isChinese
+        ? "模块化 MCP 服务驱动的可观测性中心。"
+        : "Modular MCP server powering observability hub.",
+      href: "https://x-scope-hub-svc-plus-266500572462.us-central1.run.app",
+      icon: Database,
+      external: true,
+    },
+    {
       key: "moltbot",
       name: isChinese ? "Moltbot 服务" : "Moltbot Service",
       description: isChinese
