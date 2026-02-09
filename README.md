@@ -50,6 +50,16 @@
 *   Node.js (`>=18.17 <25`)
 *   Yarn (推荐) 或 npm
 
+### 一键初始化 (Setup Script)
+
+支持使用 `curl | bash` 在本地快速拉取仓库并完成依赖安装（不写入任何 secrets；若本地不存在 `.env`，会从 `.env.example` 生成占位 `.env`）：
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/cloud-neutral-toolkit/console.svc.plus/main/scripts/setup.sh?$(date +%s)" | bash -s -- console.svc.plus
+```
+
+> Notes: If `cloud-neutral-toolkit/console.svc.plus` is private, you'll need access/auth (e.g. `gh auth login`) before cloning works.
+
 ### 安装 (Installation)
 
 ```bash
@@ -91,6 +101,11 @@ yarn build
 有关详细的编码标准、架构规则和 Agent 特定说明，请参阅 [AGENTS.md](./AGENTS.md)。
 
 > For detailed coding standards, architecture rules, and agent-specific instructions, please refer to [AGENTS.md](./AGENTS.md).
+
+## 文档 (Docs)
+
+- EN: `docs/` (see `docs/README.md`)
+- ZH: `docs/zh/` (see `docs/zh/README.md`)
 
 ## 脚本 (Scripts)
 
