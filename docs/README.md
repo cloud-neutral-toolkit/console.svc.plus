@@ -2,6 +2,11 @@
 
 This directory follows a standard open-source documentation layout and mirrors the code organization of `console.svc.plus`.
 
+## Languages
+
+- English (EN): this directory (`docs/`)
+- Chinese (ZH): `docs/zh/` (stubs / translations)
+
 ## Structure
 
 - `getting-started/` — new user path to get running quickly.
