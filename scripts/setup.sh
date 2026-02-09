@@ -7,21 +7,19 @@ Usage:
   setup.sh <repo_name_or_dir> [--repo <git_url>] [--ref <git_ref>] [--dir <path>]
 
 Examples:
-  # Recommended (remote install):
-  # curl -fsSL "https://raw.githubusercontent.com/cloud-neutral-toolkit/console.svc.plus/main/scripts/setup.sh?$(date +%s)" | bash -s -- console.svc.plus
+  # Remote install:
+  # curl -fsSL "https://raw.githubusercontent.com/cloud-neutral-toolkit/<repo>/main/scripts/setup.sh?$(date +%s)" | bash -s -- <repo>
   #
-  # Local file:
-  # bash scripts/setup.sh console.svc.plus
+  # Local:
+  # bash scripts/setup.sh <repo>
 
 Notes:
-  - This script clones the repo (if missing), installs dependencies, and prints next steps.
-  - No secrets are written. If .env does not exist, it will copy .env.example -> .env.
+  - Safe: no secrets written; no destructive actions.
+  - If .env does not exist, it copies .env.example -> .env (placeholder only).
 EOF
 }
 
-log() {
-  printf '[setup] %s\n' "$*"
-}
+log() { printf '[setup] %s\n' "$*"; }
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -30,7 +28,7 @@ need_cmd() {
   fi
 }
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || "${1:-}" == "" ]]; then
+if [[ "${1:-}" == "" || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   usage
   exit 0
 fi
@@ -44,17 +42,10 @@ DIR="$NAME"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --repo)
-      REPO_URL="${2:-}"; shift 2 ;;
-    --ref)
-      REF="${2:-}"; shift 2 ;;
-    --dir)
-      DIR="${2:-}"; shift 2 ;;
-    *)
-      log "unknown arg: $1"
-      usage
-      exit 2
-      ;;
+    --repo) REPO_URL="${2:-}"; shift 2 ;;
+    --ref) REF="${2:-}"; shift 2 ;;
+    --dir) DIR="${2:-}"; shift 2 ;;
+    *) log "unknown arg: $1"; usage; exit 2 ;;
   esac
 done
 
@@ -62,7 +53,6 @@ if [[ -z "${REPO_URL}" ]]; then
   REPO_URL="https://github.com/cloud-neutral-toolkit/${NAME}.git"
 fi
 
-need_cmd bash
 need_cmd git
 need_cmd curl
 
@@ -75,51 +65,58 @@ if [[ ! -d "${DIR}" ]]; then
   log "cloning ${REPO_URL} (ref=${REF}) -> ${DIR}"
   git clone --depth 1 --branch "${REF}" "${REPO_URL}" "${DIR}"
 else
-  if [[ -d "${DIR}/.git" ]]; then
-    log "repo directory already exists: ${DIR} (will not change branches automatically)"
-  else
+  if [[ ! -d "${DIR}/.git" ]]; then
     log "directory already exists but is not a git repo: ${DIR}"
     exit 2
   fi
+  log "repo directory already exists: ${DIR}"
 fi
 
 cd "${DIR}"
 
-if [[ -f ".nvmrc" ]]; then
-  NODE_REQ="$(cat .nvmrc | tr -d ' \t\r\n')"
-  if [[ -n "${NODE_REQ}" ]]; then
-    log "Node.js required (from .nvmrc): ${NODE_REQ}"
+did_any=false
+
+if [[ -f "package.json" ]]; then
+  need_cmd node
+  if command -v corepack >/dev/null 2>&1; then
+    corepack enable >/dev/null 2>&1 || true
+  fi
+  if command -v yarn >/dev/null 2>&1; then
+    log "installing JS dependencies (yarn install)"
+    yarn install
+    did_any=true
+  else
+    log "yarn not found; install yarn (or enable corepack) then re-run"
+    exit 1
   fi
 fi
 
-if ! command -v node >/dev/null 2>&1; then
-  log "node is not installed. Install Node.js first, then re-run:"
-  log "  bash scripts/setup.sh ${NAME} --dir ${DIR}"
-  exit 1
+if [[ -f "go.mod" ]]; then
+  need_cmd go
+  log "downloading Go dependencies (go mod download)"
+  go mod download
+  did_any=true
 fi
 
-if command -v corepack >/dev/null 2>&1; then
-  log "enabling corepack (yarn)"
-  corepack enable >/dev/null 2>&1 || true
+if [[ "${did_any}" == "false" ]]; then
+  log "no supported project type detected (package.json/go.mod)."
+  log "setup script completed without installing deps."
 fi
-
-if ! command -v yarn >/dev/null 2>&1; then
-  log "yarn is not available. If you have corepack, try:"
-  log "  corepack enable"
-  log "Or install yarn, then re-run."
-  exit 1
-fi
-
-log "installing dependencies (yarn install)"
-yarn install
 
 if [[ ! -f ".env" && -f ".env.example" ]]; then
-  log "creating .env from .env.example (no secrets included)"
+  log "creating .env from .env.example (placeholder only)"
   cp .env.example .env
 fi
 
-log "setup complete"
-log "next:"
-log "  cd ${DIR}"
-log "  yarn dev"
+if [[ -f "scripts/post-setup.sh" ]]; then
+  log "running scripts/post-setup.sh"
+  bash scripts/post-setup.sh
+fi
 
+log "setup complete"
+log "next steps:"
+if [[ -f "package.json" ]]; then
+  log "  yarn dev"
+elif [[ -f "go.mod" ]]; then
+  log "  go test ./..."
+fi
