@@ -96,10 +96,25 @@ export default function VlessQrCard({
     if (selectedNode) return selectedNode
 
     // 1. Try to use the node bound by root management (search in all nodes, including filtered ones)
-    if (boundNodeAddress && allNodes?.length) {
-      const matched = allNodes.find((node) => node.address === boundNodeAddress)
+    if (boundNodeAddress) {
+      const matched = (allNodes ?? []).find((node) => node.address === boundNodeAddress)
       if (matched) {
         return matched
+      }
+
+      // If we are in sandbox mode and API failed or node not found in list, create a synthetic fallback
+      if (allowSandboxFallbackNode) {
+        return {
+          name: 'Sandbox Node',
+          address: boundNodeAddress,
+          port: 443,
+          transport: 'tcp',
+          security: 'tls',
+          flow: 'xtls-rprx-vision',
+          // These templates are needed for URI generation if the API missed them
+          uri_scheme_tcp: 'vless://${UUID}@${DOMAIN}:${PORT}?encryption=none&flow=${FLOW}&security=tls&sni=${SNI}&fp=${FP}&type=tcp#${TAG}',
+          uri_scheme_xhttp: 'vless://${UUID}@${DOMAIN}:${PORT}?encryption=none&security=tls&sni=${SNI}&fp=${FP}&type=xhttp&mode=${MODE}&path=${PATH}#${TAG}',
+        } as VlessNode
       }
     }
 

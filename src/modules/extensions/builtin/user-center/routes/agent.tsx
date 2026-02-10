@@ -125,6 +125,11 @@ export default function UserCenterAgentRoute() {
       }
     }
 
+    // Fallback if no nodes were returned by the API but we are in sandbox mode
+    if (isGuestSandboxReadOnly && boundNode && base.length === 0) {
+      return [boundNode]
+    }
+
     return base
   }, [isGuestSandboxReadOnly, nodes, visibleNodes, normalizedEmail, boundAddress, boundNode])
 
