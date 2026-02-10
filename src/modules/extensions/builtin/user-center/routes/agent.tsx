@@ -65,7 +65,7 @@ export default function UserCenterAgentRoute() {
   const [boundNode, setBoundNode] = useState<VlessNode | null>(null)
   const normalizedEmail = user?.email?.toLowerCase() ?? ''
   const isGuestSandboxReadOnly = Boolean(
-    user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus' || normalizedEmail === 'demo@svc.plus'),
+    user?.isReadOnly && (normalizedEmail === 'sandbox@svc.plus'),
   )
   const visibleNodes = useMemo(() => {
     return (nodes ?? []).filter((node) => {

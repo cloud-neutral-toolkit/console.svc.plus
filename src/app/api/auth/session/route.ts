@@ -184,22 +184,12 @@ export async function GET(request: NextRequest) {
   const normalizedUsernameLower = String(rawUser.username ?? '').trim().toLowerCase()
   const normalizedNameLower = String(rawUser.name ?? '').trim().toLowerCase()
   const identifierLower = (identifier ?? '').toLowerCase()
-  const isNamedDemo =
-    normalizedUsernameLower === 'demo' ||
-    normalizedUsernameLower.startsWith('demo-') ||
-    normalizedNameLower === 'demo' ||
-    normalizedNameLower.startsWith('demo-') ||
-    identifierLower === 'demo' ||
-    identifierLower.startsWith('demo-')
-
   const normalizedReadOnly =
     Boolean(rawUser.readOnly) ||
     normalizedGroups.some((group) => group.toLowerCase() === 'readonly role') ||
     rawRole === 'readonly' ||
     rawRole === 'read_only' ||
-    String(rawUser.email ?? '').trim().toLowerCase() === 'demo@svc.plus' ||
-    String(rawUser.email ?? '').trim().toLowerCase() === 'sandbox@svc.plus' ||
-    isNamedDemo
+    String(rawUser.email ?? '').trim().toLowerCase() === 'sandbox@svc.plus'
   const normalizedProxyUuid =
     typeof rawUser.proxyUuid === 'string' && rawUser.proxyUuid.trim().length > 0
       ? rawUser.proxyUuid.trim()
