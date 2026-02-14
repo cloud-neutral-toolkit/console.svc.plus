@@ -320,44 +320,44 @@ export function AskAIDialog({
   }, [initialQuestion, open, performAsk])
 
 
-  if (!open) return null
+  // if (!open) return null // Removed to allow animation/persistence if needed, or controlled by parent
 
   return (
     <div
-      className="z-[60] transition-all duration-300 ease-in-out fixed right-0 bottom-0 border-l border-surface-border bg-background/80 backdrop-blur-md shadow-2xl"
+      className={
+        cn(
+          "z-[40] transition-all duration-300 ease-in-out fixed right-0 bottom-0 border-l border-surface-border bg-background/95 backdrop-blur shadow-xl",
+          !open && "translate-x-full" // Slide out instead of unmounting if we want animation, but the component returns null if !open. Let's change it to always render but slide.
+          // Actually, the current component returns null if !open. Let's keep it simple for now and just change the styling to be non-modal.
+        )
+      }
       style={{
         width: '400px',
-        top: 'var(--app-shell-nav-offset)',
-        height: 'calc(100vh - var(--app-shell-nav-offset))'
+        top: 'var(--app-shell-nav-offset, 64px)', // Fallback to 64px
+        height: 'calc(100vh - var(--app-shell-nav-offset, 64px))',
+        display: open ? 'block' : 'none' // Or we can rely on paren passing 'open' boolean. 
+        // The original component returned null if !open. To support animation we'd need to change that.
+        // But for "persistent sidebar", simply showing/hiding is fine.
       }}
     >
       <div className="flex h-full w-full flex-col">
-        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-surface-border px-4 py-3 bg-surface-muted/30">
           <div>
             <p className="text-xs uppercase tracking-wide text-text-muted">{t.title}</p>
-            <h2 className="text-lg font-semibold text-text">{t.subtitle}</h2>
+            <h2 className="text-sm font-bold text-text">{t.subtitle}</h2>
           </div>
-          <div className="flex items-center gap-2 text-text-muted">
+          <div className="flex items-center gap-1 text-text-muted">
             <button
               onClick={handleMaximize}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
-              title="Full Screen / Moltbot Workspace"
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-muted transition-colors"
+              title="Full Screen"
             >
               <Maximize2 className="h-4 w-4" />
             </button>
-            <div className="h-4 w-px bg-surface-border mx-1" />
-            <span className="text-xs font-medium text-primary px-2">Float</span>
             <button
-              onClick={onMinimize}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
-              title="Minimize"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <button
-              onClick={handleEnd}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-muted transition-colors"
-              title="Close"
+              onClick={onMinimize} // This acts as close/toggle for the sidebar
+              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-muted transition-colors"
+              title="Close Sidebar"
             >
               <X className="h-4 w-4" />
             </button>
@@ -365,16 +365,21 @@ export function AskAIDialog({
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 text-text">
+          {messages.length === 0 && (
+            <div className="text-center text-sm text-text-muted mt-10">
+              <p>How can I help you today?</p>
+            </div>
+          )}
           {messages.map((m, idx) => (
             <ChatBubble key={idx} message={m.text} type={m.sender} />
           ))}
           {sources.length > 0 && <SourceHint sources={sources} />}
         </div>
 
-        <div className="border-t border-surface-border px-4 py-3">
-          <div className="space-y-3 rounded-xl bg-surface-muted/30 p-3 shadow-inner">
+        <div className="border-t border-surface-border px-4 py-3 bg-background">
+          <div className="relative rounded-xl border border-surface-border bg-surface-muted/30 shadow-sm focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
             <textarea
-              className="w-full resize-none rounded-lg border border-surface-border bg-background p-3 text-text shadow-sm outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+              className="w-full resize-none bg-transparent p-3 text-sm text-text outline-none placeholder:text-text-muted/70"
               rows={3}
               placeholder={t.placeholder}
               value={question}
@@ -386,10 +391,12 @@ export function AskAIDialog({
                 }
               }}
             />
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between px-2 pb-2">
+              <div />
               <button
                 onClick={handleAsk}
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="flex items-center justify-center rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-50"
+                disabled={!question.trim()}
               >
                 {t.ask}
               </button>
@@ -397,6 +404,6 @@ export function AskAIDialog({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }

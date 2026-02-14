@@ -18,7 +18,7 @@ interface MoltbotState {
 export const useMoltbotStore = create<MoltbotState>()(
     persist(
         (set) => ({
-            isOpen: false,
+            isOpen: true,
             isMinimized: false,
             mode: "overlay",
             width: 400,

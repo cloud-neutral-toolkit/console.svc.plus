@@ -7,7 +7,7 @@ import { useLanguage } from "../i18n/LanguageProvider";
 import { Menu, X, Sun, Moon, Monitor, Plus, BarChart2 } from "lucide-react";
 import { translations } from "../i18n/translations";
 import LanguageToggle from "./LanguageToggle";
-import { AskAIButton } from "./AskAIButton";
+// import { AskAIButton } from "./AskAIButton";
 import ReleaseChannelSelector from "./ReleaseChannelSelector";
 import { useUserStore } from "@lib/userStore";
 import { useMoltbotStore } from "@lib/moltbotStore";
@@ -38,7 +38,7 @@ export default function UnifiedNavigation() {
   const navRef = useRef<HTMLElement | null>(null);
   const { language } = useLanguage();
   const user = useUserStore((state) => state.user);
-  const { setIsOpen, setMode } = useMoltbotStore();
+  const { setIsOpen, setMode, toggleOpen } = useMoltbotStore();
   const nav = translations[language].nav;
   const accountCopy = nav.account;
   const accountInitial =
@@ -220,8 +220,7 @@ export default function UnifiedNavigation() {
                       <button
                         key={item.key}
                         onClick={() => {
-                          setIsOpen(true);
-                          setMode('overlay');
+                          toggleOpen();
                         }}
                         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
                           ? "bg-primary/10 text-primary"
@@ -436,8 +435,7 @@ export default function UnifiedNavigation() {
                           <button
                             key={item.key}
                             onClick={() => {
-                              setIsOpen(true);
-                              setMode('overlay');
+                              toggleOpen();
                               setMenuOpen(false);
                             }}
                             className={`flex w-full items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
@@ -557,9 +555,9 @@ export default function UnifiedNavigation() {
         )}
       </nav>
 
-      <div className="hidden lg:block">
+      {/* <div className="hidden lg:block">
         <AskAIButton />
-      </div>
+      </div> Removed to merge AI assistant into navbar and sidebar only */}
     </>
   );
 }

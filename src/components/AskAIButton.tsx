@@ -14,7 +14,7 @@ type AskAIButtonProps = {
 }
 
 export function AskAIButton({ variant = 'floating', initialQuestion }: AskAIButtonProps) {
-  const { isOpen, isMinimized, setIsOpen, setMinimized, close } = useMoltbotStore()
+  const { isOpen, isMinimized, setIsOpen, setMinimized, close, toggleOpen } = useMoltbotStore()
   const { allowed, isLoading } = useAccess({ allowGuests: true })
   const { language } = useLanguage()
   const isFloating = variant === 'floating'
@@ -25,8 +25,7 @@ export function AskAIButton({ variant = 'floating', initialQuestion }: AskAIButt
   }
 
   const handleOpen = () => {
-    setIsOpen(true)
-    setMinimized(false)
+    toggleOpen()
   }
   const handleMinimize = () => {
     if (isFloating) {

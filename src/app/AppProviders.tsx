@@ -8,7 +8,7 @@ import { useMoltbotStore } from '../lib/moltbotStore'
 import { cn } from '../lib/utils'
 
 export function AppProviders({ children }: { children: ReactNode }) {
-  const { isOpen, isMinimized, setIsOpen, setMinimized, close, mode } = useMoltbotStore()
+  const { isOpen, isMinimized, setIsOpen, setMinimized, close, mode, toggleOpen } = useMoltbotStore()
 
   // Always reserve space if open and not minimized, since we only have "Float/Sidebar" mode now
   // and user wants it to NEVER cover the homepage.
@@ -27,10 +27,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
             </div>
             <AskAIDialog
               open={isOpen}
-              onMinimize={() => {
-                setIsOpen(false)
-                setMinimized(true)
-              }}
+              onMinimize={toggleOpen}
               onEnd={close}
             />
           </div>
