@@ -31,7 +31,13 @@ const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 const PASSWORD_STRENGTH_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 const USERNAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9]{3,15}$/;
 
-export default function RegisterContent() {
+type RegisterContentProps = {
+  accountServiceBaseUrl: string;
+};
+
+export default function RegisterContent({
+  accountServiceBaseUrl,
+}: RegisterContentProps) {
   const { language } = useLanguage();
   const t = translations[language].auth.register;
   const alerts = t.alerts;
@@ -39,8 +45,8 @@ export default function RegisterContent() {
   const router = useRouter();
 
   const isSocialAuthVisible = false;
-  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`;
-  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`;
+  const githubAuthUrl = `${accountServiceBaseUrl}/api/auth/oauth/login/github`;
+  const googleAuthUrl = `${accountServiceBaseUrl}/api/auth/oauth/login/google`;
 
   const socialButtons = useMemo<AuthLayoutSocialButton[]>(() => {
     if (!isSocialAuthVisible) {
@@ -326,8 +332,8 @@ export default function RegisterContent() {
     setIsSubmitting(true);
     showStatus(
       t.form.validation?.submitting ??
-        t.form.submitting ??
-        "Submitting registration request…",
+      t.form.submitting ??
+      "Submitting registration request…",
     );
 
     try {
@@ -394,9 +400,9 @@ export default function RegisterContent() {
     setIsSubmitting(true);
     showStatus(
       t.form.validation?.completing ??
-        t.form.completing ??
-        t.form.completeSubmit ??
-        t.form.submit,
+      t.form.completing ??
+      t.form.completeSubmit ??
+      t.form.submit,
     );
 
     try {

@@ -73,8 +73,8 @@ export default function LoginContent({
     `${accountServiceBaseUrl}/api/auth/login`;
 
   const socialButtonsDisabled = false;
-  const githubAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/github`;
-  const googleAuthUrl = `${process.env.NEXT_PUBLIC_ACCOUNTS_SVC_URL}/api/auth/oauth/login/google`;
+  const githubAuthUrl = `${accountServiceBaseUrl}/api/auth/oauth/login/github`;
+  const googleAuthUrl = `${accountServiceBaseUrl}/api/auth/oauth/login/google`;
 
   useEffect(() => {
     const publicToken = searchParams.get("public_token");

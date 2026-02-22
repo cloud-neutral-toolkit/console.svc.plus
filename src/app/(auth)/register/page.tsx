@@ -6,6 +6,7 @@ import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 
 import { isFeatureEnabled } from '@lib/featureToggles'
+import { getAccountServiceBaseUrl } from '@server/serviceConfig'
 
 import RegisterContent from './RegisterContent'
 
@@ -18,9 +19,11 @@ export default function RegisterPage() {
     notFound()
   }
 
+  const accountServiceBaseUrl = getAccountServiceBaseUrl()
+
   return (
     <Suspense fallback={<RegisterPageFallback />}>
-      <RegisterContent />
+      <RegisterContent accountServiceBaseUrl={accountServiceBaseUrl} />
     </Suspense>
   )
 }
