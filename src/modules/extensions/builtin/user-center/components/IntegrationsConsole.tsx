@@ -1,47 +1,51 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, CheckCircle2, Link2, Loader2, ShieldCheck, Workflow } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Link2,
+  Loader2,
+  ShieldCheck,
+  Workflow,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import type { IntegrationDefaults } from '@/lib/openclaw/types'
-import { useOpenClawConsoleStore } from '@/state/openclawConsoleStore'
+import type { IntegrationDefaults } from "@/lib/openclaw/types";
+import { useOpenClawConsoleStore } from "@/state/openclawConsoleStore";
 
-import Card from './Card'
+import Card from "./Card";
 
-type ProbeTarget = 'openclaw' | 'vault' | 'apisix'
+type ProbeTarget = "openclaw" | "vault" | "apisix";
 
 type ProbeState = {
-  ok: boolean
-  status?: number
-  tokenSource?: string
-  body?: string
-  error?: string
-}
+  ok: boolean;
+  status?: number;
+  tokenSource?: string;
+  body?: string;
+  error?: string;
+};
 
 type IntegrationsConsoleProps = {
-  defaults?: IntegrationDefaults
-}
+  defaults?: IntegrationDefaults;
+  onOpenAssistant?: () => void;
+};
 
-function StatusBadge({
-  title,
-  ok,
-}: {
-  title: string
-  ok?: boolean
-}) {
+function StatusBadge({ title, ok }: { title: string; ok?: boolean }) {
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
         ok
-          ? 'bg-emerald-500/10 text-emerald-600'
-          : 'bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)]'
+          ? "bg-emerald-500/10 text-emerald-600"
+          : "bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)]"
       }`}
     >
-      <span className={`h-2 w-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-[var(--color-text-subtle)]/50'}`} />
+      <span
+        className={`h-2 w-2 rounded-full ${ok ? "bg-emerald-500" : "bg-[var(--color-text-subtle)]/50"}`}
+      />
       {title}
     </span>
-  )
+  );
 }
 
 function Field({
@@ -49,118 +53,143 @@ function Field({
   hint,
   children,
 }: {
-  label: string
-  hint?: string
-  children: React.ReactNode
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
 }) {
   return (
     <label className="flex flex-col gap-2 text-sm">
       <div className="space-y-1">
         <span className="font-medium text-[var(--color-text)]">{label}</span>
-        {hint ? <p className="text-xs text-[var(--color-text-subtle)]">{hint}</p> : null}
+        {hint ? (
+          <p className="text-xs text-[var(--color-text-subtle)]">{hint}</p>
+        ) : null}
       </div>
       {children}
     </label>
-  )
+  );
 }
 
-function inputClassName(type: 'input' | 'textarea' = 'input'): string {
+function inputClassName(type: "input" | "textarea" = "input"): string {
   return [
-    'w-full rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition',
-    'focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary-muted)]',
-    type === 'textarea' ? 'min-h-[120px] resize-y' : '',
+    "w-full rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition",
+    "focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary-muted)]",
+    type === "textarea" ? "min-h-[120px] resize-y" : "",
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 }
 
 const EMPTY_DEFAULTS: IntegrationDefaults = {
-  openclawUrl: '',
+  openclawUrl: "",
   openclawTokenConfigured: false,
-  vaultUrl: '',
-  vaultNamespace: '',
+  vaultUrl: "",
+  vaultNamespace: "",
   vaultTokenConfigured: false,
-  apisixUrl: '',
+  apisixUrl: "",
   apisixTokenConfigured: false,
-}
+};
 
-export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
-  const router = useRouter()
-  const [loadingTarget, setLoadingTarget] = useState<ProbeTarget | null>(null)
-  const [resolvedDefaults, setResolvedDefaults] = useState<IntegrationDefaults>(defaults ?? EMPTY_DEFAULTS)
-  const [probeResults, setProbeResults] = useState<Record<ProbeTarget, ProbeState>>({
+export function IntegrationsConsole({
+  defaults,
+  onOpenAssistant,
+}: IntegrationsConsoleProps) {
+  const router = useRouter();
+  const [loadingTarget, setLoadingTarget] = useState<ProbeTarget | null>(null);
+  const [resolvedDefaults, setResolvedDefaults] = useState<IntegrationDefaults>(
+    defaults ?? EMPTY_DEFAULTS,
+  );
+  const [probeResults, setProbeResults] = useState<
+    Record<ProbeTarget, ProbeState>
+  >({
     openclaw: { ok: false },
     vault: { ok: false },
     apisix: { ok: false },
-  })
+  });
 
-  const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults)
-  const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl)
-  const openclawToken = useOpenClawConsoleStore((state) => state.openclawToken)
-  const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl)
-  const vaultNamespace = useOpenClawConsoleStore((state) => state.vaultNamespace)
-  const vaultToken = useOpenClawConsoleStore((state) => state.vaultToken)
-  const apisixUrl = useOpenClawConsoleStore((state) => state.apisixUrl)
-  const apisixToken = useOpenClawConsoleStore((state) => state.apisixToken)
-  const setOpenclawUrl = useOpenClawConsoleStore((state) => state.setOpenclawUrl)
-  const setOpenclawToken = useOpenClawConsoleStore((state) => state.setOpenclawToken)
-  const setVaultUrl = useOpenClawConsoleStore((state) => state.setVaultUrl)
-  const setVaultNamespace = useOpenClawConsoleStore((state) => state.setVaultNamespace)
-  const setVaultToken = useOpenClawConsoleStore((state) => state.setVaultToken)
-  const setApisixUrl = useOpenClawConsoleStore((state) => state.setApisixUrl)
-  const setApisixToken = useOpenClawConsoleStore((state) => state.setApisixToken)
+  const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults);
+  const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl);
+  const openclawToken = useOpenClawConsoleStore((state) => state.openclawToken);
+  const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl);
+  const vaultNamespace = useOpenClawConsoleStore(
+    (state) => state.vaultNamespace,
+  );
+  const vaultToken = useOpenClawConsoleStore((state) => state.vaultToken);
+  const apisixUrl = useOpenClawConsoleStore((state) => state.apisixUrl);
+  const apisixToken = useOpenClawConsoleStore((state) => state.apisixToken);
+  const setOpenclawUrl = useOpenClawConsoleStore(
+    (state) => state.setOpenclawUrl,
+  );
+  const setOpenclawToken = useOpenClawConsoleStore(
+    (state) => state.setOpenclawToken,
+  );
+  const setVaultUrl = useOpenClawConsoleStore((state) => state.setVaultUrl);
+  const setVaultNamespace = useOpenClawConsoleStore(
+    (state) => state.setVaultNamespace,
+  );
+  const setVaultToken = useOpenClawConsoleStore((state) => state.setVaultToken);
+  const setApisixUrl = useOpenClawConsoleStore((state) => state.setApisixUrl);
+  const setApisixToken = useOpenClawConsoleStore(
+    (state) => state.setApisixToken,
+  );
 
   useEffect(() => {
-    applyDefaults(resolvedDefaults)
-  }, [applyDefaults, resolvedDefaults])
+    applyDefaults(resolvedDefaults);
+  }, [applyDefaults, resolvedDefaults]);
 
   useEffect(() => {
     if (defaults) {
-      setResolvedDefaults(defaults)
-      return
+      setResolvedDefaults(defaults);
+      return;
     }
 
-    let cancelled = false
+    let cancelled = false;
 
     void (async () => {
       try {
-        const response = await fetch('/api/integrations/defaults', { cache: 'no-store' })
+        const response = await fetch("/api/integrations/defaults", {
+          cache: "no-store",
+        });
         if (!response.ok) {
-          return
+          return;
         }
-        const payload = (await response.json()) as IntegrationDefaults
+        const payload = (await response.json()) as IntegrationDefaults;
         if (!cancelled) {
-          setResolvedDefaults(payload)
+          setResolvedDefaults(payload);
         }
       } catch {
         // Ignore; the form still works with manual input only.
       }
-    })()
+    })();
 
     return () => {
-      cancelled = true
-    }
-  }, [defaults])
+      cancelled = true;
+    };
+  }, [defaults]);
 
   const summary = useMemo(
     () => [
       {
-        key: 'openclaw',
-        label: 'OpenClaw Gateway',
+        key: "openclaw",
+        label: "OpenClaw Gateway",
         configured: Boolean(openclawUrl.trim()),
-        tokenConfigured: resolvedDefaults.openclawTokenConfigured || Boolean(openclawToken.trim()),
+        tokenConfigured:
+          resolvedDefaults.openclawTokenConfigured ||
+          Boolean(openclawToken.trim()),
       },
       {
-        key: 'vault',
-        label: 'Vault Server',
+        key: "vault",
+        label: "Vault Server",
         configured: Boolean(vaultUrl.trim()),
-        tokenConfigured: resolvedDefaults.vaultTokenConfigured || Boolean(vaultToken.trim()),
+        tokenConfigured:
+          resolvedDefaults.vaultTokenConfigured || Boolean(vaultToken.trim()),
       },
       {
-        key: 'apisix',
-        label: 'APISIX AI Gateway',
+        key: "apisix",
+        label: "APISIX AI Gateway",
         configured: Boolean(apisixUrl.trim()),
-        tokenConfigured: resolvedDefaults.apisixTokenConfigured || Boolean(apisixToken.trim()),
+        tokenConfigured:
+          resolvedDefaults.apisixTokenConfigured || Boolean(apisixToken.trim()),
       },
     ],
     [
@@ -174,16 +203,16 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
       vaultToken,
       vaultUrl,
     ],
-  )
+  );
 
   async function probe(target: ProbeTarget): Promise<void> {
-    setLoadingTarget(target)
+    setLoadingTarget(target);
 
     try {
-      const response = await fetch('/api/integrations/probe', {
-        method: 'POST',
+      const response = await fetch("/api/integrations/probe", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           target,
@@ -194,9 +223,9 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
           apisixUrl,
           apisixToken,
         }),
-      })
+      });
 
-      const payload = (await response.json()) as ProbeState
+      const payload = (await response.json()) as ProbeState;
       setProbeResults((current) => ({
         ...current,
         [target]: {
@@ -206,17 +235,17 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
           body: payload.body,
           error: payload.error,
         },
-      }))
+      }));
     } catch (error) {
       setProbeResults((current) => ({
         ...current,
         [target]: {
           ok: false,
-          error: error instanceof Error ? error.message : 'Probe failed.',
+          error: error instanceof Error ? error.message : "Probe failed.",
         },
-      }))
+      }));
     } finally {
-      setLoadingTarget(null)
+      setLoadingTarget(null);
     }
   }
 
@@ -228,18 +257,28 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text-subtle)]">
               Assistant Integrations
             </p>
-            <h1 className="text-2xl font-semibold text-[var(--color-heading)]">OpenClaw / Vault / APISIX</h1>
+            <h1 className="text-2xl font-semibold text-[var(--color-heading)]">
+              OpenClaw / Vault / APISIX
+            </h1>
             <p className="max-w-3xl text-sm text-[var(--color-text-subtle)]">
-              这里是 console.svc.plus 主页 AI 助手的统一接入层。地址可以来自环境变量，token 既可以走服务端环境，也可以只在当前浏览器会话里临时覆盖。
+              这里是 console.svc.plus 主页 AI
+              助手的统一接入层。地址可以来自环境变量，token
+              既可以走服务端环境，也可以只在当前浏览器会话里临时覆盖。
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => router.push('/services/openclaw')}
+            onClick={() => {
+              if (onOpenAssistant) {
+                onOpenAssistant();
+                return;
+              }
+              router.push("/xworkmate");
+            }}
             className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
           >
-            打开助手主页
+            打开 XWorkmate
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
@@ -252,13 +291,18 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-[var(--color-text)]">{item.label}</p>
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
+                    {item.label}
+                  </p>
                   <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
-                    {item.configured ? 'address ready' : 'missing address'} ·{' '}
-                    {item.tokenConfigured ? 'token ready' : 'token pending'}
+                    {item.configured ? "address ready" : "missing address"} ·{" "}
+                    {item.tokenConfigured ? "token ready" : "token pending"}
                   </p>
                 </div>
-                <StatusBadge title={item.configured ? 'configured' : 'draft'} ok={item.configured} />
+                <StatusBadge
+                  title={item.configured ? "configured" : "draft"}
+                  ok={item.configured}
+                />
               </div>
             </div>
           ))}
@@ -271,9 +315,11 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
             <Link2 className="h-5 w-5" />
           </div>
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-[var(--color-heading)]">OpenClaw Gateway</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-heading)]">
+              OpenClaw Gateway
+            </h2>
             <p className="text-sm text-[var(--color-text-subtle)]">
-              侧栏助手与 `/services/openclaw` 页面都会走这里的配置。
+              侧栏助手与 `/xworkmate` 页面都会走这里的配置。
             </p>
           </div>
         </div>
@@ -288,13 +334,20 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
             />
           </Field>
 
-          <Field label="Gateway Token" hint="优先使用当前会话值，留空时回退到服务端环境变量。">
+          <Field
+            label="Gateway Token"
+            hint="优先使用当前会话值，留空时回退到服务端环境变量。"
+          >
             <input
               type="password"
               value={openclawToken}
               onChange={(event) => setOpenclawToken(event.target.value)}
               className={inputClassName()}
-              placeholder={resolvedDefaults.openclawTokenConfigured ? 'server env configured' : 'paste shared token'}
+              placeholder={
+                resolvedDefaults.openclawTokenConfigured
+                  ? "server env configured"
+                  : "paste shared token"
+              }
             />
           </Field>
         </div>
@@ -303,19 +356,27 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
           <button
             type="button"
             onClick={() => {
-              void probe('openclaw')
+              void probe("openclaw");
             }}
             className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
           >
-            {loadingTarget === 'openclaw' ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            {loadingTarget === "openclaw" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
             测试 OpenClaw
           </button>
           <StatusBadge
-            title={probeResults.openclaw.ok ? 'gateway reachable' : 'not checked'}
+            title={
+              probeResults.openclaw.ok ? "gateway reachable" : "not checked"
+            }
             ok={probeResults.openclaw.ok}
           />
           <span className="text-xs text-[var(--color-text-subtle)]">
-            token source: {probeResults.openclaw.tokenSource || (resolvedDefaults.openclawTokenConfigured ? 'env' : 'session')}
+            token source:{" "}
+            {probeResults.openclaw.tokenSource ||
+              (resolvedDefaults.openclawTokenConfigured ? "env" : "session")}
           </span>
         </div>
 
@@ -333,8 +394,12 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-[var(--color-heading)]">Vault Server</h2>
-              <p className="text-sm text-[var(--color-text-subtle)]">用于托管敏感凭证与运行时密钥。</p>
+              <h2 className="text-lg font-semibold text-[var(--color-heading)]">
+                Vault Server
+              </h2>
+              <p className="text-sm text-[var(--color-text-subtle)]">
+                用于托管敏感凭证与运行时密钥。
+              </p>
             </div>
           </div>
 
@@ -363,7 +428,11 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
               value={vaultToken}
               onChange={(event) => setVaultToken(event.target.value)}
               className={inputClassName()}
-              placeholder={resolvedDefaults.vaultTokenConfigured ? 'server env configured' : 'paste vault token'}
+              placeholder={
+                resolvedDefaults.vaultTokenConfigured
+                  ? "server env configured"
+                  : "paste vault token"
+              }
             />
           </Field>
 
@@ -371,14 +440,21 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
             <button
               type="button"
               onClick={() => {
-                void probe('vault')
+                void probe("vault");
               }}
               className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
             >
-              {loadingTarget === 'vault' ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {loadingTarget === "vault" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               测试 Vault
             </button>
-            <StatusBadge title={probeResults.vault.ok ? 'vault reachable' : 'not checked'} ok={probeResults.vault.ok} />
+            <StatusBadge
+              title={probeResults.vault.ok ? "vault reachable" : "not checked"}
+              ok={probeResults.vault.ok}
+            />
           </div>
 
           {probeResults.vault.error ? (
@@ -394,12 +470,19 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
               <Workflow className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-[var(--color-heading)]">APISIX AI Gateway</h2>
-              <p className="text-sm text-[var(--color-text-subtle)]">统一承接模型路由、鉴权和治理入口。</p>
+              <h2 className="text-lg font-semibold text-[var(--color-heading)]">
+                APISIX AI Gateway
+              </h2>
+              <p className="text-sm text-[var(--color-text-subtle)]">
+                统一承接模型路由、鉴权和治理入口。
+              </p>
             </div>
           </div>
 
-          <Field label="Gateway URL" hint="建议填写 OpenAI-compatible `/v1` 前缀所在地址。">
+          <Field
+            label="Gateway URL"
+            hint="建议填写 OpenAI-compatible `/v1` 前缀所在地址。"
+          >
             <input
               type="text"
               value={apisixUrl}
@@ -414,27 +497,39 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
               value={apisixToken}
               onChange={(event) => setApisixToken(event.target.value)}
               className={inputClassName()}
-              placeholder={resolvedDefaults.apisixTokenConfigured ? 'server env configured' : 'paste ai gateway token'}
+              placeholder={
+                resolvedDefaults.apisixTokenConfigured
+                  ? "server env configured"
+                  : "paste ai gateway token"
+              }
             />
           </Field>
 
           <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-4 py-3 text-sm text-[var(--color-text-subtle)]">
-            当前实现优先补齐 console.svc.plus 主页 AI 助手所需的接入能力。更复杂的 APISIX profile/file-driven 配置仍保留在部署侧，不在这里硬编码。
+            当前实现优先补齐 console.svc.plus 主页 AI
+            助手所需的接入能力。更复杂的 APISIX profile/file-driven
+            配置仍保留在部署侧，不在这里硬编码。
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => {
-                void probe('apisix')
+                void probe("apisix");
               }}
               className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
             >
-              {loadingTarget === 'apisix' ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {loadingTarget === "apisix" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               测试 APISIX
             </button>
             <StatusBadge
-              title={probeResults.apisix.ok ? 'gateway reachable' : 'not checked'}
+              title={
+                probeResults.apisix.ok ? "gateway reachable" : "not checked"
+              }
               ok={probeResults.apisix.ok}
             />
           </div>
@@ -447,5 +542,5 @@ export function IntegrationsConsole({ defaults }: IntegrationsConsoleProps) {
         </Card>
       </div>
     </div>
-  )
+  );
 }

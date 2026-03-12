@@ -42,17 +42,19 @@ const ServiceCard = ({
 
   const cardContent = (
     <div
-      className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${isMaterial
-        ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
-        : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
-        }`}
+      className={`group flex h-full flex-col justify-between rounded-xl p-5 transition ${
+        isMaterial
+          ? "border border-surface-border bg-surface hover:-translate-y-[1px] hover:border-primary/50 hover:bg-background-muted"
+          : "border border-white/10 bg-white/5 hover:-translate-y-[1px] hover:border-indigo-400/50 hover:bg-slate-900/60"
+      }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${isMaterial
-            ? "bg-primary/15 text-primary"
-            : "bg-indigo-500/15 text-indigo-200"
-            }`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${
+            isMaterial
+              ? "bg-primary/15 text-primary"
+              : "bg-indigo-500/15 text-indigo-200"
+          }`}
         >
           <service.icon className="h-5 w-5" aria-hidden />
         </div>
@@ -70,10 +72,11 @@ const ServiceCard = ({
         </div>
       </div>
       <span
-        className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${isMaterial
-          ? "text-primary group-hover:text-primary-hover"
-          : "text-indigo-200 group-hover:text-white"
-          }`}
+        className={`mt-4 inline-flex items-center gap-1 text-xs font-semibold transition ${
+          isMaterial
+            ? "text-primary group-hover:text-primary-hover"
+            : "text-indigo-200 group-hover:text-white"
+        }`}
       >
         {isChinese ? "打开" : "Open"}
         <ArrowRight className="h-4 w-4" aria-hidden />
@@ -118,17 +121,19 @@ const PlaceholderCard = ({
 
   return (
     <div
-      className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${isMaterial
-        ? "border-surface-border-strong bg-surface text-text-muted"
-        : "border-white/15 bg-white/5 text-slate-300"
-        }`}
+      className={`flex h-full flex-col justify-between rounded-xl border border-dashed p-5 ${
+        isMaterial
+          ? "border-surface-border-strong bg-surface text-text-muted"
+          : "border-white/15 bg-white/5 text-slate-300"
+      }`}
     >
       <div className="space-y-2">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${isMaterial
-            ? "border-surface-border-strong text-text-subtle"
-            : "border-white/20 text-slate-400"
-            }`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-sm ${
+            isMaterial
+              ? "border-surface-border-strong text-text-subtle"
+              : "border-white/20 text-slate-400"
+          }`}
         >
           <Box className="h-4 w-4" aria-hidden />
         </div>
@@ -295,11 +300,11 @@ export default function ServicesPage() {
     },
     {
       key: "moltbot",
-      name: isChinese ? "OpenClaw 助手" : "OpenClaw Assistant",
+      name: "XWorkmate",
       description: isChinese
-        ? "OpenClaw gateway 驱动的原生 AI 助手工作区。"
-        : "Native AI assistant workspace powered by OpenClaw gateway.",
-      href: "/services/openclaw",
+        ? "在线版 XWorkmate 工作区，底层由 OpenClaw gateway 驱动。"
+        : "Online XWorkmate workspace powered by the OpenClaw gateway.",
+      href: "/xworkmate",
       icon: ClawdbotLogo,
     },
   ];
@@ -343,9 +348,7 @@ export default function ServicesPage() {
               {isChinese ? "更多服务" : "More services"}
             </p>
             <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-              {isChinese
-                ? "扩展服务与工具箱"
-                : "Extended Services & Toolbox"}
+              {isChinese ? "扩展服务与工具箱" : "Extended Services & Toolbox"}
             </h1>
             <p className="max-w-2xl text-sm text-slate-300">
               {isChinese
