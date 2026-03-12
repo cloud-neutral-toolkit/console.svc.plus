@@ -2001,16 +2001,33 @@ export function XWorkmateWorkspacePage({
           <header
             className={cn(
               "border-b border-[color:var(--color-surface-border)] px-4",
-              activeSection === "assistant" ? "py-3" : "py-4",
+              activeSection === "assistant" ? "py-2.5" : "py-4",
             )}
           >
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div className={cn("space-y-2", activeSection === "assistant" ? "space-y-1.5" : "")}>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-subtle)]">
-                  {pickCopy(isChinese, "XWorkmate 在线版", "XWorkmate Online")}
-                </div>
+            <div
+              className={cn(
+                "flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between",
+                activeSection === "assistant" ? "lg:items-center" : "",
+              )}
+            >
+              <div
+                className={cn(
+                  "space-y-2",
+                  activeSection === "assistant" ? "space-y-0" : "",
+                )}
+              >
+                {activeSection !== "assistant" ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-subtle)]">
+                    {pickCopy(isChinese, "XWorkmate 在线版", "XWorkmate Online")}
+                  </div>
+                ) : null}
                 <div>
-                  <h1 className={cn("font-semibold text-[var(--color-heading)]", activeSection === "assistant" ? "text-xl" : "text-2xl")}>
+                  <h1
+                    className={cn(
+                      "font-semibold text-[var(--color-heading)]",
+                      activeSection === "assistant" ? "text-lg" : "text-2xl",
+                    )}
+                  >
                     {activeDefinition.label}
                   </h1>
                   {activeSection !== "assistant" ? (
@@ -2022,7 +2039,7 @@ export function XWorkmateWorkspacePage({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {sidebarState !== "hidden" ? (
+                {sidebarState !== "hidden" && activeSection !== "assistant" ? (
                   <button
                     type="button"
                     onClick={() =>
