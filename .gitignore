@@ -18,6 +18,7 @@ public/_build/
 public/dl-index/
 .contentlayer/
 .dev-logs/
+.console-state/
 
 # Contentlayer cache
 ui/docs/.contentlayer/

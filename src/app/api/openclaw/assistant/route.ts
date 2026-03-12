@@ -34,14 +34,55 @@ type SendBody = {
   attachments?: GatewayChatAttachmentPayload[]
 }
 
-function jsonError(message: string, status = 400, code?: string): Response {
+function jsonError(
+  message: string,
+  status = 400,
+  code?: string,
+  details?: Record<string, unknown> | null,
+  deviceId?: string,
+): Response {
   return Response.json(
     {
       error: message,
       code,
+      details: details ?? null,
+      ...(deviceId ? { deviceId } : {}),
     },
     { status },
   )
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
+}
+
+function formatGatewayError(error: OpenClawGatewayError | null, client: OpenClawGatewayClient): string {
+  if (!error) {
+    return 'Failed to connect to OpenClaw gateway.'
+  }
+
+  const details = asRecord(error.details)
+  const detailCode = stringValue(details.code)
+  if (detailCode === 'PAIRING_REQUIRED') {
+    const requestId = stringValue(details.requestId)
+    const reason = stringValue(details.reason)
+    return [
+      '需要先在 OpenClaw 网关审批该设备配对请求。',
+      requestId ? `requestId: ${requestId}` : '',
+      client.deviceId ? `deviceId: ${client.deviceId}` : '',
+      reason ? `reason: ${reason}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  }
+
+  return error.message
 }
 
 function resolveSessionKey(params: {
@@ -107,9 +148,11 @@ async function handleBootstrap(body: BootstrapBody): Promise<Response> {
   } catch (error) {
     const gatewayError = error instanceof OpenClawGatewayError ? error : null
     return jsonError(
-      gatewayError?.message ?? 'Failed to connect to OpenClaw gateway.',
+      formatGatewayError(gatewayError, client),
       gatewayError?.code === 'OFFLINE' ? 503 : 502,
       gatewayError?.code,
+      gatewayError?.details ?? null,
+      client.deviceId || undefined,
     )
   } finally {
     await client.close()

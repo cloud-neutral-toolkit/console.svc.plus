@@ -10,8 +10,25 @@ import {
   type GatewayChatMessage,
   type GatewaySessionSummary,
 } from '@/lib/openclaw/types'
+import {
+  buildOpenClawDeviceAuthPayloadV3,
+  clearOpenClawDeviceToken,
+  loadOpenClawDeviceToken,
+  loadOrCreateOpenClawDeviceIdentity,
+  saveOpenClawDeviceToken,
+  signOpenClawDevicePayload,
+} from '@/server/openclaw/device-store'
 
 const OPENCLAW_PROTOCOL_VERSION = 3
+const OPENCLAW_CLIENT_IDS = {
+  assistant: 'webchat-ui',
+} as const
+const OPENCLAW_CLIENT_MODES = {
+  assistant: 'ui',
+} as const
+const OPENCLAW_CLIENT_PLATFORM = 'web'
+const OPENCLAW_CLIENT_DEVICE_FAMILY = 'console'
+const OPENCLAW_CLIENT_MODEL = 'nextjs'
 const DEFAULT_OPERATOR_SCOPES = [
   'operator.admin',
   'operator.read',
@@ -107,16 +124,20 @@ function resolveGatewayUrl(urlRaw: string): string {
 
 export class OpenClawGatewayError extends Error {
   readonly code?: string
+  readonly details?: Record<string, unknown>
 
-  constructor(message: string, code?: string) {
+  constructor(message: string, code?: string, details?: Record<string, unknown>) {
     super(message)
     this.name = 'OpenClawGatewayError'
     this.code = code
+    this.details = details
   }
 }
 
 export class OpenClawGatewayClient {
   private socket: WebSocket | null = null
+  private currentDeviceId = ''
+  private connectChallengeNonce: string | null = null
   private pending = new Map<string, PendingRequest>()
   private listeners = new Set<(event: GatewayEventFrame) => void>()
   private handleMessageRef = (event: MessageEvent) => {
@@ -133,11 +154,17 @@ export class OpenClawGatewayClient {
     gatewayUrl: string
     gatewayToken: string
     clientId?: string
+    clientMode?: string
     clientLabel?: string
-  }): Promise<{ mainSessionKey: string }> {
+  }): Promise<{ mainSessionKey: string; deviceId: string }> {
     const url = resolveGatewayUrl(params.gatewayUrl)
     const socket = new WebSocket(url)
     this.socket = socket
+    this.connectChallengeNonce = null
+
+    socket.addEventListener('message', this.handleMessageRef)
+    socket.addEventListener('close', this.handleCloseRef)
+    socket.addEventListener('error', this.handleErrorRef)
 
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -163,43 +190,164 @@ export class OpenClawGatewayClient {
       )
     })
 
-    socket.addEventListener('message', this.handleMessageRef)
-    socket.addEventListener('close', this.handleCloseRef)
-    socket.addEventListener('error', this.handleErrorRef)
+    const clientId = params.clientId ?? OPENCLAW_CLIENT_IDS.assistant
+    const clientMode = params.clientMode ?? OPENCLAW_CLIENT_MODES.assistant
+    const identity = await loadOrCreateOpenClawDeviceIdentity()
+    this.currentDeviceId = identity.deviceId
+    const storedDeviceToken = await loadOpenClawDeviceToken({
+      deviceId: identity.deviceId,
+      role: 'operator',
+    })
+    const sharedGatewayToken = params.gatewayToken.trim()
+    const authToken = sharedGatewayToken || storedDeviceToken
+    const authDeviceToken = storedDeviceToken
 
-    const payload = asRecord(
-      await this.request('connect', {
-        minProtocol: OPENCLAW_PROTOCOL_VERSION,
-        maxProtocol: OPENCLAW_PROTOCOL_VERSION,
-        client: {
-          id: params.clientId ?? 'console-openclaw-proxy',
-          displayName: params.clientLabel ?? 'console.svc.plus Assistant',
-          version: '1.0.0',
-          platform: 'node',
-          mode: 'ui',
-          instanceId: `console-${randomUUID().slice(0, 8)}`,
-        },
-        locale: 'zh-CN',
-        userAgent: 'console.svc.plus/openclaw',
+    try {
+      const nonce = await this.waitForConnectChallenge(socket)
+
+      const signedAtMs = Date.now()
+      const signaturePayload = buildOpenClawDeviceAuthPayloadV3({
+        deviceId: identity.deviceId,
+        clientId,
+        clientMode,
         role: 'operator',
-        scopes: DEFAULT_OPERATOR_SCOPES,
-        caps: ['tool-events'],
-        ...(params.gatewayToken.trim()
-          ? {
-              auth: {
-                token: params.gatewayToken.trim(),
-              },
-            }
-          : {}),
-      }, 12000),
-    )
+        scopes: [...DEFAULT_OPERATOR_SCOPES],
+        signedAtMs,
+        token: authToken,
+        nonce,
+        platform: OPENCLAW_CLIENT_PLATFORM,
+        deviceFamily: OPENCLAW_CLIENT_DEVICE_FAMILY,
+      })
 
-    const snapshot = asRecord(payload.snapshot)
-    const sessionDefaults = asRecord(snapshot.sessionDefaults)
+      const payload = asRecord(
+        await this.request('connect', {
+          minProtocol: OPENCLAW_PROTOCOL_VERSION,
+          maxProtocol: OPENCLAW_PROTOCOL_VERSION,
+          client: {
+            id: clientId,
+            displayName: params.clientLabel ?? 'console.svc.plus Assistant',
+            version: '1.0.0',
+            platform: OPENCLAW_CLIENT_PLATFORM,
+            deviceFamily: OPENCLAW_CLIENT_DEVICE_FAMILY,
+            modelIdentifier: OPENCLAW_CLIENT_MODEL,
+            mode: clientMode,
+            instanceId: `${clientId}-${identity.deviceId.slice(0, 8)}`,
+          },
+          locale: 'zh-CN',
+          userAgent: 'console.svc.plus/openclaw',
+          role: 'operator',
+          scopes: DEFAULT_OPERATOR_SCOPES,
+          caps: ['tool-events'],
+          commands: [],
+          permissions: {},
+          ...((authToken || authDeviceToken)
+            ? {
+                auth: {
+                  ...(authToken ? { token: authToken } : {}),
+                  ...(authDeviceToken ? { deviceToken: authDeviceToken } : {}),
+                },
+              }
+            : {}),
+          device: {
+            id: identity.deviceId,
+            publicKey: identity.publicKeyBase64Url,
+            signature: signOpenClawDevicePayload({
+              identity,
+              payload: signaturePayload,
+            }),
+            signedAt: signedAtMs,
+            nonce,
+          },
+        }, 12000),
+      )
 
-    return {
-      mainSessionKey: normalizeMainSessionKey(stringValue(sessionDefaults.mainSessionKey)),
+      const snapshot = asRecord(payload.snapshot)
+      const sessionDefaults = asRecord(snapshot.sessionDefaults)
+      const auth = asRecord(payload.auth)
+      const returnedDeviceToken = stringValue(auth.deviceToken)
+
+      if (returnedDeviceToken) {
+        await saveOpenClawDeviceToken({
+          deviceId: identity.deviceId,
+          role: stringValue(auth.role) ?? 'operator',
+          token: returnedDeviceToken,
+        })
+      }
+
+      return {
+        mainSessionKey: normalizeMainSessionKey(stringValue(sessionDefaults.mainSessionKey)),
+        deviceId: identity.deviceId,
+      }
+    } catch (error) {
+      const gatewayError = error instanceof OpenClawGatewayError ? error : null
+      const detailCode = stringValue(asRecord(gatewayError?.details).code)
+
+      if (detailCode === 'AUTH_DEVICE_TOKEN_MISMATCH' && !sharedGatewayToken && authDeviceToken) {
+        await clearOpenClawDeviceToken({
+          deviceId: identity.deviceId,
+          role: 'operator',
+        })
+      }
+
+      throw error
     }
+  }
+
+  get deviceId(): string {
+    return this.currentDeviceId
+  }
+
+  private async waitForConnectChallenge(socket: WebSocket): Promise<string> {
+    if (this.connectChallengeNonce) {
+      return this.connectChallengeNonce
+    }
+
+    return await new Promise<string>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        cleanup()
+        reject(new OpenClawGatewayError('Gateway connect challenge timeout', 'CHALLENGE_TIMEOUT'))
+      }, 4000)
+
+      const stopListening = this.onEvent((event) => {
+        if (event.event !== 'connect.challenge') {
+          return
+        }
+
+        const payload = asRecord(event.payload)
+        const nonce = stringValue(payload.nonce)
+        if (!nonce) {
+          cleanup()
+          reject(
+            new OpenClawGatewayError('Gateway connect challenge missing nonce', 'CHALLENGE_NONCE'),
+          )
+          return
+        }
+
+        this.connectChallengeNonce = nonce
+        cleanup()
+        resolve(nonce)
+      })
+
+      const onClose = () => {
+        cleanup()
+        reject(new OpenClawGatewayError('Gateway closed before connect challenge', 'SOCKET_CLOSED'))
+      }
+
+      const onError = () => {
+        cleanup()
+        reject(new OpenClawGatewayError('Gateway error before connect challenge', 'SOCKET_ERROR'))
+      }
+
+      const cleanup = () => {
+        clearTimeout(timeout)
+        stopListening()
+        socket.removeEventListener('close', onClose)
+        socket.removeEventListener('error', onError)
+      }
+
+      socket.addEventListener('close', onClose, { once: true })
+      socket.addEventListener('error', onError, { once: true })
+    })
   }
 
   onEvent(listener: (event: GatewayEventFrame) => void): () => void {
@@ -383,9 +531,18 @@ export class OpenClawGatewayClient {
     const type = stringValue(payload.type)
 
     if (type === 'event') {
+      const eventName = stringValue(payload.event) ?? ''
+      if (eventName === 'connect.challenge') {
+        const challengePayload = asRecord(payload.payload)
+        const nonce = stringValue(challengePayload.nonce)
+        if (nonce) {
+          this.connectChallengeNonce = nonce
+        }
+      }
+
       const frame = {
         type: 'event' as const,
-        event: stringValue(payload.event) ?? '',
+        event: eventName,
         seq: numberValue(payload.seq),
         payload: payload.payload,
       }
@@ -421,6 +578,7 @@ export class OpenClawGatewayClient {
         new OpenClawGatewayError(
           stringValue(error.message) ?? 'Gateway request failed',
           stringValue(error.code),
+          asRecord(error.details),
         ),
       )
       return
@@ -430,6 +588,7 @@ export class OpenClawGatewayClient {
   }
 
   private failPending(error: OpenClawGatewayError): void {
+    this.connectChallengeNonce = null
     for (const [id, pending] of this.pending.entries()) {
       clearTimeout(pending.timeout)
       pending.reject(error)

@@ -24,6 +24,39 @@ function jsonError(message: string, status = 400): Response {
   return Response.json({ error: message }, { status })
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
+}
+
+function formatGatewayError(error: OpenClawGatewayError | null, client: OpenClawGatewayClient): string {
+  if (!error) {
+    return 'Failed to probe OpenClaw gateway.'
+  }
+
+  const details = asRecord(error.details)
+  const detailCode = stringValue(details.code)
+  if (detailCode === 'PAIRING_REQUIRED') {
+    const requestId = stringValue(details.requestId)
+    const reason = stringValue(details.reason)
+    return [
+      '需要先在 OpenClaw 网关审批该设备配对请求。',
+      requestId ? `requestId: ${requestId}` : '',
+      client.deviceId ? `deviceId: ${client.deviceId}` : '',
+      reason ? `reason: ${reason}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  }
+
+  return error.message
+}
+
 async function probeOpenClaw(body: ProbeBody): Promise<Response> {
   const config = resolveOpenClawGatewayConfig({
     gatewayUrl: body.gatewayUrl,
@@ -40,6 +73,7 @@ async function probeOpenClaw(body: ProbeBody): Promise<Response> {
     await client.connect({
       gatewayUrl: config.gatewayUrl,
       gatewayToken: config.gatewayToken,
+      clientLabel: 'console.svc.plus Probe',
     })
 
     const [statusPayload, healthPayload] = await Promise.all([client.status(), client.health()])
@@ -60,8 +94,10 @@ async function probeOpenClaw(body: ProbeBody): Promise<Response> {
         target: 'openclaw',
         gatewayUrl: config.gatewayUrl,
         tokenSource: config.tokenSource,
-        error: gatewayError?.message ?? 'Failed to probe OpenClaw gateway.',
+        error: formatGatewayError(gatewayError, client),
         code: gatewayError?.code,
+        details: gatewayError?.details ?? null,
+        deviceId: client.deviceId || undefined,
       },
       { status: 502 },
     )

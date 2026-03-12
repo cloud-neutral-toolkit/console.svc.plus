@@ -36,29 +36,63 @@ yarn dev
 cp .env.example .env
 ```
 
-AI 助手与集成页使用以下环境变量做服务端预填，不在前端 UI 中硬编码：
+如果你的工作区同时包含 `openclaw-deploy-example`，建议参考 `../openclaw-deploy-example/.env` 填写 AI 助手联调配置，并同时查看 `docs/getting-started/installation.md`。
 
-- `OPENCLAW_GATEWAY_REMOTE_URL`
-- `OPENCLAW_GATEWAY_TOKEN`
-- `VAULT_SERVER_URL`
-- `VAULT_NAMESPACE`
-- `VAULT_TOKEN`
-- `APISIX_AI_GATEWAY_URL`
-- `AI_GATEWAY_ACCESS_TOKEN`
+## 主要入口 (Key Routes)
 
-建议参考 `/Users/shenlan/workspaces/cloud-neutral-toolkit/openclaw-deploy-example/.env` 填写，并同时查看 `docs/getting-started/installation.md`。
+- `/services`：服务导航页，保留现有控制台布局。
+- `/services/openclaw`：原生 Next.js 的 OpenClaw 助手工作区。
+- `/panel/api`：融合设置与集成页，用于配置和探测 OpenClaw Gateway、Vault Server、APISIX AI Gateway。
+
+## AI 助手与集成能力 (Assistant & Integrations)
+
+当前主页 AI 辅助功能已经基于本仓库原生实现，核心行为如下：
+
+- 侧栏助手模式保留现有交互方式，但底层改为对接 OpenClaw gateway。
+- 最大化助手页面统一收敛到 `/services/openclaw`，不再继续使用旧的 control UI 套壳。
+- 页面截图通过 assistant chat 附件模式发送，而不是单独的浏览器控制壳。
+- `/panel/api` 提供 OpenClaw、Vault、APISIX 三类集成的默认值预填与连通性探测。
+- 网关地址与令牌从服务端环境变量读取，前端组件不硬编码敏感配置。
+
+## 环境变量 (Environment Variables)
+
+以下变量用于主页 AI 助手和集成页的服务端默认值预填：
+
+| 变量 | 用途 |
+|---|---|
+| `OPENCLAW_GATEWAY_REMOTE_URL` | OpenClaw gateway 远端 WebSocket 地址 |
+| `OPENCLAW_GATEWAY_TOKEN` | OpenClaw gateway 访问令牌 |
+| `VAULT_SERVER_URL` | Vault 服务地址 |
+| `VAULT_NAMESPACE` | Vault namespace，可选 |
+| `VAULT_TOKEN` | Vault 探测令牌 |
+| `APISIX_AI_GATEWAY_URL` | APISIX AI Gateway 地址 |
+| `AI_GATEWAY_ACCESS_TOKEN` | APISIX AI Gateway 探测令牌 |
+
+更多说明见 `docs/getting-started/installation.md` 和 `.env.example`。
 
 ## 核心特性 & 技术栈 (Features & Tech Stack)
 
 核心特性：
 * 统一控制面：汇聚 Cloud Neutral Toolkit 各微服务入口
+* 原生 AI 助手工作区：OpenClaw gateway 驱动的聊天、截图附件与会话体验
+* 融合集成设置：在 `/panel/api` 统一管理 OpenClaw、Vault、APISIX AI Gateway
 * 文档与内容系统：Contentlayer 驱动的 docs/content pipeline
 * 可扩展集成：OIDC、Cloudflare Web Analytics 等
 
 技术栈：
 * Next.js + TypeScript
 * Tailwind CSS + Radix UI
+* Zustand
 * Contentlayer
+
+## 开发命令 (Useful Commands)
+
+```bash
+yarn dev
+yarn build
+yarn typecheck
+./node_modules/.bin/eslint . --no-eslintrc --config .eslintrc.json --resolve-plugins-relative-to .
+```
 
 ## 说明文档 (Docs)
 
@@ -70,6 +104,7 @@ AI 助手与集成页使用以下环境变量做服务端预填，不在前端 U
 * OIDC: `docs/integrations/oidc-auth.md`
 * Cloudflare Web Analytics: `docs/integrations/cloudflare-web-analytics.md`
 * Assistant / Integrations env setup: `docs/getting-started/installation.md`
+* Chinese installation guide: `docs/zh/getting-started/installation.md`
 
 其他：
 * Agent rules: `AGENTS.md`
