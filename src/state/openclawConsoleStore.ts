@@ -8,6 +8,7 @@ import type { AssistantMode, IntegrationDefaults, ThinkingLevel } from '@/lib/op
 type OpenClawConsoleState = {
   defaultsLoaded: boolean
   openclawUrl: string
+  openclawOrigin: string
   openclawToken: string
   vaultUrl: string
   vaultNamespace: string
@@ -22,6 +23,7 @@ type OpenClawConsoleState = {
   selectedSessionKey: string
   applyDefaults: (defaults: IntegrationDefaults) => void
   setOpenclawUrl: (value: string) => void
+  setOpenclawOrigin: (value: string) => void
   setOpenclawToken: (value: string) => void
   setVaultUrl: (value: string) => void
   setVaultNamespace: (value: string) => void
@@ -41,6 +43,7 @@ export const useOpenClawConsoleStore = create<OpenClawConsoleState>()(
     (set, get) => ({
       defaultsLoaded: false,
       openclawUrl: '',
+      openclawOrigin: '',
       openclawToken: '',
       vaultUrl: '',
       vaultNamespace: '',
@@ -58,6 +61,7 @@ export const useOpenClawConsoleStore = create<OpenClawConsoleState>()(
         set({
           defaultsLoaded: true,
           openclawUrl: current.openclawUrl || defaults.openclawUrl,
+          openclawOrigin: current.openclawOrigin || defaults.openclawOrigin,
           vaultUrl: current.vaultUrl || defaults.vaultUrl,
           vaultNamespace: current.vaultNamespace || defaults.vaultNamespace,
           vaultSecretPath: current.vaultSecretPath || defaults.vaultSecretPath,
@@ -66,6 +70,7 @@ export const useOpenClawConsoleStore = create<OpenClawConsoleState>()(
         })
       },
       setOpenclawUrl: (openclawUrl) => set({ openclawUrl }),
+      setOpenclawOrigin: (openclawOrigin) => set({ openclawOrigin }),
       setOpenclawToken: (openclawToken) => set({ openclawToken }),
       setVaultUrl: (vaultUrl) => set({ vaultUrl }),
       setVaultNamespace: (vaultNamespace) => set({ vaultNamespace }),
@@ -84,6 +89,7 @@ export const useOpenClawConsoleStore = create<OpenClawConsoleState>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         openclawUrl: state.openclawUrl,
+        openclawOrigin: state.openclawOrigin,
         openclawToken: state.openclawToken,
         vaultUrl: state.vaultUrl,
         vaultNamespace: state.vaultNamespace,

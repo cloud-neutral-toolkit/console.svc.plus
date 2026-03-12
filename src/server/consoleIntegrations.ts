@@ -83,6 +83,7 @@ function normalizeWsUrl(value?: string): string {
 export function getConsoleIntegrationDefaults(): IntegrationDefaults {
   return {
     openclawUrl: normalizeWsUrl(readEnvValue(...OPENCLAW_URL_KEYS)),
+    openclawOrigin: '',
     openclawTokenConfigured: Boolean(readEnvValue(...OPENCLAW_TOKEN_KEYS)),
     vaultUrl: normalizeHttpUrl(readEnvValue(...VAULT_URL_KEYS)),
     vaultNamespace: readEnvValue(...VAULT_NAMESPACE_KEYS) ?? '',

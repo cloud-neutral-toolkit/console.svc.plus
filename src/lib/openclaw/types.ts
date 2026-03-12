@@ -79,6 +79,7 @@ export type OpenClawStreamEvent =
 
 export type IntegrationDefaults = {
   openclawUrl: string
+  openclawOrigin: string
   openclawTokenConfigured: boolean
   vaultUrl: string
   vaultNamespace: string

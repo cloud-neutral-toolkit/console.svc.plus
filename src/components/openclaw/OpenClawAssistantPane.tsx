@@ -230,6 +230,7 @@ export function OpenClawAssistantPane({
   );
   const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults);
   const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl);
+  const openclawOrigin = useOpenClawConsoleStore((state) => state.openclawOrigin);
   const openclawToken = useOpenClawConsoleStore((state) => state.openclawToken);
   const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl);
   const vaultNamespace = useOpenClawConsoleStore(
@@ -436,6 +437,7 @@ export function OpenClawAssistantPane({
           body: JSON.stringify({
             action: "bootstrap",
             gatewayUrl: openclawUrl,
+            gatewayOrigin: openclawOrigin,
             gatewayToken: openclawToken,
             vaultUrl,
             vaultNamespace,
@@ -479,6 +481,7 @@ export function OpenClawAssistantPane({
       copy.connectFailed,
       copy.serverMissing,
       openclawToken,
+      openclawOrigin,
       openclawUrl,
       vaultNamespace,
       vaultSecretKey,
@@ -585,6 +588,7 @@ export function OpenClawAssistantPane({
           body: JSON.stringify({
             action: "send",
             gatewayUrl: openclawUrl,
+            gatewayOrigin: openclawOrigin,
             gatewayToken: openclawToken,
             vaultUrl,
             vaultNamespace,
@@ -668,6 +672,7 @@ export function OpenClawAssistantPane({
       isChinese,
       mainSessionKey,
       openclawToken,
+      openclawOrigin,
       openclawUrl,
       vaultNamespace,
       vaultSecretKey,

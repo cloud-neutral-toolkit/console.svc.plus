@@ -30,6 +30,7 @@ export function AskAIDialog({
   const router = useRouter();
   const resolvedDefaults: IntegrationDefaults = defaults ?? {
     openclawUrl: "",
+    openclawOrigin: "",
     openclawTokenConfigured: false,
     vaultUrl: "",
     vaultNamespace: "",
