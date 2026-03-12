@@ -18,6 +18,7 @@ export const dynamic = 'force-dynamic'
 type BootstrapBody = {
   action: 'bootstrap'
   gatewayUrl?: string
+  gatewayOrigin?: string
   gatewayToken?: string
   vaultUrl?: string
   vaultNamespace?: string
@@ -31,6 +32,7 @@ type BootstrapBody = {
 type SendBody = {
   action: 'send'
   gatewayUrl?: string
+  gatewayOrigin?: string
   gatewayToken?: string
   vaultUrl?: string
   vaultNamespace?: string
@@ -112,7 +114,21 @@ function resolveSessionKey(params: {
   return makeAgentSessionKey(params.agentId?.trim() ?? '', params.mainSessionKey)
 }
 
-async function handleBootstrap(body: BootstrapBody): Promise<Response> {
+function resolveGatewayOrigin(override: string | undefined, request: NextRequest): string {
+  const explicit = override?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const headerOrigin = request.headers.get('origin')?.trim()
+  if (headerOrigin) {
+    return headerOrigin
+  }
+
+  return request.nextUrl.origin
+}
+
+async function handleBootstrap(body: BootstrapBody, request: NextRequest): Promise<Response> {
   const gateway = await resolveOpenClawGatewayConfig({
     gatewayUrl: body.gatewayUrl,
     gatewayToken: body.gatewayToken,
@@ -132,6 +148,7 @@ async function handleBootstrap(body: BootstrapBody): Promise<Response> {
   try {
     const connected = await client.connect({
       gatewayUrl: gateway.gatewayUrl,
+      gatewayOrigin: resolveGatewayOrigin(body.gatewayOrigin, request),
       gatewayToken: gateway.gatewayToken,
     })
 
@@ -178,7 +195,7 @@ async function handleBootstrap(body: BootstrapBody): Promise<Response> {
   }
 }
 
-async function handleSend(body: SendBody): Promise<Response> {
+async function handleSend(body: SendBody, request: NextRequest): Promise<Response> {
   const gateway = await resolveOpenClawGatewayConfig({
     gatewayUrl: body.gatewayUrl,
     gatewayToken: body.gatewayToken,
@@ -258,6 +275,7 @@ async function handleSend(body: SendBody): Promise<Response> {
         client = new OpenClawGatewayClient()
         const connected = await client.connect({
           gatewayUrl: gateway.gatewayUrl,
+          gatewayOrigin: resolveGatewayOrigin(body.gatewayOrigin, request),
           gatewayToken: gateway.gatewayToken,
         })
 
@@ -396,11 +414,11 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 
   if (body.action === 'bootstrap') {
-    return handleBootstrap(body)
+    return handleBootstrap(body, request)
   }
 
   if (body.action === 'send') {
-    return handleSend(body)
+    return handleSend(body, request)
   }
 
   return jsonError('Unsupported assistant action.', 400, 'UNSUPPORTED_ACTION')

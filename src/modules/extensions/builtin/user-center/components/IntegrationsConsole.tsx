@@ -89,6 +89,7 @@ function stringValue(value: unknown): string | undefined {
 
 const EMPTY_DEFAULTS: IntegrationDefaults = {
   openclawUrl: "",
+  openclawOrigin: "",
   openclawTokenConfigured: false,
   vaultUrl: "",
   vaultNamespace: "",
@@ -118,6 +119,7 @@ export function IntegrationsConsole({
 
   const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults);
   const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl);
+  const openclawOrigin = useOpenClawConsoleStore((state) => state.openclawOrigin);
   const openclawToken = useOpenClawConsoleStore((state) => state.openclawToken);
   const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl);
   const vaultNamespace = useOpenClawConsoleStore(
@@ -134,6 +136,9 @@ export function IntegrationsConsole({
   const apisixToken = useOpenClawConsoleStore((state) => state.apisixToken);
   const setOpenclawUrl = useOpenClawConsoleStore(
     (state) => state.setOpenclawUrl,
+  );
+  const setOpenclawOrigin = useOpenClawConsoleStore(
+    (state) => state.setOpenclawOrigin,
   );
   const setOpenclawToken = useOpenClawConsoleStore(
     (state) => state.setOpenclawToken,
@@ -240,6 +245,7 @@ export function IntegrationsConsole({
         body: JSON.stringify({
           target,
           gatewayUrl: openclawUrl,
+          gatewayOrigin: openclawOrigin,
           gatewayToken: openclawToken,
           vaultUrl,
           vaultNamespace,
@@ -381,6 +387,19 @@ export function IntegrationsConsole({
             />
           </Field>
         </div>
+
+        <Field
+          label="Origin Override"
+          hint="可选。留空时自动使用当前页面 origin，例如 https://preview.svc.plus。"
+        >
+          <input
+            type="text"
+            value={openclawOrigin}
+            onChange={(event) => setOpenclawOrigin(event.target.value)}
+            className={inputClassName()}
+            placeholder="https://preview.svc.plus"
+          />
+        </Field>
 
         <div className="flex flex-wrap items-center gap-3">
           <button

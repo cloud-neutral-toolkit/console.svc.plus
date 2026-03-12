@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { randomUUID } from 'node:crypto'
+import WebSocket from 'ws'
 
 import {
   extractMessageText,
@@ -49,6 +50,8 @@ type GatewayEventFrame = {
   seq?: number
   payload?: unknown
 }
+
+type GatewaySocket = WebSocket
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -135,13 +138,13 @@ export class OpenClawGatewayError extends Error {
 }
 
 export class OpenClawGatewayClient {
-  private socket: WebSocket | null = null
+  private socket: GatewaySocket | null = null
   private currentDeviceId = ''
   private connectChallengeNonce: string | null = null
   private pending = new Map<string, PendingRequest>()
   private listeners = new Set<(event: GatewayEventFrame) => void>()
-  private handleMessageRef = (event: MessageEvent) => {
-    void this.handleMessage(event)
+  private handleMessageRef = (data: unknown) => {
+    void this.handleMessage(data)
   }
   private handleCloseRef = () => {
     this.failPending(new OpenClawGatewayError('Gateway connection closed', 'SOCKET_CLOSED'))
@@ -152,42 +155,44 @@ export class OpenClawGatewayClient {
 
   async connect(params: {
     gatewayUrl: string
+    gatewayOrigin?: string
     gatewayToken: string
     clientId?: string
     clientMode?: string
     clientLabel?: string
   }): Promise<{ mainSessionKey: string; deviceId: string }> {
     const url = resolveGatewayUrl(params.gatewayUrl)
-    const socket = new WebSocket(url)
+    const origin = params.gatewayOrigin?.trim()
+    const socket = new WebSocket(url, {
+      ...(origin
+        ? {
+            headers: {
+              Origin: origin,
+            },
+          }
+        : {}),
+    })
     this.socket = socket
     this.connectChallengeNonce = null
 
-    socket.addEventListener('message', this.handleMessageRef)
-    socket.addEventListener('close', this.handleCloseRef)
-    socket.addEventListener('error', this.handleErrorRef)
+    socket.on('message', this.handleMessageRef)
+    socket.on('close', this.handleCloseRef)
+    socket.on('error', this.handleErrorRef)
 
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new OpenClawGatewayError('Gateway open timeout', 'OPEN_TIMEOUT'))
       }, 8000)
 
-      socket.addEventListener(
-        'open',
-        () => {
-          clearTimeout(timeout)
-          resolve()
-        },
-        { once: true },
-      )
+      socket.once('open', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
 
-      socket.addEventListener(
-        'error',
-        () => {
-          clearTimeout(timeout)
-          reject(new OpenClawGatewayError('Gateway open failed', 'OPEN_FAILED'))
-        },
-        { once: true },
-      )
+      socket.once('error', () => {
+        clearTimeout(timeout)
+        reject(new OpenClawGatewayError('Gateway open failed', 'OPEN_FAILED'))
+      })
     })
 
     const clientId = params.clientId ?? OPENCLAW_CLIENT_IDS.assistant
@@ -297,7 +302,7 @@ export class OpenClawGatewayClient {
     return this.currentDeviceId
   }
 
-  private async waitForConnectChallenge(socket: WebSocket): Promise<string> {
+  private async waitForConnectChallenge(socket: GatewaySocket): Promise<string> {
     if (this.connectChallengeNonce) {
       return this.connectChallengeNonce
     }
@@ -341,12 +346,12 @@ export class OpenClawGatewayClient {
       const cleanup = () => {
         clearTimeout(timeout)
         stopListening()
-        socket.removeEventListener('close', onClose)
-        socket.removeEventListener('error', onError)
+        socket.off('close', onClose)
+        socket.off('error', onError)
       }
 
-      socket.addEventListener('close', onClose, { once: true })
-      socket.addEventListener('error', onError, { once: true })
+      socket.once('close', onClose)
+      socket.once('error', onError)
     })
   }
 
@@ -509,17 +514,17 @@ export class OpenClawGatewayClient {
       return
     }
 
-    socket.removeEventListener('message', this.handleMessageRef)
-    socket.removeEventListener('close', this.handleCloseRef)
-    socket.removeEventListener('error', this.handleErrorRef)
+    socket.off('message', this.handleMessageRef)
+    socket.off('close', this.handleCloseRef)
+    socket.off('error', this.handleErrorRef)
 
     if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
       socket.close()
     }
   }
 
-  private async handleMessage(event: MessageEvent): Promise<void> {
-    const text = toText(event.data)
+  private async handleMessage(data: unknown): Promise<void> {
+    const text = toText(data)
     let payload: Record<string, unknown>
 
     try {

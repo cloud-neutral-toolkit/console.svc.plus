@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 type ProbeBody = {
   target?: 'openclaw' | 'vault' | 'apisix'
   gatewayUrl?: string
+  gatewayOrigin?: string
   gatewayToken?: string
   vaultUrl?: string
   vaultNamespace?: string
@@ -64,7 +65,21 @@ function formatGatewayError(error: OpenClawGatewayError | null, client: OpenClaw
   return error.message
 }
 
-async function probeOpenClaw(body: ProbeBody): Promise<Response> {
+function resolveGatewayOrigin(override: string | undefined, request: NextRequest): string {
+  const explicit = override?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const headerOrigin = request.headers.get('origin')?.trim()
+  if (headerOrigin) {
+    return headerOrigin
+  }
+
+  return request.nextUrl.origin
+}
+
+async function probeOpenClaw(body: ProbeBody, request: NextRequest): Promise<Response> {
   const config = await resolveOpenClawGatewayConfig({
     gatewayUrl: body.gatewayUrl,
     gatewayToken: body.gatewayToken,
@@ -84,6 +99,7 @@ async function probeOpenClaw(body: ProbeBody): Promise<Response> {
   try {
     await client.connect({
       gatewayUrl: config.gatewayUrl,
+      gatewayOrigin: resolveGatewayOrigin(body.gatewayOrigin, request),
       gatewayToken: config.gatewayToken,
       clientLabel: 'console.svc.plus Probe',
     })
@@ -223,7 +239,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   switch (body.target) {
     case 'openclaw':
-      return probeOpenClaw(body)
+      return probeOpenClaw(body, request)
     case 'vault':
       return probeVault(body)
     case 'apisix':
