@@ -259,7 +259,7 @@ function SidebarSectionButton({
       onClick={onClick}
       title={section.label}
       className={cn(
-        "group flex w-full items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-3 text-left transition",
+        "group flex w-full items-center gap-2.5 rounded-[var(--radius-lg)] border px-2.5 py-2.5 text-left transition",
         active
           ? "border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)] shadow-[var(--shadow-sm)]"
           : "border-transparent text-[var(--color-text-subtle)] hover:border-[color:var(--color-surface-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]",
@@ -268,19 +268,19 @@ function SidebarSectionButton({
     >
       <div
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-lg)] border transition",
           active
             ? "border-[color:var(--color-primary-border)] bg-white/80 text-[var(--color-primary)]"
             : "border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] group-hover:text-[var(--color-text)]",
         )}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-4.5 w-4.5" />
       </div>
 
       {!collapsed ? (
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{section.label}</p>
-          <p className="mt-1 line-clamp-2 text-xs text-[var(--color-text-subtle)]">
+          <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--color-text-subtle)]">
             {section.description}
           </p>
         </div>
@@ -302,7 +302,7 @@ function UtilityButton({
       onClick={onClick}
       title={label}
       className={cn(
-        "flex w-full items-center gap-3 rounded-[var(--radius-xl)] border px-3 py-2.5 text-sm font-medium transition",
+        "flex w-full items-center gap-2.5 rounded-[var(--radius-lg)] border px-2.5 py-2 text-sm font-medium transition",
         active
           ? "border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
           : "border-transparent text-[var(--color-text-subtle)] hover:border-[color:var(--color-surface-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]",
@@ -323,22 +323,22 @@ function SurfaceCard({
   action,
 }: SurfaceCardProps) {
   return (
-    <Card className="space-y-4 bg-[var(--color-surface)]">
-      <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-          <Icon className="h-5 w-5" />
+    <Card className="space-y-3 bg-[var(--color-surface)] p-4">
+      <div className="flex items-start gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+          <Icon className="h-4.5 w-4.5" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-[var(--color-heading)]">
+          <h3 className="text-sm font-semibold text-[var(--color-heading)]">
             {title}
           </h3>
-          <p className="text-sm text-[var(--color-text-subtle)]">
+          <p className="text-xs text-[var(--color-text-subtle)]">
             {description}
           </p>
         </div>
       </div>
       {body ? (
-        <p className="text-sm leading-6 text-[var(--color-text)]">{body}</p>
+        <p className="text-sm leading-5 text-[var(--color-text)]">{body}</p>
       ) : null}
       {action ? <div>{action}</div> : null}
     </Card>
@@ -347,14 +347,14 @@ function SurfaceCard({
 
 function StatusRow({ label, value, ok }: StatusRowProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-4 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-2.5">
       <div>
-        <p className="text-sm font-medium text-[var(--color-text)]">{label}</p>
-        <p className="mt-1 text-xs text-[var(--color-text-subtle)]">{value}</p>
+        <p className="text-xs font-medium text-[var(--color-text)]">{label}</p>
+        <p className="mt-0.5 text-[11px] text-[var(--color-text-subtle)]">{value}</p>
       </div>
       <span
         className={cn(
-          "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold",
+          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
           ok
             ? "bg-emerald-500/10 text-emerald-600"
             : "bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)]",
@@ -374,29 +374,29 @@ function StatusRow({ label, value, ok }: StatusRowProps) {
 
 function OverviewMetrics({ items }: { items: OverviewMetric[] }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       {items.map((item) => {
         const Icon = item.icon;
 
         return (
           <Card
             key={`${item.label}-${item.value}`}
-            className="space-y-3 border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-5"
+            className="space-y-2.5 border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-4"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-                <Icon className="h-5 w-5" />
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+                <Icon className="h-4.5 w-4.5" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-subtle)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-subtle)]">
                   {item.label}
                 </p>
-                <p className="mt-1 text-lg font-semibold text-[var(--color-heading)]">
+                <p className="mt-0.5 text-base font-semibold text-[var(--color-heading)]">
                   {item.value}
                 </p>
               </div>
             </div>
-            <p className="text-sm text-[var(--color-text-subtle)]">
+            <p className="text-xs text-[var(--color-text-subtle)]">
               {item.caption}
             </p>
           </Card>
@@ -418,7 +418,7 @@ export function XWorkmateWorkspacePage({
     useState<WorkspaceDestination>("assistant");
   const [activeTabs, setActiveTabs] =
     useState<Record<WorkspaceDestination, string>>(INITIAL_TABS);
-  const [sidebarState, setSidebarState] = useState<SidebarState>("expanded");
+  const [sidebarState, setSidebarState] = useState<SidebarState>("collapsed");
   const { resolvedTheme, toggleTheme, isDark } = useTheme();
   const user = useUserStore((state) => state.user);
 
@@ -785,142 +785,140 @@ export function XWorkmateWorkspacePage({
   }
 
   function renderAssistantSection(): ReactNode {
+    return <OpenClawAssistantPane defaults={defaults} variant="page" />;
+  }
+
+  function renderAssistantSidebarContent(): ReactNode {
     return (
-      <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.35fr)_360px]">
-        <div className="min-h-0">
-          <OpenClawAssistantPane defaults={defaults} variant="page" />
-        </div>
+      <div className="space-y-4">
+        <Card className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text-subtle)]">
+              XWorkmate
+            </p>
+            <h2 className="text-xl font-semibold text-[var(--color-heading)]">
+              {pickCopy(
+                isChinese,
+                "在线助手工作台",
+                "Online assistant workspace",
+              )}
+            </h2>
+            <p className="text-sm text-[var(--color-text-subtle)]">
+              {pickCopy(
+                isChinese,
+                "和桌面端一样，主屏负责对话、截图、附件和执行反馈；OpenClaw 只保留为底层 gateway。",
+                "Like desktop, the main workspace owns chat, screenshots, attachments, and execution feedback while OpenClaw remains the underlying gateway.",
+              )}
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {integrationRows.map((row) => (
+              <StatusRow
+                key={row.label}
+                label={row.label}
+                value={row.value}
+                ok={row.ok}
+              />
+            ))}
+          </div>
+        </Card>
 
-        <div className="space-y-4 overflow-y-auto">
-          <Card className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text-subtle)]">
-                XWorkmate
-              </p>
-              <h2 className="text-xl font-semibold text-[var(--color-heading)]">
-                {pickCopy(
-                  isChinese,
-                  "在线助手工作台",
-                  "Online assistant workspace",
-                )}
-              </h2>
-              <p className="text-sm text-[var(--color-text-subtle)]">
-                {pickCopy(
-                  isChinese,
-                  "和桌面端一样，主屏负责对话、截图、附件和执行反馈；OpenClaw 只保留为底层 gateway。",
-                  "Like desktop, the main workspace owns chat, screenshots, attachments, and execution feedback while OpenClaw remains the underlying gateway.",
-                )}
-              </p>
-            </div>
-            <div className="grid gap-3">
-              {integrationRows.map((row) => (
-                <StatusRow
-                  key={row.label}
-                  label={row.label}
-                  value={row.value}
-                  ok={row.ok}
-                />
-              ))}
-            </div>
-          </Card>
+        <SurfaceCard
+          icon={Workflow}
+          title={pickCopy(
+            isChinese,
+            "截图仍然走聊天模式",
+            "Screenshots stay in assistant chat mode",
+          )}
+          description={pickCopy(
+            isChinese,
+            "不再套壳 browser automation/control UI。",
+            "No browser automation shell or separate control UI.",
+          )}
+          body={pickCopy(
+            isChinese,
+            "当前页截图会直接作为附件进入会话，和文本、日志、图片共用同一条 assistant 流程。",
+            "Current-page screenshots enter the same assistant flow as text, logs, and images.",
+          )}
+          action={
+            <button
+              type="button"
+              onClick={() => setActiveSection("tasks")}
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+            >
+              {pickCopy(isChinese, "查看任务视图", "Open tasks view")}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          }
+        />
 
-          <SurfaceCard
-            icon={Workflow}
-            title={pickCopy(
-              isChinese,
-              "截图仍然走聊天模式",
-              "Screenshots stay in assistant chat mode",
-            )}
-            description={pickCopy(
-              isChinese,
-              "不再套壳 browser automation/control UI。",
-              "No browser automation shell or separate control UI.",
-            )}
-            body={pickCopy(
-              isChinese,
-              "当前页截图会直接作为附件进入会话，和文本、日志、图片共用同一条 assistant 流程。",
-              "Current-page screenshots enter the same assistant flow as text, logs, and images.",
-            )}
-            action={
-              <button
-                type="button"
-                onClick={() => setActiveSection("tasks")}
+        <SurfaceCard
+          icon={ShieldCheck}
+          title={pickCopy(
+            isChinese,
+            "Pairing 优先，其次 token",
+            "Pairing first, token second",
+          )}
+          description={pickCopy(
+            isChinese,
+            "已经接入 challenge / device token 模式。",
+            "The challenge / device token pairing flow is active.",
+          )}
+          body={pickCopy(
+            isChinese,
+            "首次连接可以使用 shared token 建链，后续回落到 device token。认证失配时会自动提示重新配对。",
+            "The first connection can use a shared token, then fall back to a stored device token. Pairing guidance appears automatically if auth drifts.",
+          )}
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("settings");
+                setActiveTabs((current) => ({
+                  ...current,
+                  settings: "integrations",
+                }));
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
+            >
+              {pickCopy(
+                isChinese,
+                "打开融合设置",
+                "Open integration settings",
+              )}
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          }
+        />
+
+        <SurfaceCard
+          icon={Waypoints}
+          title={pickCopy(isChinese, "工作区默认值", "Workspace defaults")}
+          description={pickCopy(
+            isChinese,
+            "当前会话状态",
+            "Current session state",
+          )}
+          body={`${pickCopy(isChinese, "模式", "Mode")}: ${assistantMode} · ${pickCopy(isChinese, "推理", "Reasoning")}: ${thinking} · ${pickCopy(isChinese, "会话", "Session")}: ${selectedSessionKey || "main"}`}
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/panel/api"
                 className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
               >
-                {pickCopy(isChinese, "查看任务视图", "Open tasks view")}
+                API
                 <ArrowRight className="h-4 w-4" />
-              </button>
-            }
-          />
-
-          <SurfaceCard
-            icon={ShieldCheck}
-            title={pickCopy(
-              isChinese,
-              "Pairing 优先，其次 token",
-              "Pairing first, token second",
-            )}
-            description={pickCopy(
-              isChinese,
-              "已经接入 challenge / device token 模式。",
-              "The challenge / device token pairing flow is active.",
-            )}
-            body={pickCopy(
-              isChinese,
-              "首次连接可以使用 shared token 建链，后续回落到 device token。认证失配时会自动提示重新配对。",
-              "The first connection can use a shared token, then fall back to a stored device token. Pairing guidance appears automatically if auth drifts.",
-            )}
-            action={
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveSection("settings");
-                  setActiveTabs((current) => ({
-                    ...current,
-                    settings: "integrations",
-                  }));
-                }}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
+              </Link>
+              <Link
+                href="/panel"
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
               >
-                {pickCopy(
-                  isChinese,
-                  "打开融合设置",
-                  "Open integration settings",
-                )}
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            }
-          />
-
-          <SurfaceCard
-            icon={Waypoints}
-            title={pickCopy(isChinese, "工作区默认值", "Workspace defaults")}
-            description={pickCopy(
-              isChinese,
-              "当前会话状态",
-              "Current session state",
-            )}
-            body={`${pickCopy(isChinese, "模式", "Mode")}: ${assistantMode} · ${pickCopy(isChinese, "推理", "Reasoning")}: ${thinking} · ${pickCopy(isChinese, "会话", "Session")}: ${selectedSessionKey || "main"}`}
-            action={
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/panel/api"
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
-                >
-                  API
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/panel"
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
-                >
-                  Console
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            }
-          />
-        </div>
+                Console
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          }
+        />
       </div>
     );
   }
@@ -1868,7 +1866,7 @@ export function XWorkmateWorkspacePage({
   }
 
   return (
-    <div className="relative h-full min-h-0 overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-md)]">
+    <div className="relative h-full min-h-0 overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-md)]">
       {sidebarState === "hidden" ? (
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-start p-4">
           <button
@@ -1886,25 +1884,25 @@ export function XWorkmateWorkspacePage({
         {sidebarState !== "hidden" ? (
           <aside
             className={cn(
-              "flex h-full shrink-0 flex-col border-r border-[color:var(--color-surface-border)] bg-[var(--color-background)]/90 px-3 py-4 backdrop-blur transition-[width] duration-200",
-              collapsed ? "w-[96px]" : "w-[310px]",
+              "flex h-full shrink-0 flex-col border-r border-[color:var(--color-surface-border)] bg-[var(--color-background)]/90 px-2.5 py-3 backdrop-blur transition-[width] duration-200",
+              collapsed ? "w-[88px]" : "w-[292px]",
             )}
           >
             <div
               className={cn(
-                "flex items-center gap-3 rounded-[var(--radius-xl)] px-2 py-2",
+                "flex items-center gap-2.5 rounded-[var(--radius-lg)] px-2 py-1.5",
                 collapsed ? "justify-center" : "",
               )}
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-                <Sparkles className="h-6 w-6" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+                <Sparkles className="h-5 w-5" />
               </div>
               {!collapsed ? (
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-semibold text-[var(--color-heading)]">
+                  <p className="truncate text-base font-semibold text-[var(--color-heading)]">
                     XWorkmate
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-[var(--color-text-subtle)]">
+                  <p className="mt-0.5 truncate text-[11px] text-[var(--color-text-subtle)]">
                     {pickCopy(
                       isChinese,
                       "Online Workspace",
@@ -1925,6 +1923,12 @@ export function XWorkmateWorkspacePage({
                   onClick={() => setActiveSection(section.key)}
                 />
               ))}
+
+              {!collapsed && activeSection === "assistant" ? (
+                <div className="space-y-3 border-t border-[color:var(--color-surface-border)] pt-4">
+                  {renderAssistantSidebarContent()}
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-4 space-y-2 border-t border-[color:var(--color-surface-border)] pt-4">
@@ -1967,11 +1971,11 @@ export function XWorkmateWorkspacePage({
                 onClick={() => setActiveSection("account")}
                 title={accountName}
                 className={cn(
-                  "mt-2 flex w-full items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-3 text-left transition hover:border-[color:var(--color-primary-border)]",
+                  "mt-2 flex w-full items-center gap-2.5 rounded-[var(--radius-lg)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-2.5 py-2.5 text-left transition hover:border-[color:var(--color-primary-border)]",
                   collapsed ? "justify-center px-2" : "",
                 )}
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-muted)] text-sm font-semibold text-[var(--color-primary)]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-sm font-semibold text-[var(--color-primary)]">
                   {(
                     user?.username?.charAt(0) ||
                     accountName.charAt(0) ||
@@ -1994,19 +1998,26 @@ export function XWorkmateWorkspacePage({
         ) : null}
 
         <section className="flex min-w-0 flex-1 flex-col">
-          <header className="border-b border-[color:var(--color-surface-border)] px-5 py-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-subtle)]">
+          <header
+            className={cn(
+              "border-b border-[color:var(--color-surface-border)] px-4",
+              activeSection === "assistant" ? "py-3" : "py-4",
+            )}
+          >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className={cn("space-y-2", activeSection === "assistant" ? "space-y-1.5" : "")}>
+                <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-subtle)]">
                   {pickCopy(isChinese, "XWorkmate 在线版", "XWorkmate Online")}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold text-[var(--color-heading)]">
+                  <h1 className={cn("font-semibold text-[var(--color-heading)]", activeSection === "assistant" ? "text-xl" : "text-2xl")}>
                     {activeDefinition.label}
                   </h1>
-                  <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-subtle)]">
-                    {activeDefinition.description}
-                  </p>
+                  {activeSection !== "assistant" ? (
+                    <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-subtle)]">
+                      {activeDefinition.description}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
@@ -2019,7 +2030,7 @@ export function XWorkmateWorkspacePage({
                         current === "expanded" ? "collapsed" : "expanded",
                       )
                     }
-                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3.5 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
                   >
                     {collapsed ? (
                       <ChevronRight className="h-4 w-4" />
@@ -2031,7 +2042,7 @@ export function XWorkmateWorkspacePage({
                 ) : null}
                 <Link
                   href="/panel"
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3.5 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
                 >
                   Console
                   <ArrowRight className="h-4 w-4" />
@@ -2045,7 +2056,7 @@ export function XWorkmateWorkspacePage({
                       settings: "integrations",
                     }));
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-3.5 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
                 >
                   {pickCopy(isChinese, "融合设置", "Integration settings")}
                   <ArrowRight className="h-4 w-4" />
@@ -2074,8 +2085,13 @@ export function XWorkmateWorkspacePage({
             ) : null}
           </header>
 
-          <div className="min-h-0 flex-1 overflow-auto p-5">
-            <div className="space-y-5">
+          <div
+            className={cn(
+              "min-h-0 flex-1 p-4",
+              activeSection === "assistant" ? "overflow-hidden" : "overflow-auto",
+            )}
+          >
+            <div className={cn("space-y-4", activeSection === "assistant" ? "h-full min-h-0" : "")}>
               {renderSectionOverview()}
               {renderMainContent()}
             </div>

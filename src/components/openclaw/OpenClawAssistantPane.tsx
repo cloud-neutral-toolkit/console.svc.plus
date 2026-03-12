@@ -694,7 +694,7 @@ export function OpenClawAssistantPane({
   }
 
   const containerClassName = cn(
-    "flex h-full min-h-0 flex-col overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-md)]",
+    "flex h-full min-h-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-md)]",
     compact ? "rounded-none border-0 shadow-none" : "",
   );
 
@@ -711,8 +711,8 @@ export function OpenClawAssistantPane({
         }}
       />
 
-      <div className="flex flex-wrap items-center gap-3 border-b border-[color:var(--color-surface-border)] px-4 py-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-3 py-1 text-xs font-medium text-[var(--color-text-subtle)]">
+      <div className="flex flex-wrap items-center gap-2.5 border-b border-[color:var(--color-surface-border)] px-3 py-2.5">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-subtle)]">
           <span
             className={cn(
               "h-2.5 w-2.5 rounded-full",
@@ -734,7 +734,7 @@ export function OpenClawAssistantPane({
               : copy.noToken}
         </div>
 
-        <div className="min-w-[180px] flex-1">
+        <div className="min-w-[164px] flex-1">
           <select
             value={selectedAgentId}
             onChange={(event) => {
@@ -742,7 +742,7 @@ export function OpenClawAssistantPane({
               setSelectedSessionKey("");
               void connectGateway("", event.target.value);
             }}
-            className="w-full rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition focus:border-[color:var(--color-primary)]"
+            className="w-full rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[color:var(--color-primary)]"
           >
             <option value="">{copy.mainAgent}</option>
             {agents.map((agent) => (
@@ -759,7 +759,7 @@ export function OpenClawAssistantPane({
           onClick={() => {
             void connectGateway();
           }}
-          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-[11px] font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
         >
           {connectionState === "connecting" ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -772,7 +772,7 @@ export function OpenClawAssistantPane({
         <button
           type="button"
           onClick={() => router.push("/panel/api")}
-          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] px-3 py-1.5 text-[11px] font-semibold text-[var(--color-primary)] transition hover:opacity-90"
         >
           <Settings2 className="h-3.5 w-3.5" />
           {copy.integrations}
@@ -780,7 +780,7 @@ export function OpenClawAssistantPane({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="border-b border-[color:var(--color-surface-border)] px-4 py-3">
+        <div className="border-b border-[color:var(--color-surface-border)] px-3 py-2.5">
           <div className="flex flex-wrap gap-2">
             {sessions.slice(0, compact ? 4 : 8).map((session) => (
               <button
@@ -791,7 +791,7 @@ export function OpenClawAssistantPane({
                   void connectGateway(session.key);
                 }}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition",
+                  "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] transition",
                   session.key === selectedSessionKey
                     ? "border-[color:var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
                     : "border-[color:var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-text-subtle)] hover:border-[color:var(--color-primary-border)]",
@@ -806,10 +806,10 @@ export function OpenClawAssistantPane({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="flex-1 overflow-y-auto px-3 py-3">
           {!openclawUrl.trim() ? (
-            <div className="flex h-full flex-col items-center justify-center gap-4 rounded-[var(--radius-2xl)] border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-6 text-center">
-              <Sparkles className="h-8 w-8 text-[var(--color-primary)]" />
+            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-5 text-center">
+              <Sparkles className="h-7 w-7 text-[var(--color-primary)]" />
               <div className="space-y-2">
                 <h3 className="text-base font-semibold text-[var(--color-heading)]">
                   {copy.configureGateway}
@@ -821,16 +821,16 @@ export function OpenClawAssistantPane({
               <button
                 type="button"
                 onClick={() => router.push("/panel/api")}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-3.5 py-2 text-sm font-semibold text-[var(--color-primary-foreground)]"
               >
                 {copy.openIntegrations}
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           ) : renderedMessages.length === 0 && !streamingText ? (
-            <div className="flex h-full flex-col items-center justify-center gap-5 rounded-[var(--radius-2xl)] border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-6 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
-                <Sparkles className="h-7 w-7" />
+            <div className="flex h-full flex-col items-center justify-center gap-4 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-5 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+                <Sparkles className="h-6 w-6" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-base font-semibold text-[var(--color-heading)]">
@@ -857,7 +857,7 @@ export function OpenClawAssistantPane({
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {renderedMessages.map((message) => {
                 const isUser = message.role === "user";
                 return (
@@ -870,7 +870,7 @@ export function OpenClawAssistantPane({
                   >
                     <div
                       className={cn(
-                        "max-w-[88%] rounded-[var(--radius-xl)] px-4 py-3 shadow-[var(--shadow-sm)]",
+                        "max-w-[84%] rounded-[var(--radius-lg)] px-3 py-2.5 shadow-[var(--shadow-sm)]",
                         isUser
                           ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                           : "border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-text)]",
@@ -902,7 +902,7 @@ export function OpenClawAssistantPane({
 
               {streamingText ? (
                 <div className="flex justify-start">
-                  <div className="max-w-[88%] rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-sm)]">
+                  <div className="max-w-[84%] rounded-[var(--radius-lg)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-2.5 text-[var(--color-text)] shadow-[var(--shadow-sm)]">
                     <div
                       className="prose prose-sm max-w-none break-words whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{
@@ -916,7 +916,7 @@ export function OpenClawAssistantPane({
           )}
         </div>
 
-        <div className="border-t border-[color:var(--color-surface-border)] px-4 py-4">
+        <div className="border-t border-[color:var(--color-surface-border)] px-3 py-3">
           <div className="flex flex-wrap items-center gap-2">
             {modeOptions.map((option) => (
               <button
@@ -924,7 +924,7 @@ export function OpenClawAssistantPane({
                 type="button"
                 onClick={() => setAssistantMode(option.value)}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                  "rounded-full px-2.5 py-1 text-[11px] font-semibold transition",
                   assistantMode === option.value
                     ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                     : "border border-[color:var(--color-surface-border)] text-[var(--color-text-subtle)] hover:border-[color:var(--color-primary-border)]",
@@ -934,7 +934,7 @@ export function OpenClawAssistantPane({
               </button>
             ))}
 
-            <div className="ml-auto flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs text-[var(--color-text-subtle)]">
+            <div className="ml-auto flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-2.5 py-1 text-[11px] text-[var(--color-text-subtle)]">
               <BrainCircuit className="h-3.5 w-3.5" />
               <select
                 value={thinking}
@@ -953,11 +953,11 @@ export function OpenClawAssistantPane({
           </div>
 
           {attachments.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2.5 flex flex-wrap gap-2">
               {attachments.map((attachment) => (
                 <div
                   key={attachment.id}
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs text-[var(--color-text)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-[11px] text-[var(--color-text)]"
                 >
                   {attachment.type === "image" ? (
                     <Camera className="h-3.5 w-3.5" />
@@ -982,15 +982,15 @@ export function OpenClawAssistantPane({
           ) : null}
 
           {errorMessage ? (
-            <div className="mt-3 rounded-[var(--radius-xl)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
+            <div className="mt-2.5 rounded-[var(--radius-lg)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
               {errorMessage}
             </div>
           ) : null}
 
-          <div className="mt-3 rounded-[var(--radius-2xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-sm)]">
+          <div className="mt-2.5 rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-2.5 shadow-[var(--shadow-sm)]">
             <textarea
               ref={textareaRef}
-              rows={compact ? 4 : 5}
+              rows={compact ? 3 : 4}
               value={composerValue}
               placeholder={copy.placeholder}
               onChange={(event) => setComposerValue(event.target.value)}
@@ -1005,11 +1005,11 @@ export function OpenClawAssistantPane({
               className="w-full resize-none bg-transparent text-sm leading-6 text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-subtle)]/70"
             />
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
               >
                 <Paperclip className="h-3.5 w-3.5" />
                 {copy.attachment}
@@ -1021,7 +1021,7 @@ export function OpenClawAssistantPane({
                   void capturePage();
                 }}
                 disabled={isCapturing}
-                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isCapturing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1031,7 +1031,7 @@ export function OpenClawAssistantPane({
                 {copy.capturePage}
               </button>
 
-              <div className="ml-auto flex items-center gap-2 text-xs text-[var(--color-text-subtle)]">
+              <div className="ml-auto flex items-center gap-2 text-[11px] text-[var(--color-text-subtle)]">
                 <Link2 className="h-3.5 w-3.5" />
                 <span>
                   {activeSession?.derivedTitle ||
@@ -1050,7 +1050,7 @@ export function OpenClawAssistantPane({
                   isSending ||
                   (!composerValue.trim() && attachments.length === 0)
                 }
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-3.5 py-1.5 text-sm font-semibold text-[var(--color-primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
