@@ -1,94 +1,42 @@
-# Documentation
+# Console Service Plus / 控制台服务
 
-This directory follows a standard open-source documentation layout and mirrors the code organization of `console.svc.plus`.
+This `docs/` directory now has a bilingual canonical layer for the current repository state.
 
-## Languages
+本 `docs/` 目录现已补齐双语规范层，用于承接当前仓库状态下的核心文档。
 
-- English (EN): this directory (`docs/`)
-- Chinese (ZH): `docs/zh/` (stubs / translations)
+## Quick Entry / 快速入口
 
-## Structure
+- Coverage checklist / 覆盖检查矩阵: `docs/DOC_COVERAGE.md`
+- English index / 英文入口: `docs/en/README.md`
+- 中文入口 / Chinese index: `docs/zh/README.md`
 
-- `getting-started/` — new user path to get running quickly.
-- `architecture/` — system design, boundaries, and decisions.
-- `usage/` — configuration and how-to guides.
-- `api/` — service API references.
-- `integrations/` — external systems and providers.
-- `advanced/` — performance, security, scalability, customization.
-- `development/` — contributor guides and local setup.
-- `operations/` — logging, monitoring, troubleshooting, runbooks.
-- `governance/` — license, security policy, release process.
-- `appendix/` — FAQ, glossary, references.
+## Canonical Bilingual Pages / 双语规范页
 
-## Codebase Mapping
+- `docs/en/architecture.md` / `docs/zh/architecture.md`
+- `docs/en/design.md` / `docs/zh/design.md`
+- `docs/en/deployment.md` / `docs/zh/deployment.md`
+- `docs/en/user-guide.md` / `docs/zh/user-guide.md`
+- `docs/en/developer-guide.md` / `docs/zh/developer-guide.md`
+- `docs/en/vibe-coding-reference.md` / `docs/zh/vibe-coding-reference.md`
 
-- App layer (Next.js): `src/app`, `src/components`, `src/lib`, `src/state`, `src/modules`
-- Library layer (vendored): `packages/neurapress`
-- Build/runtime glue: `scripts`, `config`, `public`
+## Current Repo Context / 当前仓库背景
 
-## Assistant Integrations
+- Root README: `console.svc.plus`
+- Previous docs index: `Documentation`
+- Manifest evidence / 构建清单: package.json (`dashboard`)
+- Active code and ops directories / 当前主要目录: `src/`, `scripts/`, `tests/`, `config/`, `public/`
 
-The homepage AI assistant and `/panel/api` integrations page read their defaults from environment variables on the server side. Use `.env.example` plus `getting-started/installation.md` for the canonical setup.
+## Existing Docs To Reconcile / 需要继续归并的现有文档
 
-Canonical variables:
-
-- `OPENCLAW_GATEWAY_REMOTE_URL`
-- `OPENCLAW_GATEWAY_TOKEN`
-- `VAULT_SERVER_URL`
-- `VAULT_NAMESPACE`
-- `VAULT_TOKEN`
-- `APISIX_AI_GATEWAY_URL`
-- `AI_GATEWAY_ACCESS_TOKEN`
-
-## Index
-
-- Getting Started
-  - `getting-started/introduction.md`
-  - `getting-started/quickstart.md`
-  - `getting-started/installation.md`
-  - `getting-started/concepts.md`
-- Architecture
-  - `architecture/overview.md`
-  - `architecture/components.md`
-  - `architecture/design-decisions.md`
-  - `architecture/roadmap.md`
-- Usage
-  - `usage/cli.md`
-  - `usage/config.md`
-  - `usage/deployment.md`
-  - `usage/examples.md`
-- API
-  - `api/overview.md`
-  - `api/auth.md`
-  - `api/endpoints.md`
-  - `api/errors.md`
-- Integrations
-  - `integrations/databases.md`
-  - `integrations/cloud.md`
-  - `integrations/cloudflare-web-analytics.md`
-  - `integrations/ai-providers.md`
-- Advanced
-  - `advanced/performance.md`
-  - `advanced/security.md`
-  - `advanced/scalability.md`
-  - `advanced/customization.md`
-- Development
-  - `development/contributing.md`
-  - `development/dev-setup.md`
-  - `development/testing.md`
-  - `development/code-structure.md`
-- Operations
-  - `operations/logging.md`
-  - `operations/monitoring.md`
-  - `operations/backup.md`
-  - `operations/troubleshooting.md`
-  - `operations/runbooks/README.md`
-  - `operations/runbooks/rag-server.md`
-- Governance
-  - `governance/license.md`
-  - `governance/security-policy.md`
-  - `governance/release-process.md`
-- Appendix
-  - `appendix/faq.md`
-  - `appendix/glossary.md`
-  - `appendix/references.md`
+- `SEO-AUDIT-REPORT.md`
+- `SEO-WORK-SUMMARY.md`
+- `advanced/customization.md`
+- `advanced/performance.md`
+- `advanced/scalability.md`
+- `advanced/security.md`
+- `api/auth.md`
+- `api/endpoints.md`
+- `api/errors.md`
+- `api/overview.md`
+- `appendix/faq.md`
+- `appendix/glossary.md`
