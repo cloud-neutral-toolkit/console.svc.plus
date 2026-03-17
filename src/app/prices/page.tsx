@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { Check, Shield } from "lucide-react";
 
@@ -163,7 +163,9 @@ export default function PricesPage() {
             </p>
           </div>
 
-          <CheckoutStatusBanner className="mx-auto mb-6 max-w-3xl" />
+          <Suspense fallback={null}>
+            <CheckoutStatusBanner className="mx-auto mb-6 max-w-3xl" />
+          </Suspense>
           {statusMessage ? (
             <p className="mx-auto mb-6 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               {statusMessage}

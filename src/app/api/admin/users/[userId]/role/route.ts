@@ -3,11 +3,13 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getAccountServiceApiBaseUrl } from '@server/serviceConfig'
-import { getAccountSession, userHasRole } from '@server/account/session'
+import { evaluateAccountAdminAccess } from '@server/account/adminAccess'
+import { getAccountSession } from '@server/account/session'
 import type { AccountUserRole } from '@server/account/session'
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 const REQUIRED_ROLES: AccountUserRole[] = ['admin']
+const WRITE_PERMISSIONS = ['admin.users.role.write']
 
 type ErrorPayload = {
   error: string
@@ -35,8 +37,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json<ErrorPayload>({ error: 'unauthenticated' }, { status: 401 })
   }
 
-  if (!(await userHasRole(user, REQUIRED_ROLES))) {
-    return NextResponse.json<ErrorPayload>({ error: 'forbidden' }, { status: 403 })
+  const access = await evaluateAccountAdminAccess(user, {
+    roles: REQUIRED_ROLES,
+    permissions: WRITE_PERMISSIONS,
+  })
+  if (!access.allowed) {
+    return NextResponse.json<ErrorPayload>({ error: access.reason ?? 'forbidden' }, { status: 403 })
   }
 
   const { userId: userIdParam } = await params
@@ -78,8 +84,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json<ErrorPayload>({ error: 'unauthenticated' }, { status: 401 })
   }
 
-  if (!(await userHasRole(user, REQUIRED_ROLES))) {
-    return NextResponse.json<ErrorPayload>({ error: 'forbidden' }, { status: 403 })
+  const access = await evaluateAccountAdminAccess(user, {
+    roles: REQUIRED_ROLES,
+    permissions: WRITE_PERMISSIONS,
+  })
+  if (!access.allowed) {
+    return NextResponse.json<ErrorPayload>({ error: access.reason ?? 'forbidden' }, { status: 403 })
   }
 
   const { userId: userIdParam } = await params

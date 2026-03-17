@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageProvider";
-import { Menu, X, Sun, Moon, Monitor, Plus, BarChart2 } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { translations } from "../i18n/translations";
 import LanguageToggle from "./LanguageToggle";
 // import { AskAIButton } from "./AskAIButton";
@@ -36,11 +36,10 @@ export default function UnifiedNavigation() {
     "stable",
   ]);
   const navRef = useRef<HTMLElement | null>(null);
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const user = useUserStore((state) => state.user);
-  const { setIsOpen, setMode, toggleOpen } = useMoltbotStore();
+  const { toggleOpen } = useMoltbotStore();
   const nav = translations[language].nav;
-  const accountCopy = nav.account;
   const accountInitial =
     user?.username?.charAt(0)?.toUpperCase() ??
     user?.email?.charAt(0)?.toUpperCase() ??
@@ -114,6 +113,22 @@ export default function UnifiedNavigation() {
   }, [user]);
 
   useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
@@ -164,16 +179,29 @@ export default function UnifiedNavigation() {
 
   const filteredMainNav = filterNavItems(mainNav, user);
   const filteredSecondaryNav = filterNavItems(secondaryNav, user);
+  const mobilePrimaryNav = [...filteredMainNav, ...filteredSecondaryNav].filter(
+    (item) => item.showOn !== "desktop",
+  );
+  const mobileQuickLinks = mobilePrimaryNav.filter((item) =>
+    ["chat", "console", "docs", "services"].includes(item.key),
+  );
+  const mobileMenuNav = mobilePrimaryNav.filter((item) => item.key !== "home");
+  const primaryAccountAction = user
+    ? (accountNav.find((item) => item.key !== "logout") ?? accountNav[0])
+    : (accountNav.find((item) => item.key === "login") ?? accountNav[0]);
+  const secondaryAccountAction = user
+    ? accountNav.find((item) => item.key === "logout")
+    : accountNav.find((item) => item.key === "register");
 
   const isHiddenRoute = pathname
     ? [
-      "/login",
-      "/register",
-      "/xstream",
-      "/xcloudflow",
-      "/xscopehub",
-      "/blogs",
-    ].some((prefix) => pathname.startsWith(prefix))
+        "/login",
+        "/register",
+        "/xstream",
+        "/xcloudflow",
+        "/xscopehub",
+        "/blogs",
+      ].some((prefix) => pathname.startsWith(prefix))
     : false;
 
   if (isHiddenRoute) {
@@ -197,10 +225,27 @@ export default function UnifiedNavigation() {
         }}
         className="sticky top-0 z-50 w-full border-b border-surface-border bg-background/95 text-text backdrop-blur transition-colors duration-150"
       >
-        <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-background">
+        <div className="flex items-center justify-between border-b border-surface-border/70 bg-background px-5 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] lg:hidden">
+          <Link
+            href="/"
+            className="flex items-center gap-2"
+            onClick={() => setMenuOpen(false)}
+          >
+            <Image
+              src="/icons/cloudnative_32.png"
+              alt="logo"
+              width={24}
+              height={24}
+              className="h-6 w-6"
+              unoptimized
+            />
+            <span className="text-[1.05rem] font-semibold tracking-tight text-text">
+              Cloud-Neutral
+            </span>
+          </Link>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 -ml-2 rounded-xl bg-surface-muted hover:bg-surface-hover text-text transition-colors"
+            className="rounded-[1.15rem] bg-surface-muted p-3 text-text transition-colors hover:bg-surface-hover"
             aria-label="Toggle menu"
           >
             {menuOpen ? (
@@ -209,7 +254,6 @@ export default function UnifiedNavigation() {
               <Menu className="w-5 h-5" />
             )}
           </button>
-          <div className="w-10" />
         </div>
 
         <div className="hidden lg:block mx-auto w-full max-w-7xl px-6 sm:px-8">
@@ -219,33 +263,35 @@ export default function UnifiedNavigation() {
                 {filteredMainNav.map((item) => {
                   const active = isActive(item);
                   if (item.showOn === "mobile") return null;
-                  if (item.key === 'chat') {
+                  if (item.key === "chat") {
                     return (
                       <button
                         key={item.key}
                         onClick={() => {
                           toggleOpen();
                         }}
-                        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
-                          ? "bg-primary/10 text-primary"
-                          : "text-text-muted hover:text-text hover:bg-surface-muted"
-                          }`}
+                        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                          active
+                            ? "bg-primary/10 text-primary"
+                            : "text-text-muted hover:text-text hover:bg-surface-muted"
+                        }`}
                       >
                         {item.icon && <item.icon className="w-4 h-4" />}
                         <span className="text-[13px] tracking-tight">
                           {getLabel(item.label, language)}
                         </span>
                       </button>
-                    )
+                    );
                   }
                   return (
                     <Link
                       key={item.key}
                       href={item.href}
-                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
-                        ? "bg-primary/10 text-primary"
-                        : "text-text-muted hover:text-text hover:bg-surface-muted"
-                        }`}
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-text-muted hover:text-text hover:bg-surface-muted"
+                      }`}
                     >
                       {item.icon && <item.icon className="w-4 h-4" />}
                       <span className="text-[13px] tracking-tight">
@@ -261,10 +307,11 @@ export default function UnifiedNavigation() {
                     <Link
                       key={item.key}
                       href={item.href}
-                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${active
-                        ? "bg-primary/10 text-primary"
-                        : "text-text-muted hover:text-text hover:bg-surface-muted"
-                        }`}
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-text-muted hover:text-text hover:bg-surface-muted"
+                      }`}
                     >
                       {item.icon && <item.icon className="w-4 h-4" />}
                       <span className="text-[13px] tracking-tight">
@@ -285,7 +332,10 @@ export default function UnifiedNavigation() {
                     onToggle={toggleChannel}
                     variant="icon"
                   />
-                  <DropdownMenu.Root open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
+                  <DropdownMenu.Root
+                    open={accountMenuOpen}
+                    onOpenChange={setAccountMenuOpen}
+                  >
                     <DropdownMenu.Trigger asChild>
                       <button
                         type="button"
@@ -320,14 +370,17 @@ export default function UnifiedNavigation() {
                             >
                               <Link
                                 href={item.href}
-                                className={`flex h-[38px] flex-row-reverse items-center justify-between gap-3 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${item.key === 'logout'
-                                  ? "text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 focus:bg-rose-500/10 focus:text-rose-600"
-                                  : "text-text-muted hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
-                                  }`}
+                                className={`flex h-[38px] flex-row-reverse items-center justify-between gap-3 px-3 rounded-lg text-[13px] font-medium transition-all group select-none ${
+                                  item.key === "logout"
+                                    ? "text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 focus:bg-rose-500/10 focus:text-rose-600"
+                                    : "text-text-muted hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
+                                }`}
                                 onClick={() => setAccountMenuOpen(false)}
                               >
                                 {item.icon && (
-                                  <item.icon className={`w-4 h-4 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity ${item.key === 'logout' ? 'text-rose-500' : 'text-current'}`} />
+                                  <item.icon
+                                    className={`w-4 h-4 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity ${item.key === "logout" ? "text-rose-500" : "text-current"}`}
+                                  />
                                 )}
                                 <span className="flex-1 text-right">
                                   {typeof item.label === "function"
@@ -373,68 +426,63 @@ export default function UnifiedNavigation() {
             </div>
           </div>
         </div>
+      </nav>
 
-        {menuOpen && (
-          <div className="fixed inset-0 z-[60] lg:hidden">
-            <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-              onClick={() => setMenuOpen(false)}
-            />
-            <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-background shadow-2xl transition-transform duration-300 ease-in-out">
-              <div className="flex h-full flex-col overflow-y-auto border-r border-surface-border">
-                <div className="flex items-center justify-between border-b border-surface-border p-4">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-2"
-                    onClick={() => setMenuOpen(false)}
+      {menuOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <button
+            type="button"
+            aria-label={isChinese ? "关闭菜单" : "Close menu"}
+            className="absolute inset-0 bg-white/72 backdrop-blur-[2px] transition-opacity"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="absolute inset-0 bg-background transition-transform duration-300 ease-in-out">
+            <div className="flex h-full flex-col overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[max(1rem,env(safe-area-inset-top))] min-[430px]:pb-[calc(env(safe-area-inset-bottom)+2.25rem)]">
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Image
+                    src="/icons/cloudnative_32.png"
+                    alt="logo"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6"
+                    unoptimized
+                  />
+                  <span className="text-[1.7rem] font-semibold tracking-[-0.05em] text-text">
+                    Cloud-Neutral
+                  </span>
+                </Link>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLanguage(language === "zh" ? "en" : "zh")}
+                    className="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-surface-border bg-surface-muted/75 px-3 text-xs font-semibold uppercase tracking-[0.18em] text-text shadow-sm transition hover:bg-surface-hover"
+                    aria-label={
+                      isChinese ? "切换到英文" : "Switch language to Chinese"
+                    }
                   >
-                    <Image
-                      src="/icons/cloudnative_32.png"
-                      alt="logo"
-                      width={24}
-                      height={24}
-                      className="h-6 w-6"
-                      unoptimized
-                    />
-                    <span className="text-lg font-bold tracking-tight">
-                      Cloud-Neutral
-                    </span>
-                  </Link>
+                    {language === "zh" ? "EN" : "中"}
+                  </button>
                   <button
                     onClick={() => setMenuOpen(false)}
-                    className="rounded-lg p-2 text-text-muted hover:bg-surface-muted transition-colors"
+                    className="rounded-full border border-surface-border bg-surface-muted/75 p-2.5 text-text shadow-sm transition-colors hover:bg-surface-hover"
+                    aria-label={isChinese ? "关闭菜单" : "Close menu"}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
+              </div>
 
-                {user && (
-                  <div className="border-b border-surface-border bg-surface-muted/30 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-semibold text-white">
-                        {accountInitial}
-                      </div>
-                      <div className="flex-1 overflow-hidden">
-                        <p className="truncate text-sm font-semibold">
-                          {user.username}
-                        </p>
-                        <p className="truncate text-xs text-text-muted">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex-1 p-4">
-                  <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50 mb-2">
-                    {isChinese ? "主导航" : "Main Navigation"}
-                  </p>
-                  <div className="space-y-1 mb-6">
-                    {filteredMainNav.map((item) => {
+              <div className="flex flex-1 flex-col justify-between pt-8">
+                <div className="relative min-h-0 flex-1">
+                  <div className="max-w-[13rem] space-y-2.5 min-[430px]:max-w-[13.5rem]">
+                    {mobileMenuNav.map((item) => {
                       const active = isActive(item);
-                      if (item.showOn === "desktop") return null;
-                      if (item.key === 'chat') {
+                      if (item.key === "chat") {
                         return (
                           <button
                             key={item.key}
@@ -442,122 +490,104 @@ export default function UnifiedNavigation() {
                               toggleOpen();
                               setMenuOpen(false);
                             }}
-                            className={`flex w-full items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
-                              ? "bg-primary/10 text-primary"
-                              : "text-text hover:bg-surface-muted"
-                              }`}
+                            className={`block w-full py-1 text-left text-[1.95rem] font-semibold tracking-[-0.055em] transition-colors min-[430px]:text-[2rem] ${
+                              active
+                                ? "text-text"
+                                : "text-text hover:text-primary"
+                            }`}
                           >
-                            {item.icon && (
-                              <item.icon className="mr-3 h-5 w-5 opacity-70" />
-                            )}
-                            <span>
-                              {getLabel(item.label, language)}
-                            </span>
+                            {getLabel(item.label, language)}
                           </button>
-                        )
+                        );
                       }
                       return (
                         <Link
                           key={item.key}
                           href={item.href}
-                          className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
-                            ? "bg-primary/10 text-primary"
-                            : "text-text hover:bg-surface-muted"
-                            }`}
+                          className={`block py-1 text-[1.95rem] font-semibold tracking-[-0.055em] transition-colors min-[430px]:text-[2rem] ${
+                            active
+                              ? "text-text"
+                              : "text-text hover:text-primary"
+                          }`}
                           onClick={() => setMenuOpen(false)}
                         >
-                          {item.icon && (
-                            <item.icon className="mr-3 h-5 w-5 opacity-70" />
-                          )}
-                          <span>
-                            {getLabel(item.label, language)}
-                          </span>
+                          {getLabel(item.label, language)}
                         </Link>
                       );
                     })}
                   </div>
 
-                  {filteredSecondaryNav.length > 0 && (
-                    <>
-                      <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50 mb-2">
-                        {isChinese ? "其他" : "Other"}
-                      </p>
-                      <div className="space-y-1 mb-6">
-                        {filteredSecondaryNav.map((item) => {
-                          const active = isActive(item);
-                          if (item.showOn === "desktop") return null;
-                          return (
-                            <Link
-                              key={item.key}
-                              href={item.href}
-                              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
-                                ? "bg-primary/10 text-primary"
-                                : "text-text hover:bg-surface-muted"
-                                }`}
-                              onClick={() => setMenuOpen(false)}
-                            >
-                              {item.icon && (
-                                <item.icon className="mr-3 h-5 w-5 opacity-70" />
-                              )}
-                              <span>
+                  {mobileQuickLinks.length > 0 ? (
+                    <div className="pointer-events-none absolute right-0 top-[60%] flex -translate-y-1/2 justify-end min-[390px]:top-[59%] min-[430px]:top-[58%]">
+                      <div className="pointer-events-auto w-[min(10.75rem,45vw)] rounded-[1.75rem] bg-surface-muted/82 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+                        <div className="space-y-2.5">
+                          {mobileQuickLinks.map((item) =>
+                            item.key === "chat" ? (
+                              <button
+                                key={item.key}
+                                onClick={() => {
+                                  toggleOpen();
+                                  setMenuOpen(false);
+                                }}
+                                className="block text-left text-[1.08rem] font-medium tracking-[-0.03em] text-text transition hover:text-primary"
+                              >
                                 {getLabel(item.label, language)}
-                              </span>
-                            </Link>
-                          );
-                        })}
+                              </button>
+                            ) : (
+                              <Link
+                                key={item.key}
+                                href={item.href}
+                                onClick={() => setMenuOpen(false)}
+                                className="block text-[1.08rem] font-medium tracking-[-0.03em] text-text transition hover:text-primary"
+                              >
+                                {getLabel(item.label, language)}
+                              </Link>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </>
-                  )}
-
-                  <div className="mt-8 space-y-3 px-2">
-                    <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50 mb-2">
-                      {isChinese ? "账户" : "Account"}
-                    </p>
-                    {accountNav.map((item) => (
-                      <Link
-                        key={item.key}
-                        href={item.href}
-                        className={`flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold transition ${item.key === "logout"
-                          ? "bg-rose-500/10 text-rose-600 shadow-sm hover:bg-rose-500/20"
-                          : "border border-surface-border bg-surface-muted/50 dark:bg-surface-muted/30 hover:bg-surface-hover"
-                          }`}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {typeof item.label === "function"
-                          ? item.label(language)
-                          : item.label}
-                      </Link>
-                    ))}
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
 
-                <div className="border-t border-surface-border p-4 space-y-4">
-                  <div className="flex flex-col gap-3">
-                    <p className="px-2 text-[10px] font-bold uppercase tracking-widest text-text-muted opacity-50">
-                      {isChinese ? "设置" : "Settings"}
-                    </p>
-                    <div className="flex items-center justify-between rounded-xl bg-surface-muted/50 p-2">
-                      <span className="ml-2 text-xs font-medium text-text-muted">
-                        {isChinese ? "界面语言" : "Language"}
+                <div className="flex items-center justify-between gap-5 pt-8">
+                  <div className="min-w-0">
+                    {secondaryAccountAction ? (
+                      <Link
+                        href={secondaryAccountAction.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="text-sm font-medium text-text-muted transition hover:text-text"
+                      >
+                        {typeof secondaryAccountAction.label === "function"
+                          ? secondaryAccountAction.label(language)
+                          : secondaryAccountAction.label}
+                      </Link>
+                    ) : (
+                      <span className="text-sm text-text-muted/60">
+                        {isChinese ? "导航" : "Menu"}
                       </span>
-                      <LanguageToggle />
-                    </div>
-                    <div className="flex flex-col gap-2 rounded-xl bg-surface-muted/50 p-2">
-                      <span className="ml-2 text-xs font-medium text-text-muted mb-1">
-                        {isChinese ? "发布频道" : "Channels"}
-                      </span>
-                      <ReleaseChannelSelector
-                        selected={selectedChannels}
-                        onToggle={toggleChannel}
-                      />
-                    </div>
+                    )}
                   </div>
+
+                  {primaryAccountAction ? (
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <Link
+                        href={primaryAccountAction.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="inline-flex min-h-[3.1rem] min-w-[7rem] items-center justify-center rounded-full bg-surface-muted px-6 text-[1.05rem] font-semibold text-text shadow-sm transition hover:bg-surface-hover"
+                      >
+                        {typeof primaryAccountAction.label === "function"
+                          ? primaryAccountAction.label(language)
+                          : primaryAccountAction.label}
+                      </Link>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </nav>
+        </div>
+      )}
 
       {/* <div className="hidden lg:block">
         <AskAIButton />
