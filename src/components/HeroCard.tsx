@@ -59,25 +59,31 @@ export function HeroCard({
         onClick={hasGuide ? openGuide : undefined}
         onKeyDown={handleCardKeyDown}
         className={cn(
-          "group relative flex items-start gap-4 overflow-hidden rounded-[1.6rem] border border-surface-border bg-white/88 p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-all duration-300 sm:rounded-2xl sm:p-6",
+          "group relative flex items-start gap-4 overflow-hidden rounded-[1.75rem] border border-slate-900/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(248,243,234,0.86))] p-5 shadow-[0_22px_44px_rgba(15,23,42,0.06)] transition-all duration-300 sm:rounded-[1.9rem] sm:p-6",
           hasGuide
-            ? "cursor-pointer hover:border-primary/50 hover:bg-surface-hover"
-            : "hover:border-primary/50 hover:bg-surface-hover",
-          showGuide ? "border-primary/50 shadow-lg" : "",
+            ? "cursor-pointer hover:-translate-y-1 hover:border-primary/40"
+            : "hover:-translate-y-1 hover:border-primary/30",
+          showGuide
+            ? "border-primary/50 shadow-[0_26px_54px_rgba(37,78,219,0.14)]"
+            : "",
         )}
       >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,78,219,0.08),transparent_26%),linear-gradient(180deg,transparent,rgba(15,23,42,0.03))]" />
         <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2.5 group-hover:border-primary/50 group-hover:text-primary">
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="space-y-1">
-            <h3 className="text-base font-semibold tracking-[-0.03em] text-heading">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-text-subtle">
+              Guided launch
+            </p>
+            <h3 className="editorial-display text-[1.4rem] leading-none text-heading">
               {title}
             </h3>
             <p className="text-sm leading-6 text-text-muted">{description}</p>
           </div>
           {hasGuide ? (
-            <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+            <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-primary/15 bg-white/85 px-3 py-1.5 text-xs font-semibold text-primary shadow-[0_10px_20px_rgba(37,78,219,0.08)]">
               点击查看向导
               <ArrowRight className="h-3.5 w-3.5" />
             </span>

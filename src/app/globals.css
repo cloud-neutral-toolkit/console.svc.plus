@@ -8,6 +8,8 @@
 :root {
   --font-geist-sans: "Geist", sans-serif;
   --font-geist-mono: "Geist Mono", monospace;
+  --font-editorial-display:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --app-shell-nav-offset: 5.5rem;
 
   /* Light theme defaults */
@@ -89,6 +91,18 @@ body {
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background-color: var(--color-background);
+  background-image:
+    radial-gradient(
+      circle at top left,
+      rgba(37, 78, 219, 0.08),
+      transparent 24rem
+    ),
+    radial-gradient(
+      circle at 85% 12%,
+      rgba(16, 185, 129, 0.08),
+      transparent 18rem
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -146,6 +160,13 @@ button {
 
   ::selection {
     background: rgba(51, 102, 255, 0.18);
+  }
+}
+
+@layer components {
+  .editorial-display {
+    font-family: var(--font-editorial-display);
+    letter-spacing: -0.04em;
   }
 }
 

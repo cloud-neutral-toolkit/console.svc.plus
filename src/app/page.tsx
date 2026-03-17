@@ -67,19 +67,27 @@ export default function HomePage() {
   const { mode, isOpen } = useMoltbotStore();
 
   return (
-    <div className="mobile-home-shell min-h-screen bg-background text-text transition-colors duration-150 flex flex-col overflow-x-hidden">
+    <div className="mobile-home-shell relative flex min-h-screen flex-col overflow-x-hidden bg-background text-text transition-colors duration-150">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="absolute left-[-10rem] top-[-8rem] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(37,78,219,0.16),transparent_68%)] blur-3xl" />
+        <div className="absolute right-[-8rem] top-[8rem] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.12),transparent_72%)] blur-3xl" />
+        <div className="absolute inset-x-8 top-24 h-px bg-[linear-gradient(90deg,transparent,rgba(17,24,39,0.08),transparent)]" />
+      </div>
       <UnifiedNavigation />
 
       <div
         className={cn(
-          "flex flex-1 relative overflow-hidden",
+          "relative flex flex-1 overflow-hidden",
           mode === "left-sidebar" && isOpen && "flex-row-reverse",
         )}
       >
-        <div className="flex-1 overflow-y-auto relative">
+        <div className="relative flex-1 overflow-y-auto">
           <div className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,78,219,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.05),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.82),transparent_58%)]"
+              className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] rounded-b-[3rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.45)_58%,transparent),radial-gradient(circle_at_top_left,rgba(37,78,219,0.1),transparent_30%),radial-gradient(circle_at_82%_15%,rgba(17,24,39,0.08),transparent_24%)]"
               aria-hidden
             />
             <main className="relative space-y-8 pt-6 sm:space-y-12 sm:pt-10">
@@ -104,54 +112,88 @@ export function HeroSection() {
   const t = translations[language].marketing.home;
 
   return (
-    <section className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+    <section className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
       <div className="flex flex-col justify-center space-y-6 sm:space-y-8">
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           {t.hero.eyebrow && (
-            <p className="font-semibold uppercase tracking-[0.28em] text-text-subtle">
-              {t.hero.eyebrow}
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="rounded-full border border-slate-900/10 bg-white/90 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-text-subtle shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+                {t.hero.eyebrow}
+              </p>
+              <span className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                Product surface
+              </span>
+            </div>
           )}
-          <h1 className="max-w-[12ch] text-[2.22rem] font-semibold leading-[0.92] tracking-[-0.075em] text-heading sm:max-w-none sm:text-3xl lg:text-[3.35rem]">
+          <h1 className="editorial-display max-w-[11ch] text-[2.9rem] leading-[0.86] text-heading sm:max-w-none sm:text-[3.4rem] lg:text-[4.85rem]">
             {t.hero.title}
           </h1>
-          <p className="max-w-xl text-[1.02rem] leading-7 text-text-muted">
+          <p className="max-w-xl text-[1.05rem] leading-8 text-text-muted">
             {t.hero.subtitle}
           </p>
         </div>
         <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
           {user ? (
-            <div className="flex items-center justify-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-2 text-sm font-medium text-success sm:justify-start sm:py-1.5">
+            <div className="flex items-center justify-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-2 text-sm font-medium text-success shadow-[0_18px_30px_rgba(22,163,74,0.12)] sm:justify-start sm:py-1.5">
               <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
               {t.signedIn.replace("{{username}}", user.username)}
             </div>
           ) : (
-            <button className="flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-hover sm:py-2.5">
+            <button className="flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(15,23,42,0.2)] transition hover:-translate-y-0.5 hover:bg-primary sm:py-2.5">
               <PlusCircle className="h-4 w-4" />
               {t.heroButtons.create}
             </button>
           )}
-          <button className="flex items-center justify-center gap-2 rounded-full border border-surface-border bg-surface/90 px-6 py-3 text-sm font-semibold text-text transition hover:bg-surface-hover sm:py-2.5">
+          <button className="flex items-center justify-center gap-2 rounded-full border border-slate-900/10 bg-white/90 px-6 py-3 text-sm font-semibold text-text shadow-[0_12px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:bg-surface-hover sm:py-2.5">
             <Play className="h-4 w-4" />
             {t.heroButtons.playground}
           </button>
-          <button className="flex items-center justify-center gap-2 rounded-full border border-surface-border bg-surface/90 px-6 py-3 text-sm font-semibold text-text transition hover:bg-surface-hover sm:py-2.5">
+          <button className="flex items-center justify-center gap-2 rounded-full border border-slate-900/10 bg-[#f8f3ea] px-6 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 hover:bg-[#f4ecdd] sm:py-2.5">
             <BookOpen className="h-4 w-4" />
             {t.heroButtons.tutorials}
           </button>
         </div>
-        <div className="flex flex-col gap-3 text-sm">
-          <p className="text-text-muted">{t.trustedBy}</p>
-          <div className="flex flex-wrap gap-2">
-            <LogoPill label="Next.js" />
-            <LogoPill label="Go" />
-            <LogoPill label="Vercel" />
-            <LogoPill label="Cloud Run" />
-            <LogoPill label="PostgreSQL" />
+        <div className="grid gap-4 rounded-[2rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.7),rgba(248,243,234,0.9))] p-5 shadow-[0_20px_42px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:grid-cols-[1.15fr_0.85fr]">
+          <div className="flex flex-col gap-3 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-subtle">
+              {t.trustedBy}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <LogoPill label="Next.js" />
+              <LogoPill label="Go" />
+              <LogoPill label="Vercel" />
+              <LogoPill label="Cloud Run" />
+              <LogoPill label="PostgreSQL" />
+            </div>
+          </div>
+          <div className="rounded-[1.5rem] border border-slate-950/10 bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] px-4 py-4 text-white shadow-[0_20px_40px_rgba(15,23,42,0.24)]">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/60">
+              Experience
+            </p>
+            <p className="mt-3 editorial-display text-[2rem] leading-none text-white">
+              Focused
+            </p>
+            <p className="mt-2 text-sm leading-6 text-white/75">
+              More contrast, stronger typography, and a cleaner hierarchy for
+              product entry points.
+            </p>
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(240,244,255,0.94))] p-4 shadow-[0_24px_50px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-text-subtle">
+              Launch paths
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Pricing, onboarding, and observability as one surface.
+            </p>
+          </div>
+          <span className="rounded-full border border-slate-900/10 bg-white/80 px-3 py-1 text-xs font-semibold text-primary">
+            3 guides
+          </span>
+        </div>
         <div className="relative flex flex-col gap-3 sm:gap-4">
           {t.heroCards.map((card) => {
             const Icon = getIcon(card.title, PlusCircle);
@@ -176,7 +218,7 @@ export function NextStepsSection() {
   const t = translations[language].marketing.home;
 
   return (
-    <section className="space-y-4 rounded-[1.75rem] border border-surface-border/70 bg-white/70 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.05)] lg:rounded-none lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none">
+    <section className="space-y-4 rounded-[2rem] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,243,234,0.8))] p-5 shadow-[0_20px_48px_rgba(15,23,42,0.06)] backdrop-blur-sm lg:p-7">
       <header className="flex flex-col gap-2 text-sm text-text-muted sm:flex-row sm:items-center sm:gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-text-subtle">
           {t.nextSteps.title}
@@ -191,7 +233,7 @@ export function NextStepsSection() {
           return (
             <div
               key={index}
-              className="flex items-start gap-3 rounded-[1.4rem] border border-surface-border bg-surface/92 p-4 shadow-lg shadow-shadow-sm"
+              className="flex items-start gap-3 rounded-[1.5rem] border border-slate-900/10 bg-white/88 p-4 shadow-[0_14px_28px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:border-primary/30"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
                 <Icon className="h-5 w-5" aria-hidden />
@@ -286,17 +328,30 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="overflow-hidden rounded-[1.9rem] border border-surface-border/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(243,244,246,0.88))] p-5 shadow-[0_18px_40px_rgba(15,23,42,0.05)] sm:p-6">
+    <section className="overflow-hidden rounded-[2rem] border border-slate-950/5 bg-[linear-gradient(135deg,#0f172a,#1e293b_45%,#1d4ed8)] p-5 shadow-[0_26px_60px_rgba(15,23,42,0.18)] sm:p-6">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
+            Platform pulse
+          </p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-white/72">
+            Metrics need contrast and tension, not another pale card.
+          </p>
+        </div>
+        <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/68">
+          Updated hourly
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-5">
         {displayStats.map((stat, index: number) => (
           <div
             key={index}
-            className="space-y-1 text-left even:text-right md:text-left"
+            className="space-y-1 rounded-[1.5rem] border border-white/10 bg-white/6 p-4 text-left even:text-right md:text-left"
           >
-            <div className="text-[2rem] font-semibold tracking-[-0.06em] text-heading sm:text-3xl">
+            <div className="editorial-display text-[2.15rem] leading-none text-white sm:text-[2.7rem]">
               {stat.value}
             </div>
-            <p className="max-w-[9rem] text-sm text-text-muted even:ml-auto md:max-w-none">
+            <p className="max-w-[9rem] text-sm text-white/70 even:ml-auto md:max-w-none">
               {stat.label}
             </p>
           </div>
@@ -352,22 +407,24 @@ export function ShortcutsSection() {
         }));
 
   return (
-    <section className="space-y-4 rounded-[1.75rem] border border-surface-border/70 bg-white/70 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.05)] lg:rounded-none lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none">
+    <section className="space-y-4 rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,#ffffff,#f5f7fb)] p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] lg:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-text-subtle">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
             {t.shortcuts.title}
           </p>
-          <p className="mt-1 text-sm text-text-muted">{t.shortcuts.subtitle}</p>
+          <p className="mt-1 text-sm font-medium text-slate-600">
+            {t.shortcuts.subtitle}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-primary">
-          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-2 transition hover:bg-surface-hover">
+          <button className="rounded-full border border-slate-900/10 bg-slate-950 px-3 py-2 text-white transition hover:bg-primary">
             {t.shortcuts.buttons.start}
           </button>
-          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-2 transition hover:bg-surface-hover">
+          <button className="rounded-full border border-slate-900/10 bg-white px-3 py-2 text-slate-700 transition hover:bg-slate-50">
             {t.shortcuts.buttons.docs}
           </button>
-          <button className="rounded-full border border-surface-border bg-surface-muted px-3 py-2 transition hover:bg-surface-hover">
+          <button className="rounded-full border border-slate-900/10 bg-white px-3 py-2 text-slate-700 transition hover:bg-slate-50">
             {t.shortcuts.buttons.guides}
           </button>
         </div>
@@ -379,19 +436,21 @@ export function ShortcutsSection() {
             <a
               key={index}
               href={item.href}
-              className="group flex items-start gap-3 rounded-[1.4rem] border border-surface-border bg-surface/92 p-4 transition hover:-translate-y-[1px] hover:border-primary/50 hover:bg-surface-hover"
+              className="group flex items-start gap-3 rounded-[1.5rem] border border-slate-900/10 bg-white p-4 shadow-[0_14px_28px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:border-primary/40 hover:bg-slate-50"
             >
               <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
                 <Icon className="h-5 w-5" aria-hidden />
               </div>
               <div className="min-w-0 space-y-1">
-                <div className="text-sm font-semibold text-heading">
+                <div className="text-base font-semibold leading-7 text-slate-900">
                   {item.title}
                 </div>
-                <p className="text-sm text-text-muted">{item.description}</p>
+                <p className="text-sm font-medium text-slate-600">
+                  {item.description}
+                </p>
               </div>
               <ArrowRight
-                className="ml-auto h-4 w-4 text-text-subtle transition group-hover:text-primary"
+                className="ml-auto h-4 w-4 text-slate-500 transition group-hover:text-primary"
                 aria-hidden
               />
             </a>
@@ -410,8 +469,8 @@ type LatestBlogPost = {
 
 function LogoPill({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface/88 px-3.5 py-1.5 text-xs font-semibold text-text shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
-      <div className="h-2 w-2 rounded-full bg-success" />
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/92 px-3.5 py-1.5 text-xs font-semibold text-text shadow-[0_10px_22px_rgba(15,23,42,0.05)]">
+      <div className="h-2 w-2 rounded-full bg-[linear-gradient(135deg,#10b981,#2563eb)]" />
       {label}
     </span>
   );
