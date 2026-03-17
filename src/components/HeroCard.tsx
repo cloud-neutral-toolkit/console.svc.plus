@@ -4,6 +4,7 @@ import { useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { ArrowRight, QrCode, X } from "lucide-react";
 
+import { useLanguage } from "../i18n/LanguageProvider";
 import { cn } from "../lib/utils";
 
 interface GuideStep {
@@ -32,6 +33,13 @@ export function HeroCard({
 }: HeroCardProps) {
   const [showGuide, setShowGuide] = useState(false);
   const hasGuide = Boolean(guide);
+  const { language } = useLanguage();
+  const isChinese = language === "zh";
+  const guideLabel = isChinese ? "查看向导" : "View guide";
+  const qrTitle = isChinese ? "VLESS 协议就绪" : "VLESS Protocol Ready";
+  const qrDescription = isChinese
+    ? "在控制台中扫码，即可快速完成连接。"
+    : "Scan the QR code in the control panel to connect automatically.";
 
   function openGuide(): void {
     if (!hasGuide) {
@@ -59,26 +67,26 @@ export function HeroCard({
         onClick={hasGuide ? openGuide : undefined}
         onKeyDown={handleCardKeyDown}
         className={cn(
-          "group relative flex items-start gap-4 overflow-hidden rounded-[1.6rem] border border-surface-border bg-white/88 p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-all duration-300 sm:rounded-2xl sm:p-6",
+          "group relative flex items-start gap-4 overflow-hidden rounded-[1.5rem] border border-slate-900/10 bg-[#fcfbf8] p-5 transition-all duration-200 sm:p-6",
           hasGuide
-            ? "cursor-pointer hover:border-primary/50 hover:bg-surface-hover"
-            : "hover:border-primary/50 hover:bg-surface-hover",
-          showGuide ? "border-primary/50 shadow-lg" : "",
+            ? "cursor-pointer hover:-translate-y-[1px] hover:border-primary/35 hover:bg-white"
+            : "hover:-translate-y-[1px] hover:border-primary/25 hover:bg-white",
+          showGuide ? "border-primary/40 bg-white" : "",
         )}
       >
-        <div className="mt-1 rounded-full border border-surface-border bg-surface-muted p-2.5 group-hover:border-primary/50 group-hover:text-primary">
+        <div className="mt-1 rounded-full border border-slate-900/10 bg-white p-2.5 text-slate-700 group-hover:border-primary/30 group-hover:text-primary">
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-semibold tracking-[-0.03em] text-heading">
+          <div className="space-y-2">
+            <h3 className="text-[1.05rem] font-semibold leading-7 tracking-[-0.03em] text-slate-900">
               {title}
             </h3>
-            <p className="text-sm leading-6 text-text-muted">{description}</p>
+            <p className="text-sm leading-6 text-slate-600">{description}</p>
           </div>
           {hasGuide ? (
-            <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-              点击查看向导
+            <span className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-slate-900/10 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+              {guideLabel}
               <ArrowRight className="h-3.5 w-3.5" />
             </span>
           ) : null}
@@ -153,11 +161,10 @@ export function HeroCard({
                           </div>
                           <div className="space-y-1">
                             <p className="text-sm font-semibold text-heading">
-                              VLESS Protocol Ready
+                              {qrTitle}
                             </p>
                             <p className="text-xs leading-relaxed text-text-muted">
-                              Scan the QR code in the control panel to connect
-                              automatically.
+                              {qrDescription}
                             </p>
                           </div>
                         </div>

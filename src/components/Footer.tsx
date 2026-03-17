@@ -36,25 +36,16 @@ export default function Footer() {
   };
 
   return (
-    <footer className="mt-12 flex flex-col items-center justify-center gap-4 rounded-[1.75rem] border border-surface-border bg-surface/88 px-6 py-4 text-sm text-text-muted shadow-[0_18px_40px_rgba(15,23,42,0.05)] lg:rounded-2xl lg:border-white/10 lg:bg-white/5 lg:text-slate-300 lg:shadow-none">
+    <footer className="mt-12 flex flex-col items-center justify-center gap-4 rounded-[2rem] border border-white/75 bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.92))] px-6 py-5 text-sm text-slate-300 shadow-[0_24px_60px_rgba(15,23,42,0.16)]">
       <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-between">
         <div className="flex gap-4 order-2 sm:order-1">
-          <Link
-            href="/terms"
-            className="transition-colors hover:text-text lg:hover:text-white"
-          >
+          <Link href="/terms" className="transition-colors hover:text-white">
             {isChinese ? "服务条款" : "Terms of Service"}
           </Link>
-          <Link
-            href="/privacy"
-            className="transition-colors hover:text-text lg:hover:text-white"
-          >
+          <Link href="/privacy" className="transition-colors hover:text-white">
             {isChinese ? "隐私政策" : "Privacy Policy"}
           </Link>
-          <Link
-            href="/support"
-            className="transition-colors hover:text-text lg:hover:text-white"
-          >
+          <Link href="/support" className="transition-colors hover:text-white">
             {isChinese ? "联系我们" : "Contact Us"}
           </Link>
         </div>
@@ -64,7 +55,7 @@ export default function Footer() {
             <a
               key={label}
               href={href}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-surface-border bg-surface-muted text-text transition hover:border-surface-border-strong hover:text-text lg:border-white/10 lg:bg-white/5 lg:text-white lg:hover:border-indigo-400/50 lg:hover:text-indigo-100"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-indigo-400/50 hover:text-indigo-100"
             >
               <Icon className="h-4 w-4" aria-hidden />
               <span className="sr-only">{label}</span>
@@ -78,7 +69,7 @@ export default function Footer() {
             onClick={handleViewToggle}
             aria-label={viewToggleLabel}
             title={viewToggleLabel}
-            className="group flex h-10 w-10 items-center justify-center rounded-full border border-surface-border bg-surface-muted text-text transition hover:border-surface-border-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 lg:border-white/10 lg:bg-white/5 lg:text-white lg:hover:border-indigo-400/50"
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-indigo-400/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             <span className="material-symbols-outlined text-xl">
               {view === "classic" ? "view_quilt" : "view_cozy"}
@@ -90,21 +81,21 @@ export default function Footer() {
             aria-pressed={isDark}
             aria-label={toggleLabel}
             title={toggleLabel}
-            className="group relative flex h-10 w-20 items-center rounded-full border border-surface-border bg-surface-muted px-2 text-text transition hover:border-surface-border-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 lg:border-white/10 lg:bg-white/5 lg:text-white lg:hover:border-indigo-400/50"
+            className="group relative flex h-10 w-20 items-center rounded-full border border-white/10 bg-white/5 px-2 text-white transition hover:border-indigo-400/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
-            <span className="relative z-10 flex w-full items-center justify-between text-text-subtle lg:text-slate-300">
+            <span className="relative z-10 flex w-full items-center justify-between text-slate-300">
               <Moon
-                className={`h-4 w-4 transition-colors ${isDark ? "text-text" : "text-text-subtle lg:text-slate-500"}`}
+                className={`h-4 w-4 transition-colors ${isDark ? "text-white" : "text-slate-500"}`}
                 aria-hidden
               />
               <Sun
-                className={`h-4 w-4 transition-colors ${isDark ? "text-text-subtle lg:text-slate-500" : "text-amber-500 lg:text-amber-300"}`}
+                className={`h-4 w-4 transition-colors ${isDark ? "text-slate-500" : "text-amber-300"}`}
                 aria-hidden
               />
             </span>
             <span
               aria-hidden
-              className={`absolute inset-y-1 left-1 h-8 w-8 rounded-full bg-background shadow-sm transition-transform duration-300 ease-out lg:bg-white/90 ${isDark ? "translate-x-0" : "translate-x-10"}`}
+              className={`absolute inset-y-1 left-1 h-8 w-8 rounded-full bg-white shadow-sm transition-transform duration-300 ease-out ${isDark ? "translate-x-0" : "translate-x-10"}`}
             />
           </button>
         </div>
