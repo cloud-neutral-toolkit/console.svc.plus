@@ -3,11 +3,13 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getAccountServiceApiBaseUrl } from '@server/serviceConfig'
-import { getAccountSession, userHasRole } from '@server/account/session'
+import { evaluateAccountAdminAccess } from '@server/account/adminAccess'
+import { getAccountSession } from '@server/account/session'
 import type { AccountUserRole } from '@server/account/session'
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 const REQUIRED_ROLES: AccountUserRole[] = ['admin']
+const WRITE_PERMISSIONS = ['admin.users.role.write']
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -48,10 +50,6 @@ function normalizeGroups(value: unknown): string[] | null {
   return Array.from(new Set(result))
 }
 
-function isAllowedRootEmail(email?: string): boolean {
-  return email?.trim().toLowerCase() === 'admin@svc.plus'
-}
-
 export async function POST(request: NextRequest) {
   const session = await getAccountSession(request)
   const user = session.user
@@ -60,12 +58,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ErrorPayload>({ error: 'unauthenticated' }, { status: 401 })
   }
 
-  if (!(await userHasRole(user, REQUIRED_ROLES))) {
-    return NextResponse.json<ErrorPayload>({ error: 'forbidden' }, { status: 403 })
-  }
-
-  if (!isAllowedRootEmail(user.email)) {
-    return NextResponse.json<ErrorPayload>({ error: 'root_only' }, { status: 403 })
+  const access = await evaluateAccountAdminAccess(user, {
+    roles: REQUIRED_ROLES,
+    permissions: WRITE_PERMISSIONS,
+    rootOnly: true,
+  })
+  if (!access.allowed) {
+    return NextResponse.json<ErrorPayload>({ error: access.reason ?? 'forbidden' }, { status: 403 })
   }
 
   const body = (await request.json().catch(() => null)) as CreateUserBody | null

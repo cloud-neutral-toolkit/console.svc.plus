@@ -7,9 +7,9 @@ const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 export async function POST(request: NextRequest) {
     try {
         const payload = await request.json()
-        const { publicToken, userId, email, role } = payload
+        const { exchangeCode } = payload
 
-        if (!publicToken || !userId || !email) {
+        if (!exchangeCode || typeof exchangeCode !== 'string') {
             return NextResponse.json({ success: false, error: 'invalid_request' }, { status: 400 })
         }
 
@@ -19,10 +19,7 @@ export async function POST(request: NextRequest) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                public_token: publicToken,
-                user_id: userId,
-                email,
-                roles: role,
+                exchange_code: exchangeCode,
             }),
             cache: 'no-store',
         })
@@ -33,12 +30,20 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await response.json()
-        const { access_token, expires_in } = data
+        const sessionToken = typeof data.token === 'string' && data.token.trim().length > 0
+            ? data.token.trim()
+            : typeof data.access_token === 'string' && data.access_token.trim().length > 0
+                ? data.access_token.trim()
+                : ''
+
+        if (!sessionToken) {
+            return NextResponse.json({ success: false, error: 'invalid_response' }, { status: 502 })
+        }
 
         const result = NextResponse.json({ success: true })
-        // If backend returns expires_in (seconds), use it; otherwise derive from expiresAt if it exists
-        const maxAge = typeof expires_in === 'number' ? expires_in : deriveMaxAgeFromExpires(data.expiresAt)
-        applySessionCookie(result, access_token, maxAge)
+        const maxAge =
+            typeof data.expires_in === 'number' ? data.expires_in : deriveMaxAgeFromExpires(data.expiresAt)
+        applySessionCookie(result, sessionToken, maxAge)
 
         return result
     } catch (error) {

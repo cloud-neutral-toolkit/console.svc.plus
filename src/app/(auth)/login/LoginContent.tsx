@@ -78,12 +78,9 @@ export default function LoginContent({
   const googleAuthUrl = `${accountServiceBaseUrl}/api/auth/oauth/login/google`;
 
   useEffect(() => {
-    const publicToken = searchParams.get("public_token");
-    const userId = searchParams.get("userId");
-    const email = searchParams.get("email");
-    const role = searchParams.get("role");
+    const exchangeCode = searchParams.get("exchange_code");
 
-    if (!publicToken || !userId || !email) {
+    if (!exchangeCode) {
       return;
     }
 
@@ -101,10 +98,7 @@ export default function LoginContent({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            publicToken,
-            userId,
-            email,
-            role: role || "user",
+            exchangeCode,
           }),
         });
 
