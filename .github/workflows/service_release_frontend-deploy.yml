@@ -42,6 +42,7 @@ env:
   PRIMARY_DOMAIN: cn.svc.plus
   SECONDARY_DOMAIN: cn.onwalk.net
   GHCR_REGISTRY: ghcr.io
+  GHCR_USERNAME: svc-design
 
 jobs:
   stage-1-build-image:
@@ -92,8 +93,8 @@ jobs:
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           registry: ${{ env.GHCR_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+          username: ${{ env.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -142,8 +143,8 @@ jobs:
       - name: Deploy Frontend Stack
         env:
           GHCR_REGISTRY: ${{ env.GHCR_REGISTRY }}
-          GHCR_USERNAME: ${{ github.actor }}
-          GHCR_PASSWORD: ${{ github.token }}
+          GHCR_USERNAME: ${{ env.GHCR_USERNAME }}
+          GHCR_PASSWORD: ${{ secrets.GHCR_TOKEN }}
           SSH_PRIVATE_KEY: ${{ secrets.FRONTEND_DEPLOY_SSH_KEY }}
           FRONTEND_IMAGE: ${{ needs.stage-1-build-image.outputs.image_ref }}
           APP_BASE_URL: ${{ vars.APP_BASE_URL || format('https://{0}', env.PRIMARY_DOMAIN) }}
