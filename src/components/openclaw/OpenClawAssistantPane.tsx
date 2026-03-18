@@ -71,6 +71,10 @@ type AssistantApiErrorPayload = {
   deviceId?: string;
 };
 
+type ConnectGatewayOptions = {
+  force?: boolean;
+};
+
 export type OpenClawAssistantViewState = {
   connectionState: ConnectionState;
   healthBadge: string;
@@ -295,6 +299,7 @@ export function OpenClawAssistantPane({
   const lastPrefillQuestionKeyRef = useRef<number | null>(null);
   const pendingAutoSubmitQuestionKeyRef = useRef<number | null>(null);
   const lastPairingRequiredSignatureRef = useRef<string | null>(null);
+  const lastConnectPairingSignatureRef = useRef<string | null>(null);
 
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("idle");
@@ -588,10 +593,19 @@ export function OpenClawAssistantPane({
   );
 
   const connectGateway = useCallback(
-    async (nextSessionKey?: string, nextAgentId?: string): Promise<void> => {
+    async (
+      nextSessionKey?: string,
+      nextAgentId?: string,
+      options?: ConnectGatewayOptions,
+    ): Promise<void> => {
       if (!openclawUrl.trim()) {
         setConnectionState("error");
         setErrorMessage(copy.serverMissing);
+        return;
+      }
+
+      if (!options?.force && lastConnectPairingSignatureRef.current) {
+        setConnectionState("error");
         return;
       }
 
@@ -624,6 +638,10 @@ export function OpenClawAssistantPane({
           | AssistantApiErrorPayload;
 
         if (!response.ok || "error" in payload) {
+          const signature = buildPairingRequiredSignature(
+            payload as AssistantApiErrorPayload,
+          );
+          lastConnectPairingSignatureRef.current = signature;
           presentAssistantError(
             payload as AssistantApiErrorPayload,
             copy.bootstrapFailed,
@@ -633,6 +651,7 @@ export function OpenClawAssistantPane({
         }
 
         const data = payload as OpenClawBootstrapResponse;
+        lastConnectPairingSignatureRef.current = null;
 
         setConnectionState("ready");
         setAgents(data.agents);
@@ -896,6 +915,19 @@ export function OpenClawAssistantPane({
   }, [connectGateway, defaultsLoaded, openclawUrl]);
 
   useEffect(() => {
+    lastConnectPairingSignatureRef.current = null;
+  }, [
+    openclawOrigin,
+    openclawToken,
+    openclawUrl,
+    vaultNamespace,
+    vaultSecretKey,
+    vaultSecretPath,
+    vaultToken,
+    vaultUrl,
+  ]);
+
+  useEffect(() => {
     if (!initialQuestion) {
       return;
     }
@@ -1027,7 +1059,7 @@ export function OpenClawAssistantPane({
                 onChange={(event) => {
                   setSelectedAgentId(event.target.value);
                   setSelectedSessionKey("");
-                  void connectGateway("", event.target.value);
+                  void connectGateway("", event.target.value, { force: true });
                 }}
                 className="w-full rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[color:var(--color-primary)]"
               >
@@ -1064,9 +1096,9 @@ export function OpenClawAssistantPane({
             <>
               <button
                 type="button"
-                onClick={() => {
-                  void connectGateway();
-                }}
+              onClick={() => {
+                void connectGateway(undefined, undefined, { force: true });
+              }}
                 className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
                 title={copy.reconnect}
               >
@@ -1102,7 +1134,7 @@ export function OpenClawAssistantPane({
                   type="button"
                   onClick={() => {
                     setSelectedSessionKey(session.key);
-                    void connectGateway(session.key);
+                    void connectGateway(session.key, undefined, { force: true });
                   }}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs transition",
