@@ -52,17 +52,7 @@ jobs:
     steps:
       - name: Compute image metadata
         id: meta
-        shell: bash
-        run: |
-          set -euo pipefail
-          image_tag="${{ github.event.inputs.image_tag }}"
-          if [[ -z "${image_tag}" ]]; then
-            image_tag="${GITHUB_SHA}"
-          fi
-          ghcr_namespace="${GITHUB_REPOSITORY_OWNER,,}"
-          echo "ghcr_namespace=${ghcr_namespace}" >> "${GITHUB_OUTPUT}"
-          echo "image_tag=${image_tag}" >> "${GITHUB_OUTPUT}"
-          echo "image_ref=ghcr.io/${ghcr_namespace}/dashboard:${image_tag}" >> "${GITHUB_OUTPUT}"
+        run: bash scripts/github-actions/compute-frontend-release-metadata.sh "${{ github.event.inputs.image_tag }}"
 
   build:
     runs-on: ubuntu-latest
