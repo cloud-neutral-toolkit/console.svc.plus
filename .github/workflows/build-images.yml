@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+      - uses: ./.github/actions/docker-login
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -98,15 +98,15 @@ jobs:
         with:
           image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ matrix.service.name }}
 
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - uses: ./.github/actions/docker-setup-qemu
+      - uses: ./.github/actions/docker-setup-buildx
 
       - name: Clone knowledge content
         run: git clone https://github.com/Cloud-Neutral-Workshop/knowledge.git knowledge
 
       - name: Build Service Image (per-arch)
         id: build
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        uses: ./.github/actions/docker-build-push
         with:
           context: ${{ matrix.service.workdir }}
           file: ${{ matrix.service.dockerfile }}
@@ -127,7 +127,7 @@ jobs:
           OUTPUT_FILE: digest-${{ matrix.service.name }}-${{ matrix.arch.artifact }}.txt
         run: bash .github/scripts/build-images/record-digest.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifact
         with:
           name: digest-${{ matrix.service.name }}-${{ matrix.arch.artifact }}
           path: digest-${{ matrix.service.name }}-${{ matrix.arch.artifact }}.txt
@@ -148,7 +148,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifact
         with:
           name: digest-${{ matrix.service.name }}-${{ matrix.arch.artifact }}
 
@@ -164,25 +164,31 @@ jobs:
           IMAGE_ARTIFACT: ${{ matrix.arch.artifact }}
         run: bash .github/scripts/build-images/set-image-ref.sh
 
-      - uses: anchore/sbom-action@v0
-        with:
-          image: ${{ env.IMG }}
-          output-file: sbom.spdx.json
+      - name: Generate SBOM
+        shell: bash
+        run: |
+          # Install syft for SBOM generation
+          curl -fsSL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft ${{ env.IMG }} -o spdx-json > sbom.spdx.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifact
         with:
           name: sbom-${{ matrix.service.name }}-${{ matrix.arch.artifact }}
           path: sbom.spdx.json
 
-      - uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: ${{ env.IMG }}
-          severity: HIGH,CRITICAL
-          exit-code: '1'
+      - name: Scan image with Trivy
+        shell: bash
+        run: |
+          # Install trivy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy image --severity HIGH,CRITICAL --exit-code 1 ${{ env.IMG }}
 
-      - uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: 'v2.4.1'
+      - name: Install Cosign
+        shell: bash
+        run: |
+          # Install cosign
+          curl -fsSL https://raw.githubusercontent.com/sigstore/cosign/main/scripts/install.sh | sh -s -- -b /usr/local/bin -d
+          cosign version
 
       - name: Cosign Sign Image
         env:
@@ -208,13 +214,13 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - uses: ./.github/actions/docker-setup-buildx
 
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifact
         with:
           name: digest-dashboard-linux-amd64
 
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifact
         with:
           name: digest-dashboard-linux-arm64
 
@@ -230,7 +236,7 @@ jobs:
         with:
           image: ${{ env.REGISTRY }}/${{ env.ORG }}/dashboard
 
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+      - uses: ./.github/actions/docker-login
         if: matrix.registry == 'ghcr.io'
         with:
           registry: ${{ matrix.registry }}
@@ -257,7 +263,7 @@ jobs:
 
       - name: Login to Docker Hub
         if: matrix.registry == 'docker.io'
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        uses: ./.github/actions/docker-login
         with:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
