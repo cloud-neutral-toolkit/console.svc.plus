@@ -32,7 +32,6 @@ import {
   type ResolvedHomepageVideoResponse,
 } from "../lib/home/homepageVideo";
 import { useMoltbotStore } from "../lib/moltbotStore";
-import { useUserStore } from "../lib/userStore";
 import { cn } from "../lib/utils";
 
 const HOME_SECTION_CLASS =
@@ -134,8 +133,6 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
             <main className="relative space-y-6 pt-6 sm:space-y-8 sm:pt-10">
               <HeroSection />
-              <ProductDemoSection />
-              <NextStepsSection />
               <StatsSection />
               <ShortcutsSection />
             </main>
@@ -150,11 +147,11 @@ export default function HomePage() {
 }
 
 export function HeroSection() {
-  const { user } = useUserStore();
   const { language } = useLanguage();
   const isChinese = language === "zh";
   const [promptSeed, setPromptSeed] = useState("");
   const [promptSeedKey, setPromptSeedKey] = useState(0);
+  const t = translations[language].marketing.home;
   const assistantDefaultsSWR = useSWR<IntegrationDefaults>(
     "/api/integrations/defaults",
     jsonFetcher,
@@ -162,19 +159,31 @@ export function HeroSection() {
       revalidateOnFocus: false,
     },
   );
+  const homepageVideoSWR = useSWR<ResolvedHomepageVideoResponse>(
+    "/api/homepage-video",
+    jsonFetcher,
+    {
+      fallbackData: {
+        resolved: DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry,
+      },
+      revalidateOnFocus: false,
+    },
+  );
+  const entry =
+    homepageVideoSWR.data?.resolved ?? DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry;
+  const presentation = resolveHomepageVideoPresentation(entry);
 
   const heroCopy = isChinese
     ? {
         eyebrow: "AI Native Workspace",
         title: "直接说出你的需求，剩下的交给 AI",
         subtitle: "从想法到上线，AI 自动完成构建、部署与优化。",
-        description:
-          "从 xstream 到 xworkmate，再到 console.svc.plus，用一次对话串起构建、部署、排障和运营。",
-        status: user
-          ? `当前模式：${user.username} · 可直接发起任务`
-          : "当前模式：Guest · 可直接体验",
-        examplesTitle: "你可以这样开始",
-        examplesHint: "点击任一示例后，会直接填入右侧输入框。",
+        demoLabel: "产品演示",
+        demoHint:
+          "这里展示当前域名对应的产品演示链接。主站默认走 YouTube，中国站可切到 Bilibili，也可以继续按域名覆盖。",
+        startTitle: t.nextSteps.title,
+        startHint: "保留原有 onboarding 内容，但改成更轻、更整齐的起步列表。",
+        itemHint: "点击后填入右侧输入框，不会自动发送。",
         examples: [
           "帮我构建一个 SaaS 应用",
           "分析这个报错并给出修复建议",
@@ -187,13 +196,13 @@ export function HeroSection() {
         title: "Describe what you need. Let AI handle the rest.",
         subtitle:
           "From idea to launch, AI can assemble, deploy, and optimize the work.",
-        description:
-          "From xstream to xworkmate to console.svc.plus, one conversation can carry the whole workflow.",
-        status: user
-          ? `Mode: ${user.username} · Ready to execute`
-          : "Mode: Guest · Ready to explore",
-        examplesTitle: "Try starting with",
-        examplesHint: "Click a prompt to fill the composer on the right.",
+        demoLabel: "Product demo",
+        demoHint:
+          "This section resolves the product demo for the current host. The default can use YouTube while regional hosts override it.",
+        startTitle: t.nextSteps.title,
+        startHint:
+          "Keep the same onboarding content, in a lighter and calmer starting list.",
+        itemHint: "Click to fill the composer on the right. It will not auto-submit.",
         examples: [
           "Help me build a SaaS app",
           "Analyze this error and suggest a fix",
@@ -212,73 +221,104 @@ export function HeroSection() {
       </div>
 
       <div className="relative grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:gap-12">
-        <div className="flex flex-col justify-between gap-8 pt-2">
-          <div className="space-y-6">
-            <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.eyebrow}</p>
-            <h1
-              className={cn(
-                "max-w-[10ch] leading-[0.94] text-heading",
-                isChinese
-                  ? "text-[3.05rem] font-semibold tracking-[-0.055em] sm:text-[3.6rem] lg:text-[4.2rem]"
-                  : "editorial-display text-[3rem] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.3rem]",
-              )}
-            >
-              {heroCopy.title}
-            </h1>
-            <div className="max-w-xl space-y-3">
-              <p className="text-[1rem] leading-8 text-text-muted sm:text-[1.08rem]">
-                {heroCopy.subtitle}
-              </p>
-              <p className="text-sm leading-7 text-slate-500 sm:text-[0.98rem]">
-                {heroCopy.description}
-              </p>
-              <p className="text-xs font-medium tracking-[0.02em] text-slate-500">
-                {heroCopy.status}
-              </p>
+        <div className="flex flex-col gap-6 pt-2">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,251,0.96))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+            <div className="border-b border-slate-900/10 px-5 py-4 sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.demoLabel}</p>
+                  <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
+                    {heroCopy.demoHint}
+                  </p>
+                </div>
+                <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
+                  {entry.domain?.trim()
+                    ? `${isChinese ? "当前域名" : "Host"}: ${entry.domain}`
+                    : isChinese
+                      ? "默认主站配置"
+                      : "Default site config"}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-4 sm:p-5">
+              <DemoVideoSurface presentation={presentation} isChinese={isChinese} />
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                <a
+                  href={entry.videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                >
+                  {isChinese ? "打开原始链接" : "Open source link"}
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-white">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {heroCopy.examplesTitle}
-                </h2>
-                <p className="text-xs text-slate-500">
-                  {heroCopy.examplesHint}
-                </p>
-              </div>
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.eyebrow}</p>
+              <h1
+                className={cn(
+                  "max-w-[10ch] leading-[0.94] text-heading",
+                  isChinese
+                    ? "text-[3.05rem] font-semibold tracking-[-0.055em] sm:text-[3.6rem] lg:text-[4.2rem]"
+                    : "editorial-display text-[3rem] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.3rem]",
+                )}
+              >
+                {heroCopy.title}
+              </h1>
+              <p className="max-w-xl text-[1rem] leading-8 text-text-muted sm:text-[1.08rem]">
+                {heroCopy.subtitle}
+              </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {heroCopy.examples.map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  onClick={() => {
-                    setPromptSeed(example);
-                    setPromptSeedKey((current) => current + 1);
-                  }}
-                  className="group rounded-[1.35rem] border border-slate-200 bg-white/90 px-4 py-4 text-left shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-[1px] hover:border-slate-300 hover:bg-[#fbfaf7]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-2">
-                      <p className="text-sm font-semibold leading-6 text-slate-900">
-                        {example}
-                      </p>
-                      <p className="text-xs leading-5 text-slate-500">
-                        {isChinese
-                          ? "点击后填入右侧输入框，不会自动发送。"
-                          : "Click to fill the composer on the right. It will not auto-submit."}
-                      </p>
-                    </div>
-                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-700" />
-                  </div>
-                </button>
-              ))}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-white">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900">
+                    {heroCopy.startTitle}
+                  </h2>
+                  <p className="text-xs text-slate-500">{heroCopy.startHint}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-3">
+                {t.nextSteps.items.map((item, index: number) => {
+                  const example = heroCopy.examples[index] ?? item.title;
+
+                  return (
+                    <button
+                      key={item.title}
+                      type="button"
+                      onClick={() => {
+                        setPromptSeed(example);
+                        setPromptSeedKey((current) => current + 1);
+                      }}
+                      className="group flex items-center justify-between gap-4 rounded-[1.25rem] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-left shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-[1px] hover:border-slate-300 hover:bg-[#fbfaf7]"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex rounded-full border border-slate-900/10 bg-[#f8f4ec] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                            {item.status}
+                          </span>
+                          <p className="truncate text-sm font-semibold text-slate-900">
+                            {item.title}
+                          </p>
+                        </div>
+                        <p className="text-xs leading-5 text-slate-500">
+                          {heroCopy.itemHint}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-700" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -314,63 +354,6 @@ export function HeroSection() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-export function NextStepsSection() {
-  const { language } = useLanguage();
-  const t = translations[language].marketing.home;
-
-  return (
-    <section className={cn(HOME_SECTION_CLASS, "space-y-4 p-5 lg:p-7")}>
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className={HOME_SECTION_LABEL_CLASS}>{t.nextSteps.title}</p>
-          <p className="mt-2 text-sm leading-6 text-text-muted">
-            {language === "zh"
-              ? "保留原有 onboarding 内容，但改成更轻、更整齐的起步列表。"
-              : "Keep the same onboarding content, in a lighter and calmer starting list."}
-          </p>
-        </div>
-        <span className="inline-flex w-fit items-center rounded-full border border-slate-900/10 bg-[#f8f4ec] px-3 py-1 text-xs font-semibold text-slate-700">
-          {t.nextSteps.badge}
-        </span>
-      </header>
-
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-        {t.nextSteps.items.map((item, index: number) => {
-          const Icon = getIcon(item.title, Users);
-          return (
-            <div
-              key={index}
-              className={cn(
-                HOME_LIST_CARD_CLASS,
-                "flex h-full flex-col justify-between gap-6 p-4 hover:-translate-y-[1px] hover:bg-white",
-              )}
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/[0.04] text-primary">
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </div>
-                  <span className="rounded-full border border-slate-900/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    {item.status}
-                  </span>
-                </div>
-                <p className="text-base font-semibold leading-7 text-slate-900">
-                  {item.title}
-                </p>
-              </div>
-
-              <button className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-hover">
-                {t.nextSteps.learnMore}
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          );
-        })}
       </div>
     </section>
   );
@@ -597,66 +580,6 @@ type LatestBlogPost = {
   title: string;
   date?: string;
 };
-
-function ProductDemoSection() {
-  const { language } = useLanguage();
-  const isChinese = language === "zh";
-  const { data } = useSWR<ResolvedHomepageVideoResponse>(
-    "/api/homepage-video",
-    jsonFetcher,
-    {
-      fallbackData: {
-        resolved: DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry,
-      },
-      revalidateOnFocus: false,
-    },
-  );
-  const entry = data?.resolved ?? DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry;
-  const presentation = resolveHomepageVideoPresentation(entry);
-
-  return (
-    <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,247,252,0.96))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-      <div className="border-b border-slate-900/10 px-5 py-4 sm:px-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className={HOME_SECTION_LABEL_CLASS}>
-              {isChinese ? "产品演示" : "Product demo"}
-            </p>
-            <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
-              {isChinese
-                ? "这里展示当前域名对应的产品演示链接。主站默认走 YouTube，中国站可切到 Bilibili，也可以继续按域名覆盖。"
-                : "This section resolves the product demo for the current host. The default can use YouTube while regional hosts override it."}
-            </p>
-          </div>
-          <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
-            {isChinese ? "按域名解析" : "Domain aware"}
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-4 p-4 sm:p-5">
-        <DemoVideoSurface presentation={presentation} isChinese={isChinese} />
-        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-          <span className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600">
-            {entry.domain?.trim()
-              ? `${isChinese ? "当前域名" : "Host"}: ${entry.domain}`
-              : isChinese
-                ? "默认主站配置"
-                : "Default site config"}
-          </span>
-          <a
-            href={entry.videoUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-          >
-            {isChinese ? "打开原始链接" : "Open source link"}
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function DemoVideoSurface({
   presentation,
