@@ -172,17 +172,6 @@ export function HeroSection() {
               {t.heroButtons.tutorials}
             </button>
           </div>
-
-          <div className="space-y-3 border-t border-slate-900/10 pt-5">
-            <p className={HOME_SECTION_LABEL_CLASS}>{t.trustedBy}</p>
-            <div className="flex flex-wrap gap-2">
-              <LogoPill label="Next.js" />
-              <LogoPill label="Go" />
-              <LogoPill label="Vercel" />
-              <LogoPill label="Cloud Run" />
-              <LogoPill label="PostgreSQL" />
-            </div>
-          </div>
         </div>
 
         <div className="lg:pl-4">
@@ -617,14 +606,5 @@ function HeroVideoShell({
         </div>
       </div>
     </div>
-  );
-}
-
-function LogoPill({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700">
-      <div className="h-2 w-2 rounded-full bg-primary" />
-      {label}
-    </span>
   );
 }
