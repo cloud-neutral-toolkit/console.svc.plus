@@ -63,6 +63,13 @@ type ComposerAttachment = GatewayChatAttachmentPayload & {
 
 type ConnectionState = "idle" | "connecting" | "ready" | "error";
 
+type AssistantApiErrorPayload = {
+  error?: string;
+  code?: string;
+  details?: Record<string, unknown> | null;
+  deviceId?: string;
+};
+
 export type OpenClawAssistantViewState = {
   connectionState: ConnectionState;
   healthBadge: string;
@@ -82,6 +89,47 @@ export type OpenClawAssistantViewState = {
 
 function pickCopy(isChinese: boolean, zh: string, en: string): string {
   return isChinese ? zh : en;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function formatAssistantApiError(params: {
+  payload: AssistantApiErrorPayload;
+  isChinese: boolean;
+  fallback: string;
+}): string {
+  const message = params.payload.error?.trim();
+  if (params.payload.code !== "PAIRING_REQUIRED") {
+    return message || params.fallback;
+  }
+
+  const details = asRecord(params.payload.details);
+  const requestId = stringValue(details.requestId);
+  const deviceId =
+    params.payload.deviceId?.trim() || stringValue(details.deviceId);
+  const reason = stringValue(details.reason);
+
+  return [
+    pickCopy(
+      params.isChinese,
+      "等待管理员审批当前设备后，X 助手才能继续连接。",
+      "Waiting for an administrator to approve this device before X Assistant can continue.",
+    ),
+    deviceId ? `deviceId: ${deviceId}` : "",
+    requestId ? `requestId: ${requestId}` : "",
+    reason ? `reason: ${reason}` : "",
+    message && message !== params.fallback ? message : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderMarkdown(value: string): string {
@@ -517,10 +565,16 @@ export function OpenClawAssistantPane({
 
         const payload = (await response.json()) as
           | OpenClawBootstrapResponse
-          | { error?: string };
+          | AssistantApiErrorPayload;
 
         if (!response.ok || "error" in payload) {
-          throw new Error((payload as { error?: string }).error || copy.bootstrapFailed);
+          throw new Error(
+            formatAssistantApiError({
+              payload: payload as AssistantApiErrorPayload,
+              isChinese,
+              fallback: copy.bootstrapFailed,
+            }),
+          );
         }
 
         const data = payload as OpenClawBootstrapResponse;
@@ -546,6 +600,7 @@ export function OpenClawAssistantPane({
       copy.bootstrapFailed,
       copy.connectFailed,
       copy.serverMissing,
+      isChinese,
       openclawToken,
       openclawOrigin,
       openclawUrl,
@@ -672,8 +727,14 @@ export function OpenClawAssistantPane({
         if (!response.ok || !response.body) {
           const payload = await response
             .json()
-            .catch(() => ({ error: copy.sendFailed }));
-          throw new Error(payload.error || copy.sendFailed);
+            .catch(() => ({ error: copy.sendFailed } as AssistantApiErrorPayload));
+          throw new Error(
+            formatAssistantApiError({
+              payload: payload as AssistantApiErrorPayload,
+              isChinese,
+              fallback: copy.sendFailed,
+            }),
+          );
         }
 
         const reader = response.body.getReader();
@@ -715,7 +776,18 @@ export function OpenClawAssistantPane({
             }
 
             if (event.type === "error") {
-              setErrorMessage(event.message);
+              setErrorMessage(
+                formatAssistantApiError({
+                  payload: {
+                    error: event.message,
+                    code: event.code,
+                    details: event.details ?? null,
+                    deviceId: event.deviceId,
+                  },
+                  isChinese,
+                  fallback: copy.sendFailed,
+                }),
+              );
             }
           }
         }
@@ -1151,7 +1223,7 @@ export function OpenClawAssistantPane({
           ) : null}
 
           {errorMessage ? (
-            <div className="mt-2.5 rounded-[var(--radius-lg)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
+            <div className="mt-2.5 whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
               {errorMessage}
             </div>
           ) : null}

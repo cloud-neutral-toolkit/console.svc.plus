@@ -75,6 +75,8 @@ export type OpenClawStreamEvent =
       type: 'error'
       message: string
       code?: string
+      details?: Record<string, unknown> | null
+      deviceId?: string
     }
 
 export type IntegrationDefaults = {

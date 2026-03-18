@@ -89,7 +89,7 @@ function formatGatewayError(error: OpenClawGatewayError | null, client: OpenClaw
     const requestId = stringValue(details.requestId)
     const reason = stringValue(details.reason)
     return [
-      '需要先在 OpenClaw 网关审批该设备配对请求。',
+      '等待管理员审批当前设备后，X 助手才能继续连接。',
       requestId ? `requestId: ${requestId}` : '',
       client.deviceId ? `deviceId: ${client.deviceId}` : '',
       reason ? `reason: ${reason}` : '',
@@ -382,6 +382,8 @@ async function handleSend(body: SendBody, request: NextRequest): Promise<Respons
           type: 'error',
           message: gatewayError?.message ?? 'Failed to send message to OpenClaw gateway.',
           ...(gatewayError?.code ? { code: gatewayError.code } : {}),
+          ...(gatewayError?.details ? { details: gatewayError.details } : {}),
+          ...(client?.deviceId ? { deviceId: client.deviceId } : {}),
         })
         controller.close()
         if (client) {
