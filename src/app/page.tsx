@@ -169,26 +169,20 @@ export function HeroSection() {
   const presentation = resolveHomepageVideoPresentation(entry);
 
   const heroCopy = isChinese
-    ? {
+      ? {
         eyebrow: "AI Native Workspace",
-        title: "直接说出你的需求，剩下的交给 AI",
         subtitle: "从想法到上线，AI 自动完成构建、部署与优化。",
         demoLabel: "产品演示",
-        demoHint:
-          "这里展示当前域名对应的产品演示链接。主站默认走 YouTube，中国站可切到 Bilibili，也可以继续按域名覆盖。",
       }
     : {
         eyebrow: "AI Native Workspace",
-        title: "Describe what you need. Let AI handle the rest.",
         subtitle:
           "From idea to launch, AI can assemble, deploy, and optimize the work.",
         demoLabel: "Product demo",
-        demoHint:
-          "This section resolves the product demo for the current host. The default can use YouTube while regional hosts override it.",
       };
 
   return (
-    <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-900/10 bg-[linear-gradient(180deg,#ffffff,#faf7f2)] p-6 shadow-[0_24px_56px_rgba(15,23,42,0.05)] sm:p-8 lg:p-10">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-900/10 bg-[linear-gradient(180deg,#ffffff,#faf7f2)] p-3 shadow-[0_18px_40px_rgba(15,23,42,0.05)] sm:p-4 lg:p-5">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute left-[8%] top-[8%] h-[16rem] w-[16rem] rounded-full bg-[radial-gradient(circle,rgba(37,78,219,0.1),transparent_64%)] blur-3xl" />
         <div className="absolute left-[30%] top-[12%] h-[14rem] w-[14rem] rounded-full bg-[radial-gradient(circle,rgba(245,211,170,0.42),transparent_66%)] blur-3xl" />
@@ -196,35 +190,25 @@ export function HeroSection() {
         <div className="absolute inset-x-0 top-0 h-[18rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(255,255,255,0)_72%)]" />
       </div>
 
-      <div className="relative grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:gap-12">
-        <div className="flex flex-col gap-6 pt-2">
-          <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,251,0.96))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-            <div className="border-b border-slate-900/10 px-5 py-4 sm:px-6">
+      <div className="relative grid gap-4 lg:grid-cols-[0.98fr_1.02fr] lg:gap-5">
+        <div className="flex flex-col gap-3 pt-1">
+          <div className="overflow-hidden rounded-[1.35rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,251,0.96))] shadow-[0_18px_44px_rgba(15,23,42,0.07)]">
+            <div className="border-b border-slate-900/10 px-4 py-3 sm:px-4.5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.demoLabel}</p>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
-                    {heroCopy.demoHint}
-                  </p>
                 </div>
-                <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
-                  {entry.domain?.trim()
-                    ? `${isChinese ? "当前域名" : "Host"}: ${entry.domain}`
-                    : isChinese
-                      ? "默认主站配置"
-                      : "Default site config"}
-                </span>
               </div>
             </div>
 
-            <div className="space-y-4 p-4 sm:p-5">
+            <div className="space-y-3 p-3 sm:p-3.5">
               <DemoVideoSurface presentation={presentation} isChinese={isChinese} />
               <div className="flex flex-wrap gap-2 text-xs text-slate-500">
                 <a
                   href={entry.videoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                  className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-2.5 py-1 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                 >
                   {isChinese ? "打开原始链接" : "Open source link"}
                 </a>
@@ -232,47 +216,32 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="space-y-5">
-            <div className="space-y-3">
+          <div className="space-y-3">
+            <div className="space-y-2">
               <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.eyebrow}</p>
-              <h1
-                className={cn(
-                  "max-w-[10ch] leading-[0.94] text-heading",
-                  isChinese
-                    ? "text-[3.05rem] font-semibold tracking-[-0.055em] sm:text-[3.6rem] lg:text-[4.2rem]"
-                    : "editorial-display text-[3rem] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.3rem]",
-                )}
-              >
-                {heroCopy.title}
-              </h1>
-              <p className="max-w-xl text-[1rem] leading-8 text-text-muted sm:text-[1.08rem]">
+              <p className="max-w-xl text-[0.95rem] leading-7 text-text-muted sm:text-[1rem]">
                 {heroCopy.subtitle}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="lg:pl-4">
-          <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,251,0.98))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-            <div className="border-b border-slate-900/10 px-5 py-4 sm:px-6">
+        <div className="lg:pl-1">
+          <div className="overflow-hidden rounded-[1.35rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,251,0.98))] shadow-[0_18px_44px_rgba(15,23,42,0.07)]">
+            <div className="border-b border-slate-900/10 px-4 py-3 sm:px-4.5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className={HOME_SECTION_LABEL_CLASS}>
                     {isChinese ? "X 助手" : "X Assistant"}
                   </p>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
-                    {isChinese
-                      ? "首页只保留一个主路径：先提问，再由助手拆解任务、调用能力并推进执行。"
-                      : "The homepage keeps one primary path: ask first, then let the assistant plan and execute."}
-                  </p>
                 </div>
-                <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
+                <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-slate-600 sm:inline-flex">
                   {isChinese ? "对话即入口" : "Prompt-first"}
                 </span>
               </div>
             </div>
 
-            <div className="p-4 sm:p-5">
+            <div className="p-3 sm:p-3.5">
               <OpenClawAssistantPane
                 defaults={assistantDefaultsSWR.data ?? EMPTY_ASSISTANT_DEFAULTS}
                 autoSubmitInitialQuestion={false}

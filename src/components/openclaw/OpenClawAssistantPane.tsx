@@ -43,6 +43,7 @@ import {
   type OpenClawStreamEvent,
   type ThinkingLevel,
 } from "@/lib/openclaw/types";
+import { useUserStore } from "@/lib/userStore";
 import { useOpenClawConsoleStore } from "@/state/openclawConsoleStore";
 
 type OpenClawAssistantPaneProps = {
@@ -74,6 +75,24 @@ type AssistantApiErrorPayload = {
 type ConnectGatewayOptions = {
   force?: boolean;
 };
+
+type PersistedPairingRequiredState = {
+  signature: string;
+  errorMessage: string;
+  scope: string;
+  savedAtMs: number;
+  ttlMs: number;
+};
+
+type PersistedPairingRequiredLookup = {
+  state: PersistedPairingRequiredState | null;
+  expired: boolean;
+};
+
+const PAIRING_REQUIRED_SESSION_STORAGE_KEY =
+  "openclaw:pairing-required-state";
+const PAIRING_REQUIRED_STATE_TTL_MS = 1000 * 60 * 60 * 12;
+const PAIRING_REQUIRED_GUEST_TTL_MS = 1000 * 60 * 60;
 
 export type OpenClawAssistantViewState = {
   connectionState: ConnectionState;
@@ -152,6 +171,99 @@ function buildPairingRequiredSignature(
     payload.deviceId?.trim() || stringValue(details.deviceId) || "";
   const reason = stringValue(details.reason) ?? "";
   return `${deviceId}::${requestId}::${reason}`;
+}
+
+function buildPairingPersistenceScope(params: {
+  openclawUrl: string;
+  openclawOrigin: string;
+  userId: string;
+}): string {
+  return `${params.userId.trim()}::${params.openclawUrl.trim()}::${params.openclawOrigin.trim()}`;
+}
+
+function inspectPersistedPairingRequiredState(
+  scope: string,
+): PersistedPairingRequiredLookup {
+  if (typeof window === "undefined") {
+    return { state: null, expired: false };
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(
+      PAIRING_REQUIRED_SESSION_STORAGE_KEY,
+    );
+    if (!raw) {
+      return { state: null, expired: false };
+    }
+
+    const parsed = JSON.parse(raw) as PersistedPairingRequiredState;
+    if (
+      !parsed ||
+      typeof parsed.signature !== "string" ||
+      typeof parsed.errorMessage !== "string" ||
+      typeof parsed.scope !== "string" ||
+      typeof parsed.savedAtMs !== "number"
+    ) {
+      window.sessionStorage.removeItem(PAIRING_REQUIRED_SESSION_STORAGE_KEY);
+      return { state: null, expired: false };
+    }
+
+    const ttlMs =
+      typeof parsed.ttlMs === "number" && Number.isFinite(parsed.ttlMs)
+        ? parsed.ttlMs
+        : PAIRING_REQUIRED_STATE_TTL_MS;
+
+    const isExpired = Date.now() - parsed.savedAtMs > ttlMs;
+
+    if (parsed.scope !== scope) {
+      window.sessionStorage.removeItem(PAIRING_REQUIRED_SESSION_STORAGE_KEY);
+      return { state: null, expired: false };
+    }
+
+    if (isExpired) {
+      window.sessionStorage.removeItem(PAIRING_REQUIRED_SESSION_STORAGE_KEY);
+      return { state: null, expired: true };
+    }
+
+    return {
+      state: {
+        ...parsed,
+        ttlMs,
+      },
+      expired: false,
+    };
+  } catch {
+    return { state: null, expired: false };
+  }
+}
+
+function persistPairingRequiredState(
+  state: PersistedPairingRequiredState,
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      PAIRING_REQUIRED_SESSION_STORAGE_KEY,
+      JSON.stringify(state),
+    );
+  } catch {
+    // Ignore unavailable storage.
+  }
+}
+
+function clearPersistedPairingRequiredState(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.removeItem(PAIRING_REQUIRED_SESSION_STORAGE_KEY);
+  } catch {
+    // Ignore unavailable storage.
+  }
 }
 
 function renderMarkdown(value: string): string {
@@ -321,6 +433,7 @@ export function OpenClawAssistantPane({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [guestSessionExpired, setGuestSessionExpired] = useState(false);
 
   const defaultsLoaded = useOpenClawConsoleStore(
     (state) => state.defaultsLoaded,
@@ -360,9 +473,20 @@ export function OpenClawAssistantPane({
   const setSelectedSessionKey = useOpenClawConsoleStore(
     (state) => state.setSelectedSessionKey,
   );
+  const sessionUser = useUserStore((state) => state.user);
 
   const compact = variant === "sidebar";
   const minimalPage = variant === "page";
+  const pairingPersistenceUserId =
+    sessionUser?.uuid?.trim() || sessionUser?.id?.trim() || "anonymous";
+  const pairingPersistenceTtlMs = sessionUser?.isGuest
+    ? PAIRING_REQUIRED_GUEST_TTL_MS
+    : PAIRING_REQUIRED_STATE_TTL_MS;
+  const pairingPersistenceScope = buildPairingPersistenceScope({
+    openclawUrl,
+    openclawOrigin,
+    userId: pairingPersistenceUserId,
+  });
   const locale = isChinese ? "zh-CN" : "en-US";
   const compactConnected = compact && connectionState === "ready";
   const showMinimalAgentSelect =
@@ -445,6 +569,13 @@ export function OpenClawAssistantPane({
         "当前没有可用的 OpenClaw 地址。先到融合设置填写 gateway / vault / APISIX，再回来启动 XWorkmate。",
         "No OpenClaw endpoint is available yet. Configure gateway, vault, and APISIX first, then return to XWorkmate.",
       ),
+      guestSessionExpired: pickCopy(
+        isChinese,
+        "演示模式已超过 1 小时。请注册或登录后继续使用助手。",
+        "Demo mode has exceeded 1 hour. Register or sign in to continue using the assistant.",
+      ),
+      login: pickCopy(isChinese, "登录", "Sign in"),
+      register: pickCopy(isChinese, "注册", "Register"),
       openIntegrations: pickCopy(
         isChinese,
         "打开接口集成",
@@ -572,24 +703,32 @@ export function OpenClawAssistantPane({
   const presentAssistantError = useCallback(
     (payload: AssistantApiErrorPayload, fallback: string) => {
       const signature = buildPairingRequiredSignature(payload);
+      const formattedMessage = formatAssistantApiError({
+        payload,
+        isChinese,
+        fallback,
+      });
+
       if (signature) {
         if (lastPairingRequiredSignatureRef.current === signature) {
           return;
         }
         lastPairingRequiredSignatureRef.current = signature;
+        setGuestSessionExpired(false);
+        persistPairingRequiredState({
+          signature,
+          errorMessage: formattedMessage,
+          scope: pairingPersistenceScope,
+          savedAtMs: Date.now(),
+          ttlMs: pairingPersistenceTtlMs,
+        });
       } else {
         lastPairingRequiredSignatureRef.current = null;
       }
 
-      setErrorMessage(
-        formatAssistantApiError({
-          payload,
-          isChinese,
-          fallback,
-        }),
-      );
+      setErrorMessage(formattedMessage);
     },
-    [isChinese],
+    [isChinese, pairingPersistenceScope, pairingPersistenceTtlMs],
   );
 
   const connectGateway = useCallback(
@@ -606,6 +745,7 @@ export function OpenClawAssistantPane({
 
       if (!options?.force && lastConnectPairingSignatureRef.current) {
         setConnectionState("error");
+        setErrorMessage((current) => current);
         return;
       }
 
@@ -652,6 +792,7 @@ export function OpenClawAssistantPane({
 
         const data = payload as OpenClawBootstrapResponse;
         lastConnectPairingSignatureRef.current = null;
+        clearPersistedPairingRequiredState();
 
         setConnectionState("ready");
         setAgents(data.agents);
@@ -902,7 +1043,29 @@ export function OpenClawAssistantPane({
   );
 
   useEffect(() => {
-    if (!defaultsLoaded || bootstrappedRef.current) {
+    const persisted = inspectPersistedPairingRequiredState(
+      pairingPersistenceScope,
+    );
+    if (persisted.state) {
+      lastPairingRequiredSignatureRef.current = persisted.state.signature;
+      lastConnectPairingSignatureRef.current = persisted.state.signature;
+      setGuestSessionExpired(false);
+      setConnectionState("error");
+      setErrorMessage(persisted.state.errorMessage);
+      return;
+    }
+
+    if (sessionUser?.isGuest && persisted.expired) {
+      lastPairingRequiredSignatureRef.current = null;
+      lastConnectPairingSignatureRef.current = "guest-session-expired";
+      setGuestSessionExpired(true);
+      setConnectionState("error");
+      setErrorMessage(copy.guestSessionExpired);
+    }
+  }, [copy.guestSessionExpired, pairingPersistenceScope, sessionUser?.isGuest]);
+
+  useEffect(() => {
+    if (!defaultsLoaded || bootstrappedRef.current || guestSessionExpired) {
       return;
     }
 
@@ -912,14 +1075,17 @@ export function OpenClawAssistantPane({
 
     bootstrappedRef.current = true;
     void connectGateway();
-  }, [connectGateway, defaultsLoaded, openclawUrl]);
+  }, [connectGateway, defaultsLoaded, guestSessionExpired, openclawUrl]);
 
   useEffect(() => {
     lastConnectPairingSignatureRef.current = null;
+    lastPairingRequiredSignatureRef.current = null;
+    setGuestSessionExpired(false);
   }, [
     openclawOrigin,
     openclawToken,
     openclawUrl,
+    pairingPersistenceUserId,
     vaultNamespace,
     vaultSecretKey,
     vaultSecretPath,
@@ -1124,7 +1290,12 @@ export function OpenClawAssistantPane({
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          compact && "grid grid-rows-[minmax(0,1fr)_auto]",
+        )}
+      >
         {!compact && !minimalPage ? (
           <div className="border-b border-[color:var(--color-surface-border)] px-3 py-2.5">
             <div className="flex flex-wrap gap-2">
@@ -1153,7 +1324,12 @@ export function OpenClawAssistantPane({
           </div>
         ) : null}
 
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div
+          className={cn(
+            "flex-1 overflow-y-auto px-3 py-3",
+            compact && "min-h-0 overscroll-contain",
+          )}
+        >
           {!showConversation ? (
             <div className="flex h-full flex-col items-center justify-center gap-4 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)]/40 px-5 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
@@ -1284,7 +1460,12 @@ export function OpenClawAssistantPane({
           )}
         </div>
 
-        <div className="border-t border-[color:var(--color-surface-border)] px-3 py-3">
+        <div
+          className={cn(
+            "border-t border-[color:var(--color-surface-border)] px-3 py-3",
+            compact && "shrink-0",
+          )}
+        >
           <div className="flex flex-wrap items-center gap-2">
             {modeOptions.map((option) => (
               <button
@@ -1350,15 +1531,40 @@ export function OpenClawAssistantPane({
           ) : null}
 
           {errorMessage ? (
-            <div className="mt-2.5 whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
-              {errorMessage}
+            <div className="mt-2.5 space-y-2">
+              <div className="whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[color:var(--color-danger-border)] bg-[var(--color-danger-muted)]/40 px-3 py-2 text-sm text-[var(--color-danger-foreground)]">
+                {errorMessage}
+              </div>
+              {guestSessionExpired ? (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/login")}
+                    className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary-foreground)] transition hover:opacity-90"
+                  >
+                    {copy.login}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/register")}
+                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+                  >
+                    {copy.register}
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
-          <div className="mt-2.5 flex min-h-[248px] flex-1 flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-2.5 shadow-[var(--shadow-sm)]">
+          <div
+            className={cn(
+              "mt-2.5 flex flex-1 flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] p-2.5 shadow-[var(--shadow-sm)]",
+              compact ? "min-h-[184px]" : "min-h-[248px]",
+            )}
+          >
             <textarea
               ref={textareaRef}
-              rows={compact ? 3 : 4}
+              rows={compact ? 2 : 4}
               value={composerValue}
               placeholder={copy.placeholder}
               onChange={(event) => setComposerValue(event.target.value)}
@@ -1370,7 +1576,10 @@ export function OpenClawAssistantPane({
                   void addFiles(clipboardFiles);
                 }
               }}
-              className="min-h-[148px] w-full flex-1 resize-none bg-transparent text-sm leading-6 text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-subtle)]/70"
+              className={cn(
+                "w-full flex-1 resize-none bg-transparent text-sm leading-6 text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-subtle)]/70",
+                compact ? "min-h-[92px]" : "min-h-[148px]",
+              )}
             />
 
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
