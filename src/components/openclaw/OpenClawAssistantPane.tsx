@@ -49,6 +49,7 @@ type OpenClawAssistantPaneProps = {
   defaults: IntegrationDefaults;
   initialQuestion?: string;
   initialQuestionKey?: number;
+  autoSubmitInitialQuestion?: boolean;
   variant?: "page" | "sidebar";
   showConversation?: boolean;
   emptyConversationHint?: string;
@@ -98,7 +99,9 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 function stringValue(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function formatAssistantApiError(params: {
@@ -130,6 +133,21 @@ function formatAssistantApiError(params: {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function buildPairingRequiredSignature(
+  payload: AssistantApiErrorPayload,
+): string | null {
+  if (payload.code !== "PAIRING_REQUIRED") {
+    return null;
+  }
+
+  const details = asRecord(payload.details);
+  const requestId = stringValue(details.requestId) ?? "";
+  const deviceId =
+    payload.deviceId?.trim() || stringValue(details.deviceId) || "";
+  const reason = stringValue(details.reason) ?? "";
+  return `${deviceId}::${requestId}::${reason}`;
 }
 
 function renderMarkdown(value: string): string {
@@ -262,6 +280,7 @@ export function OpenClawAssistantPane({
   defaults,
   initialQuestion,
   initialQuestionKey,
+  autoSubmitInitialQuestion = true,
   variant = "page",
   showConversation = true,
   emptyConversationHint,
@@ -273,7 +292,9 @@ export function OpenClawAssistantPane({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const bootstrappedRef = useRef(false);
-  const lastInitialQuestionKeyRef = useRef<number | null>(null);
+  const lastPrefillQuestionKeyRef = useRef<number | null>(null);
+  const pendingAutoSubmitQuestionKeyRef = useRef<number | null>(null);
+  const lastPairingRequiredSignatureRef = useRef<string | null>(null);
 
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("idle");
@@ -301,7 +322,9 @@ export function OpenClawAssistantPane({
   );
   const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults);
   const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl);
-  const openclawOrigin = useOpenClawConsoleStore((state) => state.openclawOrigin);
+  const openclawOrigin = useOpenClawConsoleStore(
+    (state) => state.openclawOrigin,
+  );
   const openclawToken = useOpenClawConsoleStore((state) => state.openclawToken);
   const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl);
   const vaultNamespace = useOpenClawConsoleStore(
@@ -337,8 +360,10 @@ export function OpenClawAssistantPane({
   const minimalPage = variant === "page";
   const locale = isChinese ? "zh-CN" : "en-US";
   const compactConnected = compact && connectionState === "ready";
-  const showMinimalAgentSelect = !minimalPage || agents.length > 1 || Boolean(selectedAgentId);
-  const showTopBar = !minimalPage || showMinimalAgentSelect || connectionState !== "ready";
+  const showMinimalAgentSelect =
+    !minimalPage || agents.length > 1 || Boolean(selectedAgentId);
+  const showTopBar =
+    !minimalPage || showMinimalAgentSelect || connectionState !== "ready";
 
   const quickActions = useMemo(
     () =>
@@ -415,8 +440,16 @@ export function OpenClawAssistantPane({
         "当前没有可用的 OpenClaw 地址。先到融合设置填写 gateway / vault / APISIX，再回来启动 XWorkmate。",
         "No OpenClaw endpoint is available yet. Configure gateway, vault, and APISIX first, then return to XWorkmate.",
       ),
-      openIntegrations: pickCopy(isChinese, "打开接口集成", "Open integrations"),
-      assistantTitle: pickCopy(isChinese, "XWorkmate 助手", "XWorkmate Assistant"),
+      openIntegrations: pickCopy(
+        isChinese,
+        "打开接口集成",
+        "Open integrations",
+      ),
+      assistantTitle: pickCopy(
+        isChinese,
+        "XWorkmate 助手",
+        "XWorkmate Assistant",
+      ),
       assistantHint: pickCopy(
         isChinese,
         "侧栏模式与主页布局保持不变，消息会通过 OpenClaw gateway 进入 XWorkmate。你可以上传文件、贴图，或直接截当前页给助手分析。",
@@ -531,6 +564,29 @@ export function OpenClawAssistantPane({
     streamingText,
   ]);
 
+  const presentAssistantError = useCallback(
+    (payload: AssistantApiErrorPayload, fallback: string) => {
+      const signature = buildPairingRequiredSignature(payload);
+      if (signature) {
+        if (lastPairingRequiredSignatureRef.current === signature) {
+          return;
+        }
+        lastPairingRequiredSignatureRef.current = signature;
+      } else {
+        lastPairingRequiredSignatureRef.current = null;
+      }
+
+      setErrorMessage(
+        formatAssistantApiError({
+          payload,
+          isChinese,
+          fallback,
+        }),
+      );
+    },
+    [isChinese],
+  );
+
   const connectGateway = useCallback(
     async (nextSessionKey?: string, nextAgentId?: string): Promise<void> => {
       if (!openclawUrl.trim()) {
@@ -568,13 +624,12 @@ export function OpenClawAssistantPane({
           | AssistantApiErrorPayload;
 
         if (!response.ok || "error" in payload) {
-          throw new Error(
-            formatAssistantApiError({
-              payload: payload as AssistantApiErrorPayload,
-              isChinese,
-              fallback: copy.bootstrapFailed,
-            }),
+          presentAssistantError(
+            payload as AssistantApiErrorPayload,
+            copy.bootstrapFailed,
           );
+          setConnectionState("error");
+          return;
         }
 
         const data = payload as OpenClawBootstrapResponse;
@@ -600,10 +655,10 @@ export function OpenClawAssistantPane({
       copy.bootstrapFailed,
       copy.connectFailed,
       copy.serverMissing,
-      isChinese,
       openclawToken,
       openclawOrigin,
       openclawUrl,
+      presentAssistantError,
       vaultNamespace,
       vaultSecretKey,
       vaultSecretPath,
@@ -683,12 +738,12 @@ export function OpenClawAssistantPane({
       setStreamingText("");
       setMessages((current) => [
         ...current,
-          {
-            id: randomId(),
-            role: "user",
-            text: rawPrompt || copy.attachedFallback,
-            timestampMs: Date.now(),
-          },
+        {
+          id: randomId(),
+          role: "user",
+          text: rawPrompt || copy.attachedFallback,
+          timestampMs: Date.now(),
+        },
       ]);
       setComposerValue("");
 
@@ -727,14 +782,14 @@ export function OpenClawAssistantPane({
         if (!response.ok || !response.body) {
           const payload = await response
             .json()
-            .catch(() => ({ error: copy.sendFailed } as AssistantApiErrorPayload));
-          throw new Error(
-            formatAssistantApiError({
-              payload: payload as AssistantApiErrorPayload,
-              isChinese,
-              fallback: copy.sendFailed,
-            }),
+            .catch(
+              () => ({ error: copy.sendFailed }) as AssistantApiErrorPayload,
+            );
+          presentAssistantError(
+            payload as AssistantApiErrorPayload,
+            copy.sendFailed,
           );
+          throw new Error(copy.sendFailed);
         }
 
         const reader = response.body.getReader();
@@ -776,23 +831,24 @@ export function OpenClawAssistantPane({
             }
 
             if (event.type === "error") {
-              setErrorMessage(
-                formatAssistantApiError({
-                  payload: {
-                    error: event.message,
-                    code: event.code,
-                    details: event.details ?? null,
-                    deviceId: event.deviceId,
-                  },
-                  isChinese,
-                  fallback: copy.sendFailed,
-                }),
+              presentAssistantError(
+                {
+                  error: event.message,
+                  code: event.code,
+                  details: event.details ?? null,
+                  deviceId: event.deviceId,
+                },
+                copy.sendFailed,
               );
             }
           }
         }
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : copy.sendFailed);
+        if (!(error instanceof Error && error.message === copy.sendFailed)) {
+          setErrorMessage(
+            error instanceof Error ? error.message : copy.sendFailed,
+          );
+        }
         setStreamingText("");
       } finally {
         setAttachments([]);
@@ -812,6 +868,7 @@ export function OpenClawAssistantPane({
       openclawToken,
       openclawOrigin,
       openclawUrl,
+      presentAssistantError,
       vaultNamespace,
       vaultSecretKey,
       vaultSecretPath,
@@ -839,19 +896,52 @@ export function OpenClawAssistantPane({
   }, [connectGateway, defaultsLoaded, openclawUrl]);
 
   useEffect(() => {
-    if (!initialQuestion || connectionState !== "ready") {
+    if (!initialQuestion) {
       return;
     }
 
     const resolvedKey = initialQuestionKey ?? 1;
-    if (lastInitialQuestionKeyRef.current === resolvedKey) {
+    if (lastPrefillQuestionKeyRef.current === resolvedKey) {
       return;
     }
 
-    lastInitialQuestionKeyRef.current = resolvedKey;
+    lastPrefillQuestionKeyRef.current = resolvedKey;
+    pendingAutoSubmitQuestionKeyRef.current = autoSubmitInitialQuestion
+      ? resolvedKey
+      : null;
     setComposerValue(initialQuestion);
+    requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(
+        initialQuestion.length,
+        initialQuestion.length,
+      );
+    });
+  }, [autoSubmitInitialQuestion, initialQuestion, initialQuestionKey]);
+
+  useEffect(() => {
+    if (
+      !autoSubmitInitialQuestion ||
+      !initialQuestion ||
+      connectionState !== "ready"
+    ) {
+      return;
+    }
+
+    const resolvedKey = initialQuestionKey ?? 1;
+    if (pendingAutoSubmitQuestionKeyRef.current !== resolvedKey) {
+      return;
+    }
+
+    pendingAutoSubmitQuestionKeyRef.current = null;
     void sendMessage(initialQuestion);
-  }, [connectionState, initialQuestion, initialQuestionKey, sendMessage]);
+  }, [
+    autoSubmitInitialQuestion,
+    connectionState,
+    initialQuestion,
+    initialQuestionKey,
+    sendMessage,
+  ]);
 
   function handleTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -895,105 +985,110 @@ export function OpenClawAssistantPane({
             minimalPage ? "min-h-[52px]" : "",
           )}
         >
-        {!minimalPage ? (
-          <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-subtle)]">
-            <span
+          {!minimalPage ? (
+            <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-subtle)]">
+              <span
+                className={cn(
+                  "h-2.5 w-2.5 rounded-full",
+                  connectionState === "ready"
+                    ? "bg-emerald-500"
+                    : connectionState === "connecting"
+                      ? "bg-amber-400"
+                      : connectionState === "error"
+                        ? "bg-rose-500"
+                        : "bg-[var(--color-text-subtle)]/40",
+                )}
+              />
+              {healthBadge}
+              {!compactConnected ? (
+                <>
+                  <span className="text-[var(--color-text-subtle)]/60">·</span>
+                  {gatewayTokenSource === "env"
+                    ? copy.envToken
+                    : gatewayTokenSource === "vault"
+                      ? copy.vaultToken
+                      : gatewayTokenSource === "request"
+                        ? copy.sessionToken
+                        : copy.noToken}
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {showMinimalAgentSelect ? (
+            <div
               className={cn(
-                "h-2.5 w-2.5 rounded-full",
-                connectionState === "ready"
-                  ? "bg-emerald-500"
-                  : connectionState === "connecting"
-                    ? "bg-amber-400"
-                    : connectionState === "error"
-                      ? "bg-rose-500"
-                      : "bg-[var(--color-text-subtle)]/40",
+                "min-w-[164px] flex-1",
+                minimalPage ? "max-w-xl" : "",
               )}
-            />
-            {healthBadge}
-            {!compactConnected ? (
-              <>
-                <span className="text-[var(--color-text-subtle)]/60">·</span>
-                {gatewayTokenSource === "env"
-                  ? copy.envToken
-                  : gatewayTokenSource === "vault"
-                    ? copy.vaultToken
-                    : gatewayTokenSource === "request"
-                      ? copy.sessionToken
-                      : copy.noToken}
-              </>
-            ) : null}
-          </div>
-        ) : null}
-
-        {showMinimalAgentSelect ? (
-          <div className={cn("min-w-[164px] flex-1", minimalPage ? "max-w-xl" : "")}>
-            <select
-              value={selectedAgentId}
-              onChange={(event) => {
-                setSelectedAgentId(event.target.value);
-                setSelectedSessionKey("");
-                void connectGateway("", event.target.value);
-              }}
-              className="w-full rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[color:var(--color-primary)]"
             >
-              <option value="">{copy.mainAgent}</option>
-              {agents.map((agent) => (
-                <option key={agent.id} value={agent.id}>
-                  {agent.emoji ? `${agent.emoji} ` : ""}
-                  {agent.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="flex-1" />
-        )}
+              <select
+                value={selectedAgentId}
+                onChange={(event) => {
+                  setSelectedAgentId(event.target.value);
+                  setSelectedSessionKey("");
+                  void connectGateway("", event.target.value);
+                }}
+                className="w-full rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[color:var(--color-primary)]"
+              >
+                <option value="">{copy.mainAgent}</option>
+                {agents.map((agent) => (
+                  <option key={agent.id} value={agent.id}>
+                    {agent.emoji ? `${agent.emoji} ` : ""}
+                    {agent.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
 
-        {minimalPage ? (
-          <div className="ml-auto inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-primary-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-heading)]">
-            <span
-              className={cn(
-                "h-2.5 w-2.5 rounded-full",
-                connectionState === "ready"
-                  ? "bg-emerald-500"
-                  : connectionState === "connecting"
-                    ? "bg-amber-400"
-                    : connectionState === "error"
-                      ? "bg-rose-500"
-                      : "bg-[var(--color-text-subtle)]/40",
-              )}
-            />
-            {healthBadge}
-          </div>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => {
-                void connectGateway();
-              }}
-              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
-              title={copy.reconnect}
-            >
-              {connectionState === "connecting" ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
-              )}
-              {!compactConnected ? copy.reconnect : null}
-            </button>
+          {minimalPage ? (
+            <div className="ml-auto inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] bg-[var(--color-primary-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-heading)]">
+              <span
+                className={cn(
+                  "h-2.5 w-2.5 rounded-full",
+                  connectionState === "ready"
+                    ? "bg-emerald-500"
+                    : connectionState === "connecting"
+                      ? "bg-amber-400"
+                      : connectionState === "error"
+                        ? "bg-rose-500"
+                        : "bg-[var(--color-text-subtle)]/40",
+                )}
+              />
+              {healthBadge}
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  void connectGateway();
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-surface-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:border-[color:var(--color-primary-border)] hover:bg-[var(--color-surface-muted)]"
+                title={copy.reconnect}
+              >
+                {connectionState === "connecting" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3.5 w-3.5" />
+                )}
+                {!compactConnected ? copy.reconnect : null}
+              </button>
 
-            <button
-              type="button"
-              onClick={() => router.push("/panel/api")}
-              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-90"
-              title={copy.integrations}
-            >
-              <Settings2 className="h-3.5 w-3.5" />
-              {!compactConnected ? copy.integrations : null}
-            </button>
-          </>
-        )}
+              <button
+                type="button"
+                onClick={() => router.push("/panel/api")}
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-primary-border)] bg-[var(--color-primary-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-90"
+                title={copy.integrations}
+              >
+                <Settings2 className="h-3.5 w-3.5" />
+                {!compactConnected ? copy.integrations : null}
+              </button>
+            </>
+          )}
         </div>
       ) : null}
 

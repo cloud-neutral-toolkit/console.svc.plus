@@ -25,9 +25,14 @@ export function AppProviders({
   const isOpenClawWorkspace =
     pathname.startsWith("/xworkmate") ||
     pathname.startsWith("/services/openclaw");
+  const isHomepage = pathname === "/";
 
   const reserveSpace =
-    !isOpenClawWorkspace && isOpen && !isMinimized && !isMobileViewport;
+    !isOpenClawWorkspace &&
+    !isHomepage &&
+    isOpen &&
+    !isMinimized &&
+    !isMobileViewport;
 
   useEffect(() => {
     setScope("global", assistantDefaults);
@@ -76,7 +81,7 @@ export function AppProviders({
             <div className="flex-1 flex flex-col w-full relative">
               {children}
             </div>
-            {!isOpenClawWorkspace ? (
+            {!isOpenClawWorkspace && !isHomepage ? (
               <AskAIDialog
                 open={isOpen}
                 defaults={assistantDefaults}

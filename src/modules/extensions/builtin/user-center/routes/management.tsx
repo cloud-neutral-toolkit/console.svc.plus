@@ -19,9 +19,11 @@ import UserGroupManagement, {
 } from "../management/components/UserGroupManagement";
 import SandboxNodeBindingPanel from "../management/components/SandboxNodeBindingPanel";
 import RootAssumeSandboxPanel from "../management/components/RootAssumeSandboxPanel";
+import HomepageVideoSettingsPanel from "../management/components/HomepageVideoSettingsPanel";
 import { EmailBlacklist } from "../management/components/EmailBlacklist";
 import Breadcrumbs from "@/app/panel/components/Breadcrumbs";
 import { resolveAccess } from "@lib/accessControl";
+import type { HomepageVideoSettingsResponse } from "@/lib/home/homepageVideo";
 import { useUserStore } from "@lib/userStore";
 import { useLanguage } from "@i18n/LanguageProvider";
 import { translations } from "@i18n/translations";
@@ -114,6 +116,13 @@ export default function UserCenterManagementRoute() {
     new Set(),
   );
   const [isBlacklistOpen, setIsBlacklistOpen] = useState(false);
+  const [homepageVideoSaving, setHomepageVideoSaving] = useState(false);
+  const [homepageVideoStatus, setHomepageVideoStatus] = useState<
+    string | undefined
+  >();
+  const [homepageVideoError, setHomepageVideoError] = useState<
+    string | undefined
+  >();
 
   const metricsSWR = useSWR<UserMetricsResponse>(
     canAccess ? "/api/admin/users/metrics" : null,
@@ -131,6 +140,13 @@ export default function UserCenterManagementRoute() {
   );
   const usersSWR = useSWR<ManagedUser[]>(
     canAccess ? "/api/users" : null,
+    jsonFetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+  const homepageVideoSWR = useSWR<HomepageVideoSettingsResponse>(
+    canAccess ? "/api/admin/homepage-video" : null,
     jsonFetcher,
     {
       revalidateOnFocus: false,
@@ -389,6 +405,51 @@ export default function UserCenterManagementRoute() {
     [canCreateCustomUser, usersSWR],
   );
 
+  const handleSaveHomepageVideo = useCallback(
+    async (payload: HomepageVideoSettingsResponse) => {
+      setHomepageVideoSaving(true);
+      setHomepageVideoStatus(undefined);
+      setHomepageVideoError(undefined);
+
+      try {
+        const response = await fetch("/api/admin/homepage-video", {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const responsePayload = (await response.json().catch(() => ({}))) as
+          | HomepageVideoSettingsResponse
+          | ApiError;
+
+        if (!response.ok) {
+          throw new Error(
+            (responsePayload as ApiError).error ??
+              (responsePayload as ApiError).message ??
+              "保存失败",
+          );
+        }
+
+        homepageVideoSWR.mutate(
+          responsePayload as HomepageVideoSettingsResponse,
+          { revalidate: false },
+        );
+        setHomepageVideoStatus("首页视频配置已保存");
+      } catch (error) {
+        setHomepageVideoError(
+          error instanceof Error ? error.message : "保存失败",
+        );
+      } finally {
+        setHomepageVideoSaving(false);
+      }
+    },
+    [homepageVideoSWR],
+  );
+
   const matrixPending = matrixSaving || isUserLoading;
   const metricsLoading = metricsSWR.isLoading;
   const settingsLoading = settingsSWR.isLoading;
@@ -433,6 +494,15 @@ export default function UserCenterManagementRoute() {
         onToggle={handleTogglePermission}
         onSave={handleSaveMatrix}
         canEdit={canEditPermissions}
+      />
+      <HomepageVideoSettingsPanel
+        settings={homepageVideoSWR.data}
+        isLoading={homepageVideoSWR.isLoading}
+        isSaving={homepageVideoSaving}
+        canEdit={canEditPermissions}
+        statusMessage={homepageVideoStatus}
+        errorMessage={homepageVideoError}
+        onSave={handleSaveHomepageVideo}
       />
       <UserGroupManagement
         users={usersSWR.data}

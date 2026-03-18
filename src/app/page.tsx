@@ -2,17 +2,16 @@
 
 export const dynamic = "error";
 
+import { useState } from "react";
 import {
   AppWindow,
   ArrowRight,
-  BookOpen,
+  Bot,
   Command,
   Layers,
   Link,
   Lock,
   MousePointerClick,
-  Play,
-  PlusCircle,
   ShieldCheck,
   Sparkles,
   Terminal,
@@ -20,14 +19,18 @@ import {
 } from "lucide-react";
 import useSWR from "swr";
 
+import { OpenClawAssistantPane } from "@/components/openclaw/OpenClawAssistantPane";
+import type { IntegrationDefaults } from "@/lib/openclaw/types";
 import Footer from "../components/Footer";
 import UnifiedNavigation from "../components/UnifiedNavigation";
 import { useLanguage } from "../i18n/LanguageProvider";
 import { translations } from "../i18n/translations";
 import {
-  heroVideoMedia,
-  type HeroVideoMedia,
-} from "../lib/home/heroVideoMedia";
+  DEFAULT_HOMEPAGE_VIDEO_SETTINGS,
+  resolveHomepageVideoPresentation,
+  type HomepageVideoPresentation,
+  type ResolvedHomepageVideoResponse,
+} from "../lib/home/homepageVideo";
 import { useMoltbotStore } from "../lib/moltbotStore";
 import { useUserStore } from "../lib/userStore";
 import { cn } from "../lib/utils";
@@ -38,6 +41,18 @@ const HOME_SECTION_LABEL_CLASS =
   "text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-text-subtle";
 const HOME_LIST_CARD_CLASS =
   "rounded-[1.5rem] border border-slate-900/10 bg-[#fcfbf8] transition duration-200";
+const EMPTY_ASSISTANT_DEFAULTS: IntegrationDefaults = {
+  openclawUrl: "",
+  openclawOrigin: "",
+  openclawTokenConfigured: false,
+  vaultUrl: "",
+  vaultNamespace: "",
+  vaultTokenConfigured: false,
+  vaultSecretPath: "",
+  vaultSecretKey: "",
+  apisixUrl: "",
+  apisixTokenConfigured: false,
+};
 
 const iconMap: Record<string, any> = {
   "Global Acceleration Network": Link,
@@ -71,6 +86,33 @@ const iconMap: Record<string, any> = {
 
 const getIcon = (key: string, fallback: any) => iconMap[key] || fallback;
 
+async function jsonFetcher<T>(
+  input: RequestInfo,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(input, {
+    ...init,
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      ...(init?.headers instanceof Headers
+        ? Object.fromEntries(init.headers.entries())
+        : init?.headers),
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      message?: string;
+    };
+    throw new Error(payload.error ?? payload.message ?? "请求失败");
+  }
+
+  return (await response.json()) as T;
+}
+
 export default function HomePage() {
   const { mode, isOpen } = useMoltbotStore();
 
@@ -92,6 +134,7 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
             <main className="relative space-y-6 pt-6 sm:space-y-8 sm:pt-10">
               <HeroSection />
+              <ProductDemoSection />
               <NextStepsSection />
               <StatsSection />
               <ShortcutsSection />
@@ -110,7 +153,54 @@ export function HeroSection() {
   const { user } = useUserStore();
   const { language } = useLanguage();
   const isChinese = language === "zh";
-  const t = translations[language].marketing.home;
+  const [promptSeed, setPromptSeed] = useState("");
+  const [promptSeedKey, setPromptSeedKey] = useState(0);
+  const assistantDefaultsSWR = useSWR<IntegrationDefaults>(
+    "/api/integrations/defaults",
+    jsonFetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const heroCopy = isChinese
+    ? {
+        eyebrow: "AI Native Workspace",
+        title: "直接说出你的需求，剩下的交给 AI",
+        subtitle: "从想法到上线，AI 自动完成构建、部署与优化。",
+        description:
+          "从 xstream 到 xworkmate，再到 console.svc.plus，用一次对话串起构建、部署、排障和运营。",
+        status: user
+          ? `当前模式：${user.username} · 可直接发起任务`
+          : "当前模式：Guest · 可直接体验",
+        examplesTitle: "你可以这样开始",
+        examplesHint: "点击任一示例后，会直接填入右侧输入框。",
+        examples: [
+          "帮我构建一个 SaaS 应用",
+          "分析这个报错并给出修复建议",
+          "生成一个 AI agent workflow",
+          "帮我设计一个控制台首页",
+        ],
+      }
+    : {
+        eyebrow: "AI Native Workspace",
+        title: "Describe what you need. Let AI handle the rest.",
+        subtitle:
+          "From idea to launch, AI can assemble, deploy, and optimize the work.",
+        description:
+          "From xstream to xworkmate to console.svc.plus, one conversation can carry the whole workflow.",
+        status: user
+          ? `Mode: ${user.username} · Ready to execute`
+          : "Mode: Guest · Ready to explore",
+        examplesTitle: "Try starting with",
+        examplesHint: "Click a prompt to fill the composer on the right.",
+        examples: [
+          "Help me build a SaaS app",
+          "Analyze this error and suggest a fix",
+          "Generate an AI agent workflow",
+          "Design a console homepage",
+        ],
+      };
 
   return (
     <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-900/10 bg-[linear-gradient(180deg,#ffffff,#faf7f2)] p-6 shadow-[0_24px_56px_rgba(15,23,42,0.05)] sm:p-8 lg:p-10">
@@ -122,64 +212,107 @@ export function HeroSection() {
       </div>
 
       <div className="relative grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:gap-12">
-        <div className="flex flex-col justify-between gap-8">
-          <div className="space-y-5">
-            {t.hero.eyebrow ? (
-              <p className={HOME_SECTION_LABEL_CLASS}>{t.hero.eyebrow}</p>
-            ) : null}
+        <div className="flex flex-col justify-between gap-8 pt-2">
+          <div className="space-y-6">
+            <p className={HOME_SECTION_LABEL_CLASS}>{heroCopy.eyebrow}</p>
             <h1
               className={cn(
-                "max-w-[11ch] leading-[0.88] text-heading",
+                "max-w-[10ch] leading-[0.94] text-heading",
                 isChinese
-                  ? "text-[2.85rem] font-semibold tracking-[-0.08em] sm:text-[3.4rem] lg:text-[4.5rem]"
-                  : "editorial-display text-[3.05rem] tracking-[-0.06em] sm:text-[3.6rem] lg:text-[4.8rem]",
+                  ? "text-[3.05rem] font-semibold tracking-[-0.055em] sm:text-[3.6rem] lg:text-[4.2rem]"
+                  : "editorial-display text-[3rem] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.3rem]",
               )}
             >
-              {t.hero.title}
+              {heroCopy.title}
             </h1>
-            <p className="max-w-xl text-[1rem] leading-8 text-text-muted sm:text-[1.05rem]">
-              {t.hero.subtitle}
-            </p>
+            <div className="max-w-xl space-y-3">
+              <p className="text-[1rem] leading-8 text-text-muted sm:text-[1.08rem]">
+                {heroCopy.subtitle}
+              </p>
+              <p className="text-sm leading-7 text-slate-500 sm:text-[0.98rem]">
+                {heroCopy.description}
+              </p>
+              <p className="text-xs font-medium tracking-[0.02em] text-slate-500">
+                {heroCopy.status}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {user ? (
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success/10 px-4 py-2 text-sm font-semibold text-success">
-                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                {t.signedIn.replace("{{username}}", user.username)}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-white">
+                <Bot className="h-4 w-4" />
               </div>
-            ) : (
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary"
-              >
-                <PlusCircle className="h-4 w-4" />
-                {t.heroButtons.create}
-              </button>
-            )}
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
-            >
-              <Play className="h-4 w-4" />
-              {t.heroButtons.playground}
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-[#f8f4ec] px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-[#f2ebdd]"
-            >
-              <BookOpen className="h-4 w-4" />
-              {t.heroButtons.tutorials}
-            </button>
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900">
+                  {heroCopy.examplesTitle}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {heroCopy.examplesHint}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {heroCopy.examples.map((example) => (
+                <button
+                  key={example}
+                  type="button"
+                  onClick={() => {
+                    setPromptSeed(example);
+                    setPromptSeedKey((current) => current + 1);
+                  }}
+                  className="group rounded-[1.35rem] border border-slate-200 bg-white/90 px-4 py-4 text-left shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-[1px] hover:border-slate-300 hover:bg-[#fbfaf7]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold leading-6 text-slate-900">
+                        {example}
+                      </p>
+                      <p className="text-xs leading-5 text-slate-500">
+                        {isChinese
+                          ? "点击后填入右侧输入框，不会自动发送。"
+                          : "Click to fill the composer on the right. It will not auto-submit."}
+                      </p>
+                    </div>
+                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-700" />
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="lg:pl-4">
-          <HeroVideoShell
-            items={t.heroCards.map((card) => card.title)}
-            isChinese={isChinese}
-            media={heroVideoMedia}
-          />
+          <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,251,0.98))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+            <div className="border-b border-slate-900/10 px-5 py-4 sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className={HOME_SECTION_LABEL_CLASS}>
+                    {isChinese ? "X 助手" : "X Assistant"}
+                  </p>
+                  <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
+                    {isChinese
+                      ? "首页只保留一个主路径：先提问，再由助手拆解任务、调用能力并推进执行。"
+                      : "The homepage keeps one primary path: ask first, then let the assistant plan and execute."}
+                  </p>
+                </div>
+                <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
+                  {isChinese ? "对话即入口" : "Prompt-first"}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <OpenClawAssistantPane
+                defaults={assistantDefaultsSWR.data ?? EMPTY_ASSISTANT_DEFAULTS}
+                initialQuestion={promptSeed}
+                initialQuestionKey={promptSeedKey}
+                autoSubmitInitialQuestion={false}
+                variant="page"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -465,30 +598,21 @@ type LatestBlogPost = {
   date?: string;
 };
 
-function HeroVideoShell({
-  items,
-  isChinese,
-  media,
-}: {
-  items: string[];
-  isChinese: boolean;
-  media: HeroVideoMedia;
-}) {
-  const mediaTitle = isChinese ? media.title.zh : media.title.en;
-  const mediaDescription = isChinese
-    ? media.description.zh
-    : media.description.en;
-  const mediaStatusLabel = isChinese
-    ? media.statusLabel.zh
-    : media.statusLabel.en;
-  const hasVideo = Boolean(media.videoUrl);
-  const previewStyle = media.posterUrl
-    ? {
-        backgroundImage: `linear-gradient(180deg,rgba(15,23,42,0.18),rgba(15,23,42,0.52)), url(${media.posterUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : undefined;
+function ProductDemoSection() {
+  const { language } = useLanguage();
+  const isChinese = language === "zh";
+  const { data } = useSWR<ResolvedHomepageVideoResponse>(
+    "/api/homepage-video",
+    jsonFetcher,
+    {
+      fallbackData: {
+        resolved: DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry,
+      },
+      revalidateOnFocus: false,
+    },
+  );
+  const entry = data?.resolved ?? DEFAULT_HOMEPAGE_VIDEO_SETTINGS.defaultEntry;
+  const presentation = resolveHomepageVideoPresentation(entry);
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-slate-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,247,252,0.96))] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
@@ -500,111 +624,106 @@ function HeroVideoShell({
             </p>
             <p className="mt-2 max-w-md text-sm leading-6 text-text-muted">
               {isChinese
-                ? "这里预留为视频展示区，后续可以直接替换成产品介绍、工作流演示或 onboarding 视频。"
-                : "Reserved for a video showcase. You can later replace it with a product intro, workflow demo, or onboarding clip."}
+                ? "这里展示当前域名对应的产品演示链接。主站默认走 YouTube，中国站可切到 Bilibili，也可以继续按域名覆盖。"
+                : "This section resolves the product demo for the current host. The default can use YouTube while regional hosts override it."}
             </p>
           </div>
           <span className="hidden rounded-full border border-slate-900/10 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-600 sm:inline-flex">
-            {isChinese ? "16:9 占位" : "16:9 shell"}
+            {isChinese ? "按域名解析" : "Domain aware"}
           </span>
         </div>
       </div>
 
       <div className="space-y-4 p-4 sm:p-5">
-        <div
-          className={cn(
-            "group relative aspect-video overflow-hidden rounded-[1.6rem] border border-slate-900/10",
-            !hasVideo &&
-              "bg-[radial-gradient(circle_at_top_left,rgba(51,102,255,0.16),transparent_34%),linear-gradient(135deg,#0f172a,#172033_52%,#1f2d4d)]",
-          )}
-          style={previewStyle}
-        >
-          {hasVideo ? (
-            <video
-              className="h-full w-full object-cover"
-              controls
-              playsInline
-              preload="metadata"
-              poster={media.posterUrl || undefined}
-            >
-              <source src={media.videoUrl} />
-            </video>
-          ) : (
-            <>
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(15,23,42,0.18))]"
-              />
-              <div
-                aria-hidden
-                className="absolute left-5 top-5 h-20 w-20 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.18),transparent_70%)] blur-2xl"
-              />
-              <div
-                aria-hidden
-                className="absolute right-[-1.5rem] top-[-1.5rem] h-28 w-28 rounded-full border border-white/10"
-              />
-            </>
-          )}
-
-          <div className="absolute inset-0 flex flex-col justify-between p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {mediaStatusLabel}
-              </span>
-              <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs font-medium text-white/70">
-                {media.durationLabel}
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {!hasVideo ? (
-                <button
-                  type="button"
-                  className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white shadow-[0_14px_35px_rgba(15,23,42,0.25)] backdrop-blur transition group-hover:scale-[1.02]"
-                >
-                  <Play className="ml-1 h-7 w-7" fill="currentColor" />
-                </button>
-              ) : null}
-              <div className="max-w-lg space-y-2">
-                <p className="text-xl font-semibold tracking-[-0.03em] text-white sm:text-2xl">
-                  {mediaTitle}
-                </p>
-                <p className="text-sm leading-6 text-white/72 sm:text-[0.95rem]">
-                  {mediaDescription}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/12">
-                <div className="h-full w-[28%] rounded-full bg-white/75" />
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-[11px] font-medium text-white/60 sm:text-xs">
-                {media.chapters.map((chapter) => (
-                  <span
-                    key={chapter.en}
-                    className="rounded-full border border-white/10 bg-white/8 px-3 py-2 text-center"
-                  >
-                    {isChinese ? chapter.zh : chapter.en}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {items.map((item) => (
-            <span
-              key={item}
-              className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
-            >
-              {item}
-            </span>
-          ))}
+        <DemoVideoSurface presentation={presentation} isChinese={isChinese} />
+        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+          <span className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600">
+            {entry.domain?.trim()
+              ? `${isChinese ? "当前域名" : "Host"}: ${entry.domain}`
+              : isChinese
+                ? "默认主站配置"
+                : "Default site config"}
+          </span>
+          <a
+            href={entry.videoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center rounded-full border border-slate-900/10 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+          >
+            {isChinese ? "打开原始链接" : "Open source link"}
+          </a>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DemoVideoSurface({
+  presentation,
+  isChinese,
+}: {
+  presentation: HomepageVideoPresentation;
+  isChinese: boolean;
+}) {
+  const fallbackStyle =
+    presentation.posterUrl && presentation.kind === "empty"
+      ? {
+          backgroundImage: `linear-gradient(180deg,rgba(15,23,42,0.16),rgba(15,23,42,0.42)), url(${presentation.posterUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : undefined;
+
+  return (
+    <div
+      className={cn(
+        "group relative aspect-video overflow-hidden rounded-[1.6rem] border border-slate-900/10 bg-[radial-gradient(circle_at_top_left,rgba(51,102,255,0.16),transparent_34%),linear-gradient(135deg,#0f172a,#172033_52%,#1f2d4d)]",
+        presentation.kind !== "empty" && "bg-slate-950",
+      )}
+      style={fallbackStyle}
+    >
+      {presentation.kind === "embed" ? (
+        <iframe
+          src={presentation.src}
+          title={isChinese ? "产品演示视频" : "Product demo video"}
+          className="h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : null}
+
+      {presentation.kind === "direct" ? (
+        <video
+          className="h-full w-full object-cover"
+          controls
+          playsInline
+          preload="metadata"
+          poster={presentation.posterUrl || undefined}
+        >
+          <source src={presentation.src} />
+        </video>
+      ) : null}
+
+      {presentation.kind === "empty" ? (
+        <div className="absolute inset-0 flex flex-col justify-between p-5 sm:p-6">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-amber-300" />
+            {isChinese ? "待接入视频" : "Awaiting media"}
+          </div>
+          <div className="max-w-lg space-y-2">
+            <p className="text-xl font-semibold tracking-[-0.03em] text-white sm:text-2xl">
+              {isChinese
+                ? "这里会展示当前域名的视频演示"
+                : "This area shows the domain-specific product demo"}
+            </p>
+            <p className="text-sm leading-6 text-white/72 sm:text-[0.95rem]">
+              {isChinese
+                ? "管理页可为不同域名配置不同链接。若链接不是可嵌入或直链格式，这里会保留为占位状态。"
+                : "The admin page can assign a different link per host. Unsupported links remain in placeholder mode until a valid embed or direct video URL is provided."}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
