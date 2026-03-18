@@ -1,7 +1,8 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-export const dynamic = "force-dynamic";
 import { XWorkmateProfileEditor } from "@/components/xworkmate/XWorkmateProfileEditor";
+
+export const dynamic = "force-dynamic";
 import {
   buildSharedXWorkmateUrl,
   isLegacyConsoleXWorkmateHost,
