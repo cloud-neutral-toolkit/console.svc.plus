@@ -2,11 +2,9 @@
 
 export const dynamic = "error";
 
-import { useState } from "react";
 import {
   AppWindow,
   ArrowRight,
-  Bot,
   Command,
   Layers,
   Link,
@@ -149,9 +147,6 @@ export default function HomePage() {
 export function HeroSection() {
   const { language } = useLanguage();
   const isChinese = language === "zh";
-  const [promptSeed, setPromptSeed] = useState("");
-  const [promptSeedKey, setPromptSeedKey] = useState(0);
-  const t = translations[language].marketing.home;
   const assistantDefaultsSWR = useSWR<IntegrationDefaults>(
     "/api/integrations/defaults",
     jsonFetcher,
@@ -181,15 +176,6 @@ export function HeroSection() {
         demoLabel: "产品演示",
         demoHint:
           "这里展示当前域名对应的产品演示链接。主站默认走 YouTube，中国站可切到 Bilibili，也可以继续按域名覆盖。",
-        startTitle: t.nextSteps.title,
-        startHint: "保留原有 onboarding 内容，但改成更轻、更整齐的起步列表。",
-        itemHint: "点击后填入右侧输入框，不会自动发送。",
-        examples: [
-          "帮我构建一个 SaaS 应用",
-          "分析这个报错并给出修复建议",
-          "生成一个 AI agent workflow",
-          "帮我设计一个控制台首页",
-        ],
       }
     : {
         eyebrow: "AI Native Workspace",
@@ -199,16 +185,6 @@ export function HeroSection() {
         demoLabel: "Product demo",
         demoHint:
           "This section resolves the product demo for the current host. The default can use YouTube while regional hosts override it.",
-        startTitle: t.nextSteps.title,
-        startHint:
-          "Keep the same onboarding content, in a lighter and calmer starting list.",
-        itemHint: "Click to fill the composer on the right. It will not auto-submit.",
-        examples: [
-          "Help me build a SaaS app",
-          "Analyze this error and suggest a fix",
-          "Generate an AI agent workflow",
-          "Design a console homepage",
-        ],
       };
 
   return (
@@ -273,53 +249,6 @@ export function HeroSection() {
                 {heroCopy.subtitle}
               </p>
             </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-white">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-slate-900">
-                    {heroCopy.startTitle}
-                  </h2>
-                  <p className="text-xs text-slate-500">{heroCopy.startHint}</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3">
-                {t.nextSteps.items.map((item, index: number) => {
-                  const example = heroCopy.examples[index] ?? item.title;
-
-                  return (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => {
-                        setPromptSeed(example);
-                        setPromptSeedKey((current) => current + 1);
-                      }}
-                      className="group flex items-center justify-between gap-4 rounded-[1.25rem] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-left shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-[1px] hover:border-slate-300 hover:bg-[#fbfaf7]"
-                    >
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex rounded-full border border-slate-900/10 bg-[#f8f4ec] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-                            {item.status}
-                          </span>
-                          <p className="truncate text-sm font-semibold text-slate-900">
-                            {item.title}
-                          </p>
-                        </div>
-                        <p className="text-xs leading-5 text-slate-500">
-                          {heroCopy.itemHint}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-700" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -346,8 +275,6 @@ export function HeroSection() {
             <div className="p-4 sm:p-5">
               <OpenClawAssistantPane
                 defaults={assistantDefaultsSWR.data ?? EMPTY_ASSISTANT_DEFAULTS}
-                initialQuestion={promptSeed}
-                initialQuestionKey={promptSeedKey}
                 autoSubmitInitialQuestion={false}
                 variant="page"
               />

@@ -1,6 +1,8 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
+
+import { headers } from "next/headers";
+import { connection } from "next/server";
+import { redirect } from "next/navigation";
 import { XWorkmateProfileEditor } from "@/components/xworkmate/XWorkmateProfileEditor";
 import {
   buildSharedXWorkmateUrl,
@@ -17,6 +19,7 @@ export const metadata = {
 };
 
 export default async function XWorkmateIntegrationsPage() {
+  await connection();
   const requestHeaders = await headers();
   const requestHost = normalizeXWorkmateHost(
     requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
