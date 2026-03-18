@@ -1,31 +1,28 @@
 # 部署
 
-该仓库以 Web 前端体验为主，文档需要覆盖产品流程、界面边界与集成触点。
+## 生产基线
 
-本页用于统一部署前提、支持的拓扑、运维检查项与回滚注意事项。
+- 运行拓扑: `Caddy + Docker Compose`
+- 目标主机: `47.120.61.35`
+- 域名:
+  - `cn.svc.plus`
+  - `cn.onwalk.net`
+- 前端独立发布流水线: `.github/workflows/service_release_frontend-deploy.yml`
 
-## 与当前代码对齐的说明
+## 运行方式
 
-- 文档目标仓库: `console.svc.plus`
-- 仓库类型: `frontend`
-- 构建与运行依据: package.json (`dashboard`)
-- 主要实现与运维目录: `src/`, `scripts/`, `tests/`, `config/`, `public/`
-- `package.json` 脚本快照: `dev`, `prebuild`, `build`, `build:static`, `start`, `lint`
+前端镜像在 GitHub Actions 中完成构建并推送到镜像仓库，目标主机只负责拉取镜像和启动容器，不在机器上本地构建。
 
-## 需要继续归并的现有文档
+当前方案尽量以静态模式运行：
 
-- `development/dev-setup.md`
-- `getting-started/installation.md`
-- `getting-started/quickstart.md`
-- `governance/release-process.md`
-- `operations/runbooks/README.md`
-- `operations/runbooks/rag-server.md`
+- Caddy 直接服务 `/_next/static/*` 与 `public/` 里的静态资源。
+- Next.js standalone 容器只承接动态页面、认证接口和代理接口。
+- `knowledge/` 在 CI 阶段拉取，并在 Docker 打包时直接写入镜像。
+
+这是针对当前单机弱 IO 环境的权衡。后续如果 `docs.svc.plus` 被拆成独立 API 服务，需要同步调整这里和 `docs/usage/deployment.md` 的镜像内容与路由职责。
+
+## 相关文档
+
 - `usage/deployment.md`
-- `zh/development/dev-setup.md`
-
-## 本页下一步应补充的内容
-
-- 先描述当前已落地实现，再补充未来规划，避免只写愿景不写现状。
-- 术语需要与仓库根 README、构建清单和实际目录保持一致。
-- 将上方列出的历史 runbook、spec、子系统说明逐步链接并归并到本页。
-- 每次发布前，依据当前脚本、清单、CI/CD 流程和环境契约重新核对部署步骤。
+- `governance/release-process.md`
+- `development/dev-setup.md`
