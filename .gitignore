@@ -1,6 +1,7 @@
 .env
 models/
 *.tsbuildinfo
+knowledge/
 
 # macOS
 .DS_Store
