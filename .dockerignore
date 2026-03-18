@@ -1,0 +1,15 @@
+.git
+.github
+.next
+.contentlayer
+node_modules
+coverage
+dist
+build
+test-results
+*.log
+.env
+.env.local
+.env.*.local
+deploy/single-node/.env.runtime
+knowledge/.git

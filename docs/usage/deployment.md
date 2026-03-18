@@ -3,146 +3,142 @@
 ## Scope
 
 - Runtime: `console.svc.plus`
-- Frontend host: Vercel
-- Edge: Cloudflare
-- Auth backend: `https://accounts.svc.plus`
+- Topology: `Caddy + Docker Compose + GitHub Actions`
+- Deploy host: `root@47.120.61.35`
+- Public domains:
+  - `https://cn.svc.plus`
+  - `https://cn.onwalk.net`
+- Primary origin: `https://cn.svc.plus`
 
-This runbook is the minimum checklist for production incidents where login or MFA stops working and browser devtools show `/api/auth/login` or `/api/auth/mfa/*` failures.
+## Current Delivery Model
 
-## Expected Request Flow
+The production frontend is deployed as a prebuilt container image from GitHub Actions.
 
-1. Browser loads `https://console.svc.plus/login`
-2. Browser calls same-origin Next routes on `console.svc.plus`
-3. Next route proxies server-side to `https://accounts.svc.plus/api/auth/*`
-4. `accounts.svc.plus` returns either a session token or an MFA challenge
+- The target host does not build images locally.
+- The workflow builds an `linux/amd64` image and pushes it to `ghcr.io/<owner>/dashboard:<sha>`.
+- The host only performs `docker login`, `docker compose pull`, static asset extraction, and `docker compose up`.
+- `knowledge/` is cloned during CI build and packed into the image.
+- Static assets are extracted from the image into a shared Docker volume so Caddy can serve `/_next/static/*` and checked-in public files directly.
 
-The browser should not call `accounts.svc.plus` directly for login.
+This is intentionally static-first for the current weak-IO single-node host. Dynamic HTML, auth routes, and API proxy routes still run through the Next.js container. When `docs.svc.plus` is later split into an API/service, revisit this runbook and remove docs content from the frontend image.
 
-## Fast Triage
+## Runtime Layout
 
-Run these checks first:
+Remote directory:
 
 ```bash
-curl -si https://console.svc.plus/login | sed -n '1,20p'
-curl -si https://console.svc.plus/api/auth/login | sed -n '1,20p'
-curl -si https://accounts.svc.plus/healthz | sed -n '1,20p'
-curl -si https://accounts.svc.plus/api/auth/login | sed -n '1,20p'
+/opt/console-svc-plus
 ```
 
-Interpretation:
+Files deployed there:
 
-- `console.svc.plus` returns `403` with `cf-mitigated: challenge`
-  Cloudflare is blocking the page or auth API before Vercel sees it.
-- `console.svc.plus/api/auth/login` returns `404`
-  Vercel production is not serving the expected Next route, or Cloudflare is pointing at the wrong origin/deployment behavior.
-- `accounts.svc.plus/healthz` fails
-  Back-end outage. Fix backend first.
-- `accounts.svc.plus/api/auth/login` returns `200` with `mfaRequired`
-  Backend is healthy; continue on console/Vercel/Cloudflare.
+```bash
+docker-compose.yml
+Caddyfile
+.env.runtime
+```
 
-## Application Checks
+Containers:
 
-Verify the current build still contains the auth routes:
+- `dashboard`: Next.js standalone runtime on port `3000`
+- `frontend-assets`: one-shot task that copies `static/` and `public/` into a shared volume
+- `caddy`: TLS termination and reverse proxy
+
+## GitHub Actions Inputs
+
+Workflow:
+
+```text
+.github/workflows/service_release_frontend-deploy.yml
+```
+
+Secrets required:
+
+- `FRONTEND_DEPLOY_SSH_KEY`
+- `OPENCLAW_GATEWAY_TOKEN` if used
+- `VAULT_TOKEN` if used
+- `AI_GATEWAY_ACCESS_TOKEN` if used
+- `INTERNAL_SERVICE_TOKEN` if used
+- `CLOUDFLARE_API_TOKEN` if used
+
+Repository/environment variables recommended:
+
+- `APP_BASE_URL`
+- `NEXT_PUBLIC_APP_BASE_URL`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_LOGIN_URL`
+- `NEXT_PUBLIC_DOCS_BASE_URL`
+- `ACCOUNT_SERVICE_URL`
+- `NEXT_PUBLIC_ACCOUNT_SERVICE_URL`
+- `SERVER_SERVICE_URL`
+- `NEXT_PUBLIC_SERVER_SERVICE_URL`
+- `RUNTIME_HOSTNAME`
+- `DEPLOYMENT_HOSTNAME`
+- `NEXT_PUBLIC_RUNTIME_ENVIRONMENT`
+- `NEXT_PUBLIC_RUNTIME_REGION`
+- `NEXT_PUBLIC_GISCUS_*`
+- `NEXT_PUBLIC_STRIPE_*`
+- `NEXT_PUBLIC_PAYPAL_CLIENT_ID`
+
+## Release Flow
+
+1. GitHub Actions checks out the repo.
+2. GitHub Actions clones `knowledge/`.
+3. Docker builds the frontend image with the public `NEXT_PUBLIC_*` values needed at build time.
+4. The image is pushed to GHCR.
+5. The workflow renders `.env.runtime`.
+6. The workflow uploads `docker-compose.yml`, `Caddyfile`, and `.env.runtime` to the host.
+7. The host pulls the new image, refreshes the static asset volume, and starts `dashboard + caddy`.
+8. The workflow verifies `cn.svc.plus` and `cn.onwalk.net`.
+
+## Verification Commands
+
+Local syntax checks:
 
 ```bash
 cd /Users/shenlan/workspaces/cloud-neutral-toolkit/console.svc.plus
-yarn build
-cat .next/app-path-routes-manifest.json | jq 'with_entries(select(.key|test("/api/auth/")))'
+bash -n scripts/github-actions/render-frontend-runtime-env.sh
+bash -n scripts/github-actions/deploy-frontend-single-node.sh
+cp deploy/single-node/.env.runtime.example deploy/single-node/.env.runtime
+docker compose -f deploy/single-node/docker-compose.yml --env-file deploy/single-node/.env.runtime config >/tmp/console-compose.rendered.yaml
+rm -f deploy/single-node/.env.runtime
+python3 - <<'PY'
+from pathlib import Path
+import yaml
+yaml.safe_load(Path('.github/workflows/service_release_frontend-deploy.yml').read_text())
+print('workflow yaml ok')
+PY
 ```
 
-Verify the login page still uses same-origin routes:
+Remote checks:
 
 ```bash
-nl -ba 'src/app/(auth)/login/LoginForm.tsx' | sed -n '64,180p'
-nl -ba 'src/app/api/auth/login/route.ts' | sed -n '1,180p'
-nl -ba 'src/app/api/auth/mfa/verify/route.ts' | sed -n '1,180p'
+ssh root@47.120.61.35 "cd /opt/console-svc-plus && docker compose --env-file .env.runtime ps"
+ssh root@47.120.61.35 "curl -fsSI -H 'Host: cn.svc.plus' http://127.0.0.1/"
+curl -fsSIL https://cn.svc.plus
+curl -fsSIL https://cn.onwalk.net
 ```
 
-Expected behavior:
+## Failure Signatures
 
-- `LoginForm` posts to `/api/auth/login`
-- login proxy accepts backend `mfaRequired` / `mfaTicket`
-- MFA verify proxy calls `/api/auth/mfa/verify`
+- `docker login ghcr.io` fails
+  The workflow token or package visibility is wrong.
+- `frontend-assets` fails
+  The image layout changed and no longer contains `/app/dashboard/static` or `/app/dashboard/public`.
+- `cn.svc.plus` returns `502`
+  Caddy is up, but the `dashboard` container failed or is not reachable on port `3000`.
+- `cn.onwalk.net` does not redirect
+  Check the deployed `Caddyfile` and domain DNS.
 
-## Vercel Checks
+## Rollback
 
-In the Vercel project for `console-svc-plus`, verify:
-
-1. The production deployment corresponds to the intended git commit.
-2. Framework preset is `Next.js`.
-3. Build command is `yarn build` or the project default, not a static export command.
-4. Output is not being overridden to static export.
-5. Production Functions include `app/api/auth/login` and the other `app/api/auth/*` handlers.
-6. Required runtime env vars are present for the auth proxy path if they are managed in Vercel.
-
-If the route exists locally but Vercel returns `404`, suspect:
-
-- wrong production deployment selected
-- wrong root directory/project link
-- stale alias or domain assignment
-- build output mismatch between local and Vercel
-
-## Cloudflare Checks
-
-If `curl` shows `cf-mitigated: challenge`, check Cloudflare first.
-
-Look for:
-
-1. Managed Challenge or WAF custom rules affecting `/login`
-2. Managed Challenge or WAF custom rules affecting `/api/auth/*`
-3. Bot Fight Mode or Super Bot Fight Mode interactions
-4. Transform/redirect/cache rules that alter `/api/auth/*`
-5. Page Rules or Ruleset Engine policies applied only to the production hostname
-
-Recommended policy for auth API:
-
-- Do not cache `/api/auth/*`
-- Do not apply JS challenge to `/api/auth/*`
-- Keep standard security headers, but let requests reach Vercel
-
-## Backend Verification
-
-Use the backend directly to prove whether auth is healthy:
+1. Re-run the workflow with a previous known-good image tag.
+2. Or update `/opt/console-svc-plus/.env.runtime` and set `FRONTEND_IMAGE=ghcr.io/<owner>/dashboard:<previous-tag>`.
+3. Restart the services:
 
 ```bash
-cd /Users/shenlan/workspaces/cloud-neutral-toolkit/accounts.svc.plus
-set -a; source .env; set +a
-payload=$(printf '{"identifier":"admin@svc.plus","password":"%s"}' "$SUPERADMIN_PASSWORD")
-curl -sS -X POST https://accounts.svc.plus/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d "$payload"
+ssh root@47.120.61.35 "cd /opt/console-svc-plus && docker compose --env-file .env.runtime run --rm frontend-assets"
+ssh root@47.120.61.35 "cd /opt/console-svc-plus && docker compose --env-file .env.runtime up -d dashboard caddy"
 ```
 
-Expected for an MFA-enabled admin:
-
-- HTTP `200`
-- response contains `mfaRequired`
-- response contains `mfaTicket` or `mfaToken`
-
-## Known Failure Signatures
-
-- `POST https://console.svc.plus/api/auth/login 404`
-  Likely Vercel deployment mismatch or route not published.
-- `403` with `cf-mitigated: challenge`
-  Cloudflare blocked request before Vercel.
-- login returns generic failure even though backend returns MFA challenge
-  Console auth proxy is not parsing MFA fields correctly.
-- MFA code accepted by authenticator but web login still fails
-  Console proxy may be calling the setup endpoint instead of the login MFA endpoint.
-
-## Rollback Strategy
-
-When a release breaks auth:
-
-1. Remove or relax Cloudflare rules affecting `/login` and `/api/auth/*`
-2. Re-point domain to last known-good Vercel production deployment
-3. Roll back `console.svc.plus`
-4. Only then consider `accounts.svc.plus` rollback
-
-## Related Files
-
-- `src/app/(auth)/login/LoginForm.tsx`
-- `src/app/api/auth/login/route.ts`
-- `src/app/api/auth/mfa/status/route.ts`
-- `src/app/api/auth/mfa/verify/route.ts`
-- `src/server/serviceConfig.ts`
+4. Verify `https://cn.svc.plus` again before closing the incident.

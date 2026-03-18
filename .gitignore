@@ -55,6 +55,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+deploy/single-node/.env.runtime
 
 # Build artifacts
 build/
