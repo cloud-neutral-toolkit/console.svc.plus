@@ -25,7 +25,7 @@ import type { IntegrationDefaults } from "@/lib/openclaw/types";
 import type { XWorkmateProfileResponse } from "@/lib/xworkmate/types";
 import { cn } from "@/lib/utils";
 import { useOpenClawConsoleStore } from "@/state/openclawConsoleStore";
-import { XWorkmateAssistantShell } from "@/components/xworkmate/XWorkmateAssistantShell";
+import { OpenClawAssistantPane } from "@/components/openclaw/OpenClawAssistantPane";
 
 type WorkspaceDestination =
   | "assistant"
@@ -556,23 +556,27 @@ export function XWorkmateWorkspacePage({
   scopeKey,
   requestHost,
   initialPrompt = "",
+  initialSessionKey = "",
 }: {
   defaults: IntegrationDefaults;
   profile?: XWorkmateProfileResponse | null;
   scopeKey: string;
   requestHost?: string;
   initialPrompt?: string;
+  initialSessionKey?: string;
 }) {
   const { language } = useLanguage();
   const isChinese = language === "zh";
   const router = useRouter();
   const [activeSection, setActiveSection] =
     useState<WorkspaceDestination>("assistant");
-  const [composerValue, setComposerValue] = useState(initialPrompt);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   const setScope = useOpenClawConsoleStore((state) => state.setScope);
   const applyDefaults = useOpenClawConsoleStore((state) => state.applyDefaults);
+  const setSelectedSessionKey = useOpenClawConsoleStore(
+    (state) => state.setSelectedSessionKey,
+  );
   const openclawUrl = useOpenClawConsoleStore((state) => state.openclawUrl);
   const vaultUrl = useOpenClawConsoleStore((state) => state.vaultUrl);
   const apisixUrl = useOpenClawConsoleStore((state) => state.apisixUrl);
@@ -583,8 +587,11 @@ export function XWorkmateWorkspacePage({
   }, [applyDefaults, defaults, scopeKey, setScope]);
 
   useEffect(() => {
-    setComposerValue(initialPrompt);
-  }, [initialPrompt]);
+    if (!initialSessionKey.trim()) {
+      return;
+    }
+    setSelectedSessionKey(initialSessionKey);
+  }, [initialSessionKey, setSelectedSessionKey]);
 
   const sections = useMemo(() => createSections(isChinese), [isChinese]);
   const activeDefinition =
@@ -768,22 +775,13 @@ export function XWorkmateWorkspacePage({
                 </div>
               ) : null}
               {activeSection === "assistant" ? (
-                <XWorkmateAssistantShell
-                  mode="full"
-                  isChinese={isChinese}
-                  endpointLabel={endpointLabel}
-                  connected={connected}
-                  prompt={composerValue}
-                  onPromptChange={setComposerValue}
-                  onOpenConnections={openConnections}
-                  canManageConnections={canEditIntegrations}
-                  primaryActionLabel={primaryActionLabel}
-                  secondaryActionLabel={secondaryActionLabel}
-                  connectionHint={connectionHint}
-                  actionDisabled={!canEditIntegrations}
-                  showConnectionStatus={
-                    profile?.profileScope !== "tenant-shared"
-                  }
+                <OpenClawAssistantPane
+                  defaults={defaults}
+                  initialQuestion={initialPrompt}
+                  initialQuestionKey={initialPrompt ? 1 : undefined}
+                  initialSessionKey={initialSessionKey}
+                  autoSubmitInitialQuestion={false}
+                  variant="page"
                 />
               ) : (
                 <SectionOverview

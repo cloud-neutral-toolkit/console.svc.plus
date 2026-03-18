@@ -1,11 +1,16 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
+import { headers } from "next/headers";
 
 import { XWorkmateLoading } from "@/app/xworkmate/XWorkmateLoading";
 import { XWorkmateWorkspacePage } from "@/components/xworkmate/XWorkmateWorkspacePage";
-import { buildXWorkmateScopeKey } from "@/lib/xworkmate/types";
+import {
+  buildXWorkmateScopeKey,
+  toXWorkmateIntegrationDefaults,
+} from "@/lib/xworkmate/types";
 import { getConsoleIntegrationDefaults } from "@/server/consoleIntegrations";
+import { getXWorkmateSessionContext } from "@/server/xworkmate/profile";
 
 export const metadata = {
   title: "XWorkmate",
@@ -15,14 +20,26 @@ export const metadata = {
 export default async function XWorkmatePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ prompt?: string }>;
+  searchParams?: Promise<{ prompt?: string; sessionKey?: string }>;
 }) {
-  const defaults = getConsoleIntegrationDefaults();
-  const scopeKey = buildXWorkmateScopeKey(null, null);
+  const requestHeaders = await headers();
+  const requestHost = requestHeaders.get("host");
+  const { user, profile } = await getXWorkmateSessionContext(requestHost);
+  const defaults =
+    profile ? toXWorkmateIntegrationDefaults(profile) : getConsoleIntegrationDefaults();
+  const scopeKey = buildXWorkmateScopeKey(
+    profile,
+    user?.id ?? user?.uuid ?? null,
+    requestHost,
+  );
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const initialPrompt =
     typeof resolvedSearchParams?.prompt === "string"
       ? resolvedSearchParams.prompt
+      : "";
+  const initialSessionKey =
+    typeof resolvedSearchParams?.sessionKey === "string"
+      ? resolvedSearchParams.sessionKey
       : "";
 
   return (
@@ -30,7 +47,10 @@ export default async function XWorkmatePage({
       <Suspense fallback={<XWorkmateLoading />}>
         <XWorkmateWorkspacePage
           defaults={defaults}
+          profile={profile}
           initialPrompt={initialPrompt}
+          initialSessionKey={initialSessionKey}
+          requestHost={requestHost ?? undefined}
           scopeKey={scopeKey}
         />
       </Suspense>
