@@ -1,4 +1,4 @@
-export const dynamic = "error";
+export const dynamic = "force-dynamic";
 export const revalidate = false;
 
 import type { Metadata } from "next";
@@ -6,8 +6,8 @@ import { Suspense } from "react";
 
 import BlogList from "@components/blog/BlogList";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import type { BlogCategory, BlogPostSummary } from "@lib/blogContent";
-import { getBlogCategories, getBlogPosts } from "@lib/blogContent";
+import type { BlogCategoryPayload, BlogPostPayload } from "@lib/docsServiceClient";
+import { getBlogList } from "@lib/docsServiceClient";
 
 export const metadata: Metadata = {
   title: "Blog | Cloud-Neutral",
@@ -16,10 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const posts = await getBlogPosts();
-  const categories: BlogCategory[] = await getBlogCategories();
-  const postsWithoutContent: BlogPostSummary[] = posts.map(
-    ({ content: _content, ...post }) => post,
+  const listing = await getBlogList({ page: 1, pageSize: 200 });
+  const categories: BlogCategoryPayload[] = listing.categories;
+  const postsWithoutContent = listing.posts.map(
+    ({ html: _html, plaintext: _plaintext, sourcePath: _sourcePath, language: _language, ...post }: BlogPostPayload) => post,
   );
 
   return (

@@ -1,4 +1,4 @@
-export const dynamic = "error";
+export const dynamic = "force-dynamic";
 export const revalidate = false;
 
 import type { Metadata } from "next";
@@ -6,7 +6,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
-import DocArticle from "@/components/doc/DocArticle";
 import DocMetaPanel from "@/components/doc/DocMetaPanel";
 import { PublicPageIntro } from "@/components/public/PublicPageShell";
 import { isFeatureEnabled } from "@lib/featureToggles";
@@ -41,14 +40,6 @@ function DocsBreadcrumbs({
     </nav>
   );
 }
-
-export const generateStaticParams = async () => {
-  if (!isFeatureEnabled("appModules", "/docs")) {
-    return [];
-  }
-
-  return getDocVersionParams();
-};
 
 export const dynamicParams = false;
 
@@ -109,7 +100,10 @@ export default async function DocVersionPage({
         </section>
 
         <section className="rounded-[1rem] border border-slate-900/8 bg-white/90 p-5 shadow-[var(--shadow-soft)] lg:p-6">
-          <DocArticle content={version.content} />
+          <article
+            className="public-doc-prose"
+            dangerouslySetInnerHTML={{ __html: version.html }}
+          />
         </section>
 
         <Feedback />

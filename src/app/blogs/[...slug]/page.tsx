@@ -6,8 +6,7 @@ import { notFound } from "next/navigation";
 
 import BrandCTA from "@components/BrandCTA";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import { getBlogPostBySlug } from "@lib/blogContent";
-import { renderMarkdownContent } from "@server/render-markdown";
+import { getBlogPost } from "@lib/docsServiceClient";
 
 type PageProps = {
   params: Promise<{ slug: string | string[] }>;
@@ -38,7 +37,12 @@ export async function generateMetadata({
   const slugPath = Array.isArray(slugParam.slug)
     ? slugParam.slug.join("/")
     : slugParam.slug;
-  const post = await getBlogPostBySlug(slugPath);
+  let post;
+  try {
+    post = await getBlogPost(slugPath);
+  } catch {
+    post = undefined;
+  }
 
   if (!post) {
     return { title: "Blog Post | Cloud-Neutral" };
@@ -55,15 +59,19 @@ export default async function BlogPostPage({ params }: PageProps) {
   const slugPath = Array.isArray(slugParam.slug)
     ? slugParam.slug.join("/")
     : slugParam.slug;
-  const post = await getBlogPostBySlug(slugPath);
+  let post;
+  try {
+    post = await getBlogPost(slugPath);
+  } catch {
+    post = undefined;
+  }
 
   if (!post) {
     notFound();
   }
 
-  const html = renderMarkdownContent(post.content);
   const language: "zh" | "en" = /[\u4e00-\u9fff]/.test(
-    `${post.title} ${post.content}`,
+    `${post.title} ${post.excerpt} ${post.plaintext ?? ""}`,
   )
     ? "zh"
     : "en";
@@ -123,7 +131,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <section className="rounded-[2rem] border border-slate-900/10 bg-white/92 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)] lg:p-8">
           <article
             className="public-doc-prose"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: post.html }}
           />
         </section>
 

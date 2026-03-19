@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getBlogPosts } from "@/lib/blogContent";
+import { getLatestBlogPosts } from "@/lib/docsServiceClient";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = parseLimit(searchParams.get("limit"));
 
-  const posts = await getBlogPosts();
+  const posts = await getLatestBlogPosts(limit);
   const latestPosts = posts.slice(0, limit).map((post) => ({
     slug: post.slug,
     title: post.title,

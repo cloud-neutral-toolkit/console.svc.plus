@@ -1,29 +1,17 @@
-import { promises as fs } from "fs";
-import path from "path";
+export const dynamic = "force-dynamic";
 
-import matter from "gray-matter";
 import { ArrowRight, BookCopy, Files } from "lucide-react";
 import Link from "next/link";
-
-import DocArticle from "@/components/doc/DocArticle";
 import { PublicPageIntro } from "@/components/public/PublicPageShell";
 
-import { getDocCollections } from "./resources.server";
+import { getDocCollections, getDocsHomeContent } from "./resources.server";
 
 export default async function DocsHome() {
   try {
-    const indexPath = path.join(
-      process.cwd(),
-      "src",
-      "content",
-      "doc",
-      "index.md",
-    );
-    const [fileContent, collections] = await Promise.all([
-      fs.readFile(indexPath, "utf-8"),
+    const [home, collections] = await Promise.all([
+      getDocsHomeContent(),
       getDocCollections(),
     ]);
-    const { data: frontmatter, content } = matter(fileContent);
     const articleCount = collections.reduce(
       (sum, collection) => sum + collection.versions.length,
       0,
@@ -35,9 +23,9 @@ export default async function DocsHome() {
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <PublicPageIntro
               eyebrow="Documentation"
-              title={frontmatter.title || "Documentation"}
+              title={home?.title || "Documentation"}
               subtitle={
-                frontmatter.description ||
+                home?.description ||
                 "Unified references for Cloud-Neutral Toolkit services."
               }
               titleClassName="editorial-display text-[2.8rem] tracking-[-0.06em] sm:text-[3.4rem]"
@@ -132,7 +120,10 @@ export default async function DocsHome() {
               Overview
             </p>
           </div>
-          <DocArticle content={content} />
+          <article
+            className="public-doc-prose"
+            dangerouslySetInnerHTML={{ __html: home?.html ?? "" }}
+          />
         </section>
       </div>
     );
@@ -145,8 +136,7 @@ export default async function DocsHome() {
           No Documentation Found
         </h3>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-text-muted">
-          We could not find any documentation files. Please ensure content is
-          synced to <code>src/content/doc</code>.
+          We could not load the remote documentation service.
         </p>
       </div>
     );

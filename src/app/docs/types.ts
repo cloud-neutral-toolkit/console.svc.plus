@@ -5,8 +5,10 @@ export interface DocVersionOption {
   description: string
   updatedAt?: string
   tags?: string[]
-  content: string
-  isMdx: boolean
+  content?: string
+  html: string
+  toc?: Array<{ level: number; title: string; anchor: string }>
+  isMdx?: boolean
   category?: string
   subcategory?: boolean
 }

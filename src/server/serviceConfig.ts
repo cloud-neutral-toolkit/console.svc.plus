@@ -4,6 +4,7 @@ import { loadRuntimeConfig } from './runtime-loader'
 
 const FALLBACK_ACCOUNT_SERVICE_URL = 'https://accounts.svc.plus'
 const FALLBACK_SERVER_SERVICE_URL = 'https://api.svc.plus'
+const FALLBACK_DOCS_SERVICE_URL = 'https://docs.svc.plus'
 
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
 
@@ -17,6 +18,12 @@ function getRuntimeDefaultServerServiceUrl(): string {
   const runtime = loadRuntimeConfig()
   const candidate = typeof runtime.apiBaseUrl === 'string' ? runtime.apiBaseUrl : undefined
   return candidate ?? FALLBACK_SERVER_SERVICE_URL
+}
+
+function getRuntimeDefaultDocsServiceUrl(): string {
+  const runtime = loadRuntimeConfig()
+  const candidate = typeof runtime.docsServiceUrl === 'string' ? runtime.docsServiceUrl : undefined
+  return candidate ?? FALLBACK_DOCS_SERVICE_URL
 }
 
 
@@ -108,6 +115,12 @@ const SERVER_INTERNAL_URL_ENV_KEYS = [
   'INTERNAL_SERVER_SERVICE_URL',
 ] as const
 
+const DOCS_SERVICE_URL_ENV_KEYS = [
+  'DOCS_SERVICE_URL',
+  'NEXT_PUBLIC_DOCS_SERVICE_URL',
+  'DOCS_SERVICE_INTERNAL_URL',
+] as const
+
 export function getInternalServerServiceBaseUrl(): string {
   const configured = readEnvValue(...SERVER_INTERNAL_URL_ENV_KEYS)
   if (configured) {
@@ -118,11 +131,19 @@ export function getInternalServerServiceBaseUrl(): string {
   return getServerServiceBaseUrl()
 }
 
+export function getDocsServiceBaseUrl(): string {
+  const configured = readEnvValue(...DOCS_SERVICE_URL_ENV_KEYS)
+  return normalizeBaseUrl(configured ?? getRuntimeDefaultDocsServiceUrl())
+}
+
 export const serviceConfig = {
   account: {
     baseUrl: getAccountServiceBaseUrl(),
   },
   server: {
     baseUrl: getServerServiceBaseUrl(),
+  },
+  docs: {
+    baseUrl: getDocsServiceBaseUrl(),
   },
 } as const

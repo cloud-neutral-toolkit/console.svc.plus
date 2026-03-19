@@ -13,22 +13,12 @@ echo "======================================"
 
 # Step 1: Sync documentation from service repositories
 echo ""
-echo "[1/4] Syncing documentation content..."
-bash scripts/sync-doc-content.sh
-
-# Step 2: Sync blog content
-echo ""
-echo "[2/4] Syncing blog content..."
-bash scripts/sync-blog-content.sh
-
-# Step 3: Generate static content (homepage, products)
-echo ""
-echo "[3/4] Generating static content..."
+echo "[1/2] Generating static content..."
 npx tsx scripts/generate-content.ts
 
-# Step 4: Build contentlayer
+# Step 2: Build contentlayer
 echo ""
-echo "[4/4] Building contentlayer..."
+echo "[2/2] Building contentlayer..."
 node scripts/build-contentlayer.mjs
 
 echo ""

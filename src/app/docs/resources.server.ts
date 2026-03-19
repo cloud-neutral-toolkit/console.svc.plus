@@ -2,7 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 
-import { getDocCollection, getDocCollections as loadDocCollections, getDocParams } from '@lib/docContent'
+import { getDocCollections as loadDocCollections, getDocPage, getDocsHome } from '@lib/docsServiceClient'
 import { isFeatureEnabled } from '@lib/featureToggles'
 import type { DocCollection } from './types'
 
@@ -16,6 +16,13 @@ export const getDocCollections = cache(async (): Promise<DocCollection[]> => {
 })
 
 export const getDocCollectionsForBuildTime = getDocCollections
+
+export const getDocsHomeContent = cache(async () => {
+  if (!isDocsModuleEnabled()) {
+    return undefined
+  }
+  return getDocsHome()
+})
 
 export async function getDocResources(): Promise<DocCollection[]> {
   return getDocCollections()
@@ -31,22 +38,17 @@ export async function getDocResource(slug: string): Promise<DocCollection | unde
 }
 
 export async function getDocVersionParams() {
-  if (!isDocsModuleEnabled()) {
-    return []
-  }
-  return getDocParams()
+  return []
 }
 
 export async function getDocVersion(collectionSlug: string, slugSegments: string | string[]) {
   if (!isDocsModuleEnabled()) {
     return undefined
   }
-  const collection = await getDocCollection(collectionSlug)
-  if (!collection) return undefined
-
   const targetSlug = Array.isArray(slugSegments) ? slugSegments.join('/') : slugSegments
-  const versionMatch = collection.versions.find((item) => item.slug === targetSlug)
-
-  if (!versionMatch) return undefined
-  return { collection, version: versionMatch }
+  try {
+    return await getDocPage(collectionSlug, targetSlug)
+  } catch {
+    return undefined
+  }
 }

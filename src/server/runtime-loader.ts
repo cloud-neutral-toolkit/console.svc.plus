@@ -53,6 +53,7 @@ export type RuntimeConfig = {
   apiBaseUrl?: string
   authUrl?: string
   dashboardUrl?: string
+  docsServiceUrl?: string
   internalApiBaseUrl?: string
   logLevel?: string
   [key: string]: unknown

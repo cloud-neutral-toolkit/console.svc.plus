@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { getBlogPosts } from '@/lib/blogContent'
-import { getDocCollections } from '@/lib/docContent'
+import { getBlogList, getDocCollections } from '@/lib/docsServiceClient'
 import { PRODUCT_LIST } from '@/modules/products/registry'
 
 const baseUrl = 'https://console.svc.plus'
@@ -10,7 +9,10 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, collections] = await Promise.all([getBlogPosts(), getDocCollections()])
+  const [{ posts }, collections] = await Promise.all([
+    getBlogList({ page: 1, pageSize: 500 }),
+    getDocCollections(),
+  ])
 
   const staticEntries: MetadataRoute.Sitemap = [
     {
