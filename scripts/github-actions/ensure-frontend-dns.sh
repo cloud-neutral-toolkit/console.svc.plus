@@ -7,9 +7,14 @@ if [[ "${1-}" == "--dry-run" ]]; then
   shift
 fi
 
-TARGET_IP="${1:?usage: ensure-frontend-dns.sh [--dry-run] <target-ip> <primary-domain> <secondary-domain>}"
-PRIMARY_DOMAIN="${2:?usage: ensure-frontend-dns.sh [--dry-run] <target-ip> <primary-domain> <secondary-domain>}"
-SECONDARY_DOMAIN="${3:?usage: ensure-frontend-dns.sh [--dry-run] <target-ip> <primary-domain> <secondary-domain>}"
+TARGET_IP="${1:?usage: ensure-frontend-dns.sh [--dry-run] <target-ip> <domain> [domain...]}"
+shift
+
+if [[ "$#" -lt 1 ]]; then
+  echo "usage: ensure-frontend-dns.sh [--dry-run] <target-ip> <domain> [domain...]" >&2
+  exit 1
+fi
+
 PROXIED="${CLOUDFLARE_PROXIED:-true}"
 
 require_env() {
@@ -26,6 +31,45 @@ json_get() {
   python3 -c "import json,sys; data=json.load(sys.stdin); ${expression}"
 }
 
+cloudflare_api_get() {
+  local path="$1"
+  curl -fsS \
+    -H "Authorization: Bearer ${CLOUDFLARE_DNS_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    "https://api.cloudflare.com/client/v4${path}"
+}
+
+resolve_zone_for_domain() {
+  local domain="$1"
+  local candidate="${domain%.}"
+  local response
+  local zone_id
+
+  if [[ -n "${CLOUDFLARE_DNS_ZONE_TAG-}" ]]; then
+    printf '%s\t%s\n' "${CLOUDFLARE_DNS_ZONE_TAG}" "override"
+    return 0
+  fi
+
+  while [[ "${candidate}" == *.* ]]; do
+    response="$(cloudflare_api_get "/zones?name=${candidate}")"
+    if [[ "$(printf '%s' "${response}" | json_get 'print("true" if data.get("success") else "false")')" != "true" ]]; then
+      echo "Failed to query Cloudflare zones for ${candidate}" >&2
+      exit 1
+    fi
+
+    zone_id="$(printf '%s' "${response}" | json_get 'result=data.get("result", []); print(result[0]["id"] if result else "")')"
+    if [[ -n "${zone_id}" ]]; then
+      printf '%s\t%s\n' "${zone_id}" "${candidate}"
+      return 0
+    fi
+
+    candidate="${candidate#*.}"
+  done
+
+  echo "Unable to resolve Cloudflare zone for ${domain}" >&2
+  exit 1
+}
+
 dns_payload() {
   local domain="$1"
   DOMAIN="${domain}" TARGET_IP="${TARGET_IP}" PROXIED="${PROXIED}" python3 -c \
@@ -37,6 +81,8 @@ upsert_record() {
   local payload
   local response
   local record_id
+  local zone_id
+  local zone_name
 
   payload="$(dns_payload "${domain}")"
 
@@ -46,12 +92,11 @@ upsert_record() {
     return 0
   fi
 
-  response="$(
-    curl -fsS \
-      -H "Authorization: Bearer ${CLOUDFLARE_DNS_API_TOKEN}" \
-      -H "Content-Type: application/json" \
-      "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_TAG}/dns_records?type=A&name=${domain}"
-  )"
+  IFS=$'\t' read -r zone_id zone_name <<EOF
+$(resolve_zone_for_domain "${domain}")
+EOF
+
+  response="$(cloudflare_api_get "/zones/${zone_id}/dns_records?type=A&name=${domain}")"
 
   if [[ "$(printf '%s' "${response}" | json_get 'print("true" if data.get("success") else "false")')" != "true" ]]; then
     echo "Failed to query Cloudflare DNS records for ${domain}" >&2
@@ -66,7 +111,7 @@ upsert_record() {
         -H "Authorization: Bearer ${CLOUDFLARE_DNS_API_TOKEN}" \
         -H "Content-Type: application/json" \
         --data "${payload}" \
-        "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_TAG}/dns_records/${record_id}"
+        "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records/${record_id}"
     )"
   else
     response="$(
@@ -74,7 +119,7 @@ upsert_record() {
         -H "Authorization: Bearer ${CLOUDFLARE_DNS_API_TOKEN}" \
         -H "Content-Type: application/json" \
         --data "${payload}" \
-        "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_TAG}/dns_records"
+        "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records"
     )"
   fi
 
@@ -83,13 +128,13 @@ upsert_record() {
     exit 1
   fi
 
-  printf 'updated: %s -> %s\n' "${domain}" "${TARGET_IP}"
+  printf 'updated: %s -> %s (zone %s)\n' "${domain}" "${TARGET_IP}" "${zone_name}"
 }
 
 if [[ "${DRY_RUN}" != "true" ]]; then
   require_env CLOUDFLARE_DNS_API_TOKEN
-  require_env CLOUDFLARE_ZONE_TAG
 fi
 
-upsert_record "${PRIMARY_DOMAIN}"
-upsert_record "${SECONDARY_DOMAIN}"
+for domain in "$@"; do
+  upsert_record "${domain}"
+done

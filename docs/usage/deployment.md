@@ -88,6 +88,8 @@ Repository/environment variables recommended:
 - `NEXT_PUBLIC_GISCUS_*`
 - `NEXT_PUBLIC_STRIPE_*`
 - `NEXT_PUBLIC_PAYPAL_CLIENT_ID`
+- `CLOUDFLARE_ZONE_TAG` if homepage Cloudflare analytics are enabled at runtime
+- `CLOUDFLARE_DNS_ZONE_TAG` only for single-domain manual DNS override; the GitHub Actions DNS stage resolves zones from each domain automatically
 
 ## Release Flow
 
@@ -95,10 +97,11 @@ Repository/environment variables recommended:
 2. GitHub Actions clones `knowledge/`.
 3. Docker builds the frontend image with the public `NEXT_PUBLIC_*` values needed at build time.
 4. The image is pushed to GHCR.
-5. The workflow renders `.env.runtime`.
-6. The workflow uploads `docker-compose.yml`, `Caddyfile`, and `.env.runtime` to the host.
-7. The host pulls the new image, refreshes the static asset volume, and starts `dashboard + caddy`.
-8. The workflow verifies `cn.svc.plus` and `cn.onwalk.net`.
+5. The workflow runs a matrix DNS stage, updating one public domain per job.
+6. The workflow renders `.env.runtime`.
+7. The workflow uploads `docker-compose.yml`, `Caddyfile`, and `.env.runtime` to the host.
+8. The host pulls the new image, refreshes the static asset volume, and starts `dashboard + caddy`.
+9. The workflow verifies `cn.svc.plus` and `cn.onwalk.net`.
 
 ## Verification Commands
 
