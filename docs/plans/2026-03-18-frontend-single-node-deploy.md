@@ -208,7 +208,7 @@ This avoids rebuilding and keeps rollback cheap on the weak-IO host.
 
 Secrets must not be committed to the repo. The workflow should consume:
 
-- `FRONTEND_DEPLOY_SSH_KEY`
+- `SINGLE_NODE_VPS_SSH_PRIVATE_KEY`
 - service tokens
 - vault tokens
 - internal service token

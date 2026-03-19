@@ -62,7 +62,7 @@ Workflow:
 
 Secrets required:
 
-- `FRONTEND_DEPLOY_SSH_KEY`
+- `SINGLE_NODE_VPS_SSH_PRIVATE_KEY`
 - `OPENCLAW_GATEWAY_TOKEN` if used
 - `VAULT_TOKEN` if used
 - `AI_GATEWAY_ACCESS_TOKEN` if used
