@@ -11,12 +11,12 @@ echo "======================================"
 echo "Starting prebuild process..."
 echo "======================================"
 
-# Step 1: Sync documentation from service repositories
+# Step 1: Generate local marketing content artifacts
 echo ""
-echo "[1/2] Generating static content..."
+echo "[1/2] Generating marketing content..."
 npx tsx scripts/generate-content.ts
 
-# Step 2: Build contentlayer
+# Step 2: Build contentlayer artifacts used by non-doc pages
 echo ""
 echo "[2/2] Building contentlayer..."
 node scripts/build-contentlayer.mjs

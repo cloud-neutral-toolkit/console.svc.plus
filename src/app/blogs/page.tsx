@@ -6,7 +6,6 @@ import { Suspense } from "react";
 
 import BlogList from "@components/blog/BlogList";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import type { BlogCategoryPayload, BlogPostPayload } from "@lib/docsServiceClient";
 import { getBlogList } from "@lib/docsServiceClient";
 
 export const metadata: Metadata = {
@@ -17,9 +16,15 @@ export const metadata: Metadata = {
 
 export default async function BlogPage() {
   const listing = await getBlogList({ page: 1, pageSize: 200 });
-  const categories: BlogCategoryPayload[] = listing.categories;
+  const categories = listing.categories;
   const postsWithoutContent = listing.posts.map(
-    ({ html: _html, plaintext: _plaintext, sourcePath: _sourcePath, language: _language, ...post }: BlogPostPayload) => post,
+    ({
+      html: _html,
+      plaintext: _plaintext,
+      sourcePath: _sourcePath,
+      language: _language,
+      ...post
+    }) => post,
   );
 
   return (

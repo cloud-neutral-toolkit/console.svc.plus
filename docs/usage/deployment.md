@@ -17,18 +17,14 @@ The production frontend is deployed as a prebuilt container image from GitHub Ac
 - The target host does not build images locally.
 - The workflow builds an `linux/amd64` image and pushes it to `ghcr.io/<owner>/dashboard:<sha>`.
 - The host only performs `docker login`, `docker compose pull`, static asset extraction, and `docker compose up`.
-- `knowledge/` is cloned during CI build (via `scripts/sync-blog-content.sh`) and synced with other docs (via `scripts/sync-doc-content.sh`) before being packed into the image.
+- `/docs` and `/blogs` fetch their content from `docs.svc.plus` at runtime; the frontend image no longer packs `knowledge/` or synced markdown payloads.
 - Static assets are extracted from the image into a shared Docker volume so Caddy can serve `/_next/static/*` and checked-in public files directly.
 
-This is intentionally static-first for the current weak-IO single-node host. Dynamic HTML, auth routes, and API proxy routes still run through the Next.js container. When `docs.svc.plus` is later split into an API/service, revisit this runbook and remove docs content from the frontend image.
+This is intentionally static-first for the current weak-IO single-node host. Dynamic HTML, auth routes, and API proxy routes still run through the Next.js container, but docs/blog content delivery is now delegated to `docs.svc.plus`.
 
 ## Control Plane & DNS Stage
 
 The control repo (`github-org-x-evor`) tracks `console.svc.plus` through `console.svc.plus.code-workspace` and keeps the `subrepos/accounts.svc.plus` pointer in sync via `skills/cross-repo-upstream-submodule-sync`. Releases resolve metadata with that workspace and the `config/single-node-release` manifests. After `.github/workflows/service_release_frontend-deploy.yml` finishes pushing the new image, the control-plane workflow `.github/workflows/service_release_apiserver-deploy.yml` calls `scripts/github-actions/update-release-dns.sh` to update Cloudflare DNS so the new endpoint is reachable under `cn.svc.plus` and `cn.onwalk.net`.
-
-## Future Docs Strategy
-
-Because the frontend currently ships docs content directly (knowledge/blog + rendered markdown), any future split where `docs.svc.plus` becomes an API-backed service should include a repo-level migration plan: stop syncing docs into the frontend image, move documentation storage/serving into the dedicated API, and adjust the runbook/workflow notes above accordingly.
 
 ## Runtime Layout
 
@@ -83,6 +79,8 @@ Repository/environment variables recommended:
 - `NEXT_PUBLIC_SERVER_SERVICE_URL`
 - `RUNTIME_HOSTNAME`
 - `DEPLOYMENT_HOSTNAME`
+- `DOCS_SERVICE_URL`
+- `DOCS_SERVICE_INTERNAL_URL`
 - `NEXT_PUBLIC_RUNTIME_ENVIRONMENT`
 - `NEXT_PUBLIC_RUNTIME_REGION`
 - `NEXT_PUBLIC_GISCUS_*`
@@ -94,14 +92,13 @@ Repository/environment variables recommended:
 ## Release Flow
 
 1. GitHub Actions checks out the repo.
-2. GitHub Actions clones `knowledge/`.
-3. Docker builds the frontend image with the public `NEXT_PUBLIC_*` values needed at build time.
-4. The image is pushed to GHCR.
-5. The workflow runs a matrix DNS stage, updating one public domain per job.
-6. The workflow renders `.env.runtime`.
-7. The workflow uploads `docker-compose.yml`, `Caddyfile`, and `.env.runtime` to the host.
-8. The host pulls the new image, refreshes the static asset volume, and starts `dashboard + caddy`.
-9. The workflow verifies `cn.svc.plus` and `cn.onwalk.net`.
+2. Docker builds the frontend image with the public `NEXT_PUBLIC_*` values needed at build time.
+3. The image is pushed to GHCR.
+4. The workflow runs a matrix DNS stage, updating one public domain per job.
+5. The workflow renders `.env.runtime`, including docs service runtime endpoints.
+6. The workflow uploads `docker-compose.yml`, `Caddyfile`, and `.env.runtime` to the host.
+7. The host pulls the new image, refreshes the static asset volume, and starts `dashboard + caddy`.
+8. The workflow verifies `cn.svc.plus` and `cn.onwalk.net`.
 
 ## Verification Commands
 

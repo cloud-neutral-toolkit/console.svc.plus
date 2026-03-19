@@ -9,7 +9,21 @@ import BrandCTA from "@components/BrandCTA";
 import { PublicPageIntro } from "@/components/public/PublicPageShell";
 import SearchComponent from "@components/search";
 import { useLanguage } from "@i18n/LanguageProvider";
-import type { BlogCategory, BlogPostSummary } from "@lib/blogContent";
+
+type BlogCategory = {
+  key: string;
+  label: string;
+};
+
+type BlogPostSummary = {
+  slug: string;
+  title: string;
+  author?: string;
+  date?: string;
+  tags: string[];
+  excerpt: string;
+  category?: BlogCategory;
+};
 
 function formatDate(
   dateStr: string | undefined,
