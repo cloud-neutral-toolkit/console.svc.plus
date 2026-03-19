@@ -49,7 +49,6 @@ init:
 			 echo "❌ Unsupported OS. Please install Yarn manually."; exit 1; \
 		 fi; \
 	fi
-	yarn config set npmRegistryServer https://registry.npmmirror.com
 	yarn install --immutable
 
 ensure-deps:
@@ -83,7 +82,6 @@ test:
 	@yarn test || echo "No tests configured"
 
 build: init
-	yarn config set npmRegistryServer https://registry.npmmirror.com
 	@if [ -z "$(SKIP_SYNC)" ]; then \
 		 $(MAKE) sync-dl-index; \
 	fi

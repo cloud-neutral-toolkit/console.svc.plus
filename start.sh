@@ -8,12 +8,13 @@ cd /var/www/XControl/dashboard
 # 2. 安装 Node.js 和 npm
 sudo apt install -y nodejs
 
-# 安装生产依赖（跳过 devDependencies）
-npm install --omit=dev --registry=https://registry.npmmirror.com
-npm install -g yarn --registry=https://registry.npmmirror.com
+# 使用仓库声明的 Yarn 版本和 npm 官方 registry，避免落到全局 Yarn Classic 或 yarnpkg proxy。
+corepack enable
+corepack prepare yarn@4.12.0 --activate
+yarn install --immutable
+
 # 构建项目
-/usr/bin/npm run build --registry=https://registry.npmmirror.com
+yarn build
 
 # 启动 Next.js 生产服务器
-/usr/bin/npm start
-
+yarn start
