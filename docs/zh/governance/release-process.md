@@ -49,5 +49,5 @@
 
 ## 备注
 
-- GitHub Release：`https://github.com/cloud-neutral-toolkit/console.svc.plus/releases/tag/v0.2`
+- GitHub Release：`https://github.com/x-evor/console.svc.plus/releases/tag/v0.2`
 - 相关文档：`docs/README.md`、`docs/en/README.md`、`docs/zh/README.md`

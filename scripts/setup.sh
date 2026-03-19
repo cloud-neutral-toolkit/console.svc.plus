@@ -8,7 +8,7 @@ Usage:
 
 Examples:
   # Remote install:
-  # curl -fsSL "https://raw.githubusercontent.com/cloud-neutral-toolkit/<repo>/main/scripts/setup.sh?$(date +%s)" | bash -s -- <repo>
+  # curl -fsSL "https://raw.githubusercontent.com/x-evor/<repo>/main/scripts/setup.sh?$(date +%s)" | bash -s -- <repo>
   #
   # Local:
   # bash scripts/setup.sh <repo>
@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "${REPO_URL}" ]]; then
-  REPO_URL="https://github.com/cloud-neutral-toolkit/${NAME}.git"
+  REPO_URL="https://github.com/x-evor/${NAME}.git"
 fi
 
 need_cmd git

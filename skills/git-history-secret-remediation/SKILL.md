@@ -3,7 +3,7 @@ name: git-history-secret-remediation
 description: Use when a user asks to detect secrets in git commit history, clean tracked sensitive data, rewrite history with git-filter-repo, or verify cleanup with gitleaks. Covers gitleaks detect -v, replacement mapping, path removal, ref inventory, history rewrites, force-push planning, and post-cleanup coordination.
 license: Internal use only
 metadata:
-  owner: cloud-neutral-toolkit
+  owner: x-evor
   distribution: clawhub-compatible
   package-format: .skill
 ---

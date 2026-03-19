@@ -25,7 +25,7 @@ emit_lines() {
   printf 'NEXT_PUBLIC_DOCS_BASE_URL=%s\n' "${NEXT_PUBLIC_DOCS_BASE_URL:-https://${primary_domain}/docs}"
   printf 'NEXT_PUBLIC_RUNTIME_ENVIRONMENT=%s\n' "${NEXT_PUBLIC_RUNTIME_ENVIRONMENT:-prod}"
   printf 'NEXT_PUBLIC_RUNTIME_REGION=%s\n' "${NEXT_PUBLIC_RUNTIME_REGION:-cn}"
-  printf 'NEXT_PUBLIC_GISCUS_REPO=%s\n' "${NEXT_PUBLIC_GISCUS_REPO:-cloud-neutral-toolkit/console.svc.plus}"
+  printf 'NEXT_PUBLIC_GISCUS_REPO=%s\n' "${NEXT_PUBLIC_GISCUS_REPO:-x-evor/console.svc.plus}"
   printf 'NEXT_PUBLIC_GISCUS_REPO_ID=%s\n' "${NEXT_PUBLIC_GISCUS_REPO_ID-}"
   printf 'NEXT_PUBLIC_GISCUS_CATEGORY=%s\n' "${NEXT_PUBLIC_GISCUS_CATEGORY:-General}"
   printf 'NEXT_PUBLIC_GISCUS_CATEGORY_ID=%s\n' "${NEXT_PUBLIC_GISCUS_CATEGORY_ID-}"

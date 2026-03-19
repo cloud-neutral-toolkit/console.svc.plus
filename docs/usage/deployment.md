@@ -24,7 +24,7 @@ This is intentionally static-first for the current weak-IO single-node host. Dyn
 
 ## Control Plane & DNS Stage
 
-The control repo (`github-org-cloud-neutral-toolkit`) tracks `console.svc.plus` through `console.svc.plus.code-workspace` and keeps the `subrepos/accounts.svc.plus` pointer in sync via `skills/cross-repo-upstream-submodule-sync`. Releases resolve metadata with that workspace and the `config/single-node-release` manifests. After `.github/workflows/service_release_frontend-deploy.yml` finishes pushing the new image, the control-plane workflow `.github/workflows/service_release_apiserver-deploy.yml` calls `scripts/github-actions/update-release-dns.sh` to update Cloudflare DNS so the new endpoint is reachable under `cn.svc.plus` and `cn.onwalk.net`.
+The control repo (`github-org-x-evor`) tracks `console.svc.plus` through `console.svc.plus.code-workspace` and keeps the `subrepos/accounts.svc.plus` pointer in sync via `skills/cross-repo-upstream-submodule-sync`. Releases resolve metadata with that workspace and the `config/single-node-release` manifests. After `.github/workflows/service_release_frontend-deploy.yml` finishes pushing the new image, the control-plane workflow `.github/workflows/service_release_apiserver-deploy.yml` calls `scripts/github-actions/update-release-dns.sh` to update Cloudflare DNS so the new endpoint is reachable under `cn.svc.plus` and `cn.onwalk.net`.
 
 ## Future Docs Strategy
 

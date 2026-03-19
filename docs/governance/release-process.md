@@ -47,5 +47,5 @@ Published commit: `0fab89e`
 
 ## Notes
 
-- GitHub Release: `https://github.com/cloud-neutral-toolkit/console.svc.plus/releases/tag/v0.2`
+- GitHub Release: `https://github.com/x-evor/console.svc.plus/releases/tag/v0.2`
 - Related docs: `docs/README.md`, `docs/en/README.md`, `docs/zh/README.md`

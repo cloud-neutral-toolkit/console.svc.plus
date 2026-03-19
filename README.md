@@ -20,7 +20,7 @@ Cloud Neutral Toolkit 的开放云控制面板 (Open Cloud Control Panel).
 ### 一键初始化 (Setup Script)
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/cloud-neutral-toolkit/console.svc.plus/main/scripts/setup.sh?$(date +%s)" \
+curl -fsSL "https://raw.githubusercontent.com/x-evor/console.svc.plus/main/scripts/setup.sh?$(date +%s)" \
   | bash -s -- console.svc.plus
 ```
 

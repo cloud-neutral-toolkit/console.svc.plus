@@ -1435,7 +1435,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           title: 'Cloud Infrastructure',
           content: 'GitHub / Cloudflare / Vercel / Google Cloud Run',
           links: [
-            { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+            { label: 'GitHub', url: 'https://github.com/x-evor' },
             { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
             { label: 'Vercel', url: 'https://vercel.com' },
             { label: 'Google Cloud Run', url: 'https://cloud.google.com' }
@@ -2097,7 +2097,7 @@ export const translations: Record<'en' | 'zh', Translation> = {
           title: '云基础设施',
           content: 'GitHub / Cloudflare / Vercel / Google Cloud Run',
           links: [
-            { label: 'GitHub', url: 'https://github.com/cloud-neutral-toolkit' },
+            { label: 'GitHub', url: 'https://github.com/x-evor' },
             { label: 'Cloudflare', url: 'https://www.cloudflare.com' },
             { label: 'Vercel', url: 'https://vercel.com' },
             { label: 'Google Cloud Run', url: 'https://cloud.google.com' }

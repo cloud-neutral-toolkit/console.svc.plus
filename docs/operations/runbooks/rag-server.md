@@ -16,7 +16,7 @@
 - **区域**: asia-northeast1
 - **项目 ID**: xzerolab-480008
 - **服务 URL**: https://rag-server-svc-plus-266500572462.asia-northeast1.run.app
-- **代码仓库**: https://github.com/cloud-neutral-toolkit/rag-server.svc.plus
+- **代码仓库**: https://github.com/x-evor/rag-server.svc.plus
 
 ### 服务功能
 RAG (Retrieval-Augmented Generation) 服务器提供以下功能：
@@ -68,7 +68,7 @@ rag-server.svc.plus/
 #### 1. 代码变更
 ```bash
 # 克隆仓库
-git clone https://github.com/cloud-neutral-toolkit/rag-server.svc.plus.git
+git clone https://github.com/x-evor/rag-server.svc.plus.git
 cd rag-server.svc.plus
 
 # 创建功能分支
@@ -407,7 +407,7 @@ gcloud run services update rag-server-svc-plus \
 - **紧急联系**: [电话]
 
 ### 相关链接
-- **GitHub**: https://github.com/cloud-neutral-toolkit/rag-server.svc.plus
+- **GitHub**: https://github.com/x-evor/rag-server.svc.plus
 - **Cloud Console**: https://console.cloud.google.com/run/detail/asia-northeast1/rag-server-svc-plus
 - **监控面板**: [Monitoring Dashboard URL]
 - **文档**: [Documentation URL]

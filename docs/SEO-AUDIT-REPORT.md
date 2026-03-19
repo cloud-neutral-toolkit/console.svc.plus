@@ -364,7 +364,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     logo: 'https://console.svc.plus/logo.png',
     sameAs: [
       'https://twitter.com/cloudneutral',
-      'https://github.com/cloud-neutral-toolkit',
+      'https://github.com/x-evor',
     ],
   }
 
