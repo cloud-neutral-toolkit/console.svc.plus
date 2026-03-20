@@ -4,17 +4,17 @@ type ButtonVariant = 'primary' | 'secondary'
 
 export const designTokens = {
   colors: {
-    primary: 'text-white bg-[#3467e9] hover:bg-[#2957cf] focus-visible:outline-[#2957cf]',
-    accent: 'text-[#3467e9]',
-    accentHover: 'text-[#2957cf]',
-    textPrimary: 'text-slate-900',
-    textSecondary: 'text-slate-600',
-    textMuted: 'text-slate-500',
-    border: 'border-black/10',
+    primary: 'text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-[var(--color-primary)]',
+    accent: 'text-[var(--color-primary)]',
+    accentHover: 'text-[var(--color-primary-hover)]',
+    textPrimary: 'text-[var(--color-text)]',
+    textSecondary: 'text-[var(--color-text-muted)]',
+    textMuted: 'text-[var(--color-text-subtle)]',
+    border: 'border-[color:var(--color-surface-border)]',
     surface: 'bg-white',
-    surfaceAlt: 'bg-[#f6f7f9]',
-    background: 'bg-[#f6f7f9]',
-    gradient: 'bg-white',
+    surfaceAlt: 'bg-[var(--color-surface-muted)]',
+    background: 'bg-[var(--color-background)]',
+    gradient: 'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(242,245,248,0.86))]',
   },
   layout: {
     container: 'max-w-7xl mx-auto px-6 md:px-10',
@@ -31,18 +31,20 @@ export const designTokens = {
       product: 'min-h-[60vh]',
     } satisfies Record<PageVariant, string>,
     background: {
-      homepage: 'bg-gradient-to-br from-brand-surface/60 via-white to-white',
-      product: 'bg-gradient-to-b from-brand-surface/70 to-white',
+      homepage:
+        'bg-[linear-gradient(160deg,rgba(242,245,248,0.94),rgba(255,255,255,0.92),rgba(232,240,251,0.72))]',
+      product:
+        'bg-[linear-gradient(180deg,rgba(242,245,248,0.92),rgba(255,255,255,0.96))]',
     } satisfies Record<PageVariant, string>,
   },
   effects: {
     radii: {
-      sm: 'rounded-md',
-      md: 'rounded-lg',
-      xl: 'rounded-xl',
+      sm: 'rounded-[6px]',
+      md: 'rounded-[8px]',
+      xl: 'rounded-[8px]',
     },
     shadows: {
-      soft: 'shadow-none',
+      soft: 'shadow-[var(--shadow-soft)]',
     },
   },
   transitions: {
@@ -50,17 +52,19 @@ export const designTokens = {
     product: 'transition duration-300',
   } satisfies Record<PageVariant, string>,
   cards: {
-    base: 'border border-black/10 rounded-md md:rounded-lg transition duration-200 bg-white',
+    base: 'border border-[color:var(--color-surface-border)] rounded-[6px] md:rounded-[8px] transition duration-200 bg-white/94 shadow-[var(--shadow-soft)]',
   },
   buttons: {
-    base: 'inline-flex items-center justify-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2957cf]/60',
+    base: 'inline-flex items-center justify-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]',
     palette: {
-      primary: 'bg-[#3467e9] text-white hover:bg-[#2957cf]',
-      secondary: 'border border-black/10 text-[#2957cf] hover:bg-[#f6f7f9]',
+      primary:
+        'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]',
+      secondary:
+        'border border-[color:var(--color-surface-border)] bg-white/88 text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)]',
     } satisfies Record<ButtonVariant, string>,
     shape: {
-      homepage: 'rounded-md px-6 py-3 text-base',
-      product: 'rounded-md px-5 py-3 text-sm',
+      homepage: 'rounded-[8px] px-5 py-2.5 text-[13px]',
+      product: 'rounded-[8px] px-4 py-2 text-[13px]',
     } satisfies Record<PageVariant, string>,
   },
 }

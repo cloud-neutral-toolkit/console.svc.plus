@@ -223,9 +223,9 @@ export default function UnifiedNavigation() {
           width: "calc(100% + var(--assistant-reserve-offset, 0px))",
           marginRight: "calc(var(--assistant-reserve-offset, 0px) * -1)",
         }}
-        className="sticky top-0 z-50 w-full border-b border-surface-border/80 bg-background/92 text-text backdrop-blur-xl transition-colors duration-150"
+        className="sticky top-0 z-50 w-full border-b border-surface-border bg-background/88 text-text backdrop-blur-xl transition-colors duration-150"
       >
-        <div className="flex items-center justify-between border-b border-surface-border/70 bg-background px-4 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] lg:hidden">
+        <div className="flex items-center justify-between border-b border-surface-border bg-background/92 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden">
           <Link
             href="/"
             className="flex items-center gap-2"
@@ -239,13 +239,13 @@ export default function UnifiedNavigation() {
               className="h-6 w-6"
               unoptimized
             />
-            <span className="text-[1.05rem] font-semibold tracking-tight text-text">
+            <span className="text-[13px] font-semibold tracking-[-0.02em] text-text">
               Cloud-Neutral
             </span>
           </Link>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="tactile-button tactile-button-soft h-10 w-10 rounded-[12px] p-0"
+            className="tactile-button tactile-button-soft h-8 w-8 rounded-[8px] p-0"
             aria-label="Toggle menu"
           >
             {menuOpen ? (
@@ -256,8 +256,8 @@ export default function UnifiedNavigation() {
           </button>
         </div>
 
-        <div className="hidden lg:block mx-auto w-full max-w-7xl px-6 sm:px-8">
-          <div className="flex items-center gap-5 py-3">
+        <div className="mx-auto hidden w-full max-w-7xl px-6 sm:px-8 lg:block">
+          <div className="flex items-center gap-4 py-2.5">
             <div className="flex flex-1 items-center">
               <nav className="hidden items-center gap-1 text-sm font-medium text-text-muted lg:flex whitespace-nowrap -ml-2">
                 {filteredMainNav.map((item) => {

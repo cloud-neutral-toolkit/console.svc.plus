@@ -155,10 +155,10 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 overflow-hidden border-b border-[color:var(--color-surface-border)] bg-white/80 text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur-xl transition-colors">
+    <header className="sticky top-0 z-30 overflow-hidden border-b border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur-xl transition-colors">
       {assumeStatus.isAssuming ? (
-        <div className="flex items-center justify-between gap-3 px-4 py-2 text-xs md:px-6">
-          <div className="rounded-[12px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-1.5 text-[var(--color-warning-foreground)]">
+        <div className="flex items-center justify-between gap-3 px-4 py-2 text-xs md:px-5">
+          <div className="rounded-[8px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-1.5 text-[var(--color-warning-foreground)]">
             {language === "zh"
               ? `当前处于 Assume: ${assumeStatus.target || "sandbox@svc.plus"}（只读视角）`
               : `Assuming: ${assumeStatus.target || "sandbox@svc.plus"} (read-only view)`}
@@ -167,7 +167,7 @@ export default function Header({
             type="button"
             onClick={() => void handleRevertAssume()}
             disabled={assumeBusy}
-            className="tactile-button tactile-button-subtle min-h-9 px-3 text-[var(--color-warning-foreground)] disabled:opacity-60"
+            className="tactile-button tactile-button-subtle min-h-8 px-3 text-[var(--color-warning-foreground)] disabled:opacity-60"
           >
             {assumeBusy
               ? language === "zh"
@@ -179,13 +179,13 @@ export default function Header({
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-end gap-2 px-4 py-2 text-xs md:px-6">
+        <div className="flex items-center justify-end gap-2 px-4 py-2 text-xs md:px-5">
           {isRoot ? (
             <button
               type="button"
               onClick={() => void handleAssumeSandbox()}
               disabled={assumeBusy || isLoading}
-              className="tactile-button tactile-button-soft min-h-9 border border-[color:var(--color-primary-border)] px-3 text-[var(--color-primary)] disabled:opacity-60"
+              className="tactile-button tactile-button-soft min-h-8 border border-[color:var(--color-primary-border)] px-3 text-[var(--color-primary)] disabled:opacity-60"
             >
               {assumeBusy
                 ? language === "zh"
@@ -199,11 +199,11 @@ export default function Header({
         </div>
       )}
 
-      <div className="flex items-center justify-between px-4 py-3 md:px-6">
+      <div className="flex items-center justify-between px-4 py-2.5 md:px-5">
         <div className="flex items-center gap-4">
           <button
             type="button"
-            className="tactile-button tactile-button-soft gap-2 px-3 text-sm font-medium text-[var(--color-text-subtle)] md:hidden"
+            className="tactile-button tactile-button-soft gap-2 px-3 text-[13px] font-medium text-[var(--color-text-subtle)] md:hidden"
             onClick={onMenu}
             aria-label="Toggle navigation menu"
           >
@@ -214,7 +214,7 @@ export default function Header({
           {onCollapse && (
             <button
               type="button"
-              className="tactile-button tactile-button-soft hidden h-10 w-10 items-center justify-center p-0 text-[var(--color-text-subtle)] md:flex"
+              className="tactile-button tactile-button-soft hidden h-8 w-8 items-center justify-center p-0 text-[var(--color-text-subtle)] md:flex"
               onClick={onCollapse}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -231,16 +231,16 @@ export default function Header({
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="tactile-button tactile-button-soft gap-2 px-3 text-sm font-medium text-[var(--color-text-subtle)]"
+              className="tactile-button tactile-button-soft gap-2 px-3 text-[13px] font-medium text-[var(--color-text-subtle)]"
             >
               返回主页
             </Link>
             <span
-              className={`rounded-[12px] px-3 py-1.5 text-xs font-semibold ${badgeClasses}`}
+              className={`rounded-[999px] px-3 py-1.5 text-xs font-semibold ${badgeClasses}`}
             >
               {statusBadge}
             </span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-gradient-to-br from-[var(--gradient-primary-from)] to-[var(--gradient-primary-to)] text-sm font-semibold text-[var(--color-primary-foreground)] shadow-[var(--shadow-soft)] transition-colors">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-gradient-to-br from-[var(--gradient-primary-from)] to-[var(--gradient-primary-to)] text-[13px] font-semibold text-[var(--color-primary-foreground)] shadow-[var(--shadow-soft)] transition-colors">
               {isLoading ? (
                 <span className="animate-pulse">…</span>
               ) : (
@@ -248,7 +248,7 @@ export default function Header({
               )}
             </div>
             <div className="hidden flex-col text-right text-xs text-[var(--color-text-subtle)] transition-colors sm:flex">
-              <span className="text-sm font-semibold text-[var(--color-text)]">
+              <span className="text-[13px] font-semibold text-[var(--color-text)]">
                 {accountLabel}
               </span>
               <span>

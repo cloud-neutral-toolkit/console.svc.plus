@@ -116,15 +116,15 @@ export default function PanelLayout({
           onCollapse={() => setIsCollapsed((prev) => !prev)}
           isCollapsed={isCollapsed}
         />
-        <main className="flex flex-1 flex-col space-y-4 bg-transparent px-3 py-4 text-[var(--color-text)] transition-colors sm:px-4 md:px-5 lg:px-6">
+        <main className="flex flex-1 flex-col space-y-3 bg-transparent px-2 py-3 text-[var(--color-text)] transition-colors sm:px-3 md:px-4 lg:px-5">
           {requiresSetup ? (
-            <div className="rounded-[14px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)]/90 p-4 text-sm text-[var(--color-warning-foreground)] shadow-[var(--shadow-soft)] transition-colors">
-              <p className="text-sm">{copy.lockedMessage}</p>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <div className="rounded-[6px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)]/92 p-3 text-[13px] text-[var(--color-warning-foreground)] shadow-[var(--shadow-soft)] transition-colors">
+              <p className="text-[13px]">{copy.lockedMessage}</p>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => router.replace("/panel/account?setupMfa=1")}
-                  className="tactile-button tactile-button-primary px-3 text-sm"
+                  className="tactile-button tactile-button-primary px-3 text-[13px]"
                 >
                   {copy.actions.setup}
                 </button>
@@ -132,26 +132,26 @@ export default function PanelLayout({
                   href={copy.actions.docsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="tactile-button tactile-button-soft border border-[color:var(--color-primary-border)] px-3 text-sm text-[var(--color-primary)]"
+                  className="tactile-button tactile-button-soft border border-[color:var(--color-primary-border)] px-3 text-[13px] text-[var(--color-primary)]"
                 >
                   {copy.actions.docs}
                 </a>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="tactile-button tactile-button-subtle px-3 text-sm text-[var(--color-warning-foreground)]"
+                  className="tactile-button tactile-button-subtle px-3 text-[13px] text-[var(--color-warning-foreground)]"
                 >
                   {copy.actions.logout}
                 </button>
                 {isLoading ? (
-                  <span className="inline-flex min-h-10 items-center rounded-[12px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-1.5 text-xs text-[var(--color-warning-foreground)]">
+                  <span className="inline-flex min-h-8 items-center rounded-[8px] border border-[color:var(--color-warning-muted)] bg-[var(--color-warning-muted)] px-3 py-1.5 text-xs text-[var(--color-warning-foreground)]">
                     …
                   </span>
                 ) : null}
               </div>
             </div>
           ) : null}
-          <div className="flex w-full flex-1 flex-col gap-4 rounded-[16px] border border-[color:var(--color-surface-border)] bg-white/72 p-3 text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur md:gap-5 md:p-4">
+          <div className="flex w-full flex-1 flex-col gap-3 rounded-[6px] border border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] p-3 text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur md:gap-4 md:p-4">
             {children}
           </div>
         </main>

@@ -36,8 +36,8 @@ export default function Footer() {
   };
 
   const footerClassName = isDark
-    ? "border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.92))] text-slate-300 shadow-[0_24px_60px_rgba(15,23,42,0.16)]"
-    : "border-slate-200/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(244,247,252,0.95))] text-slate-600 shadow-[0_24px_60px_rgba(148,163,184,0.18)]";
+    ? "border-[color:var(--color-surface-border)] bg-[linear-gradient(135deg,rgba(23,28,40,0.96),rgba(30,36,51,0.94))] text-[var(--color-text-muted)] shadow-[var(--shadow-md)]"
+    : "border-[color:var(--color-surface-border)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(242,245,248,0.95))] text-[var(--color-text-muted)] shadow-[var(--shadow-md)]";
   const linkClassName = isDark
     ? "transition-colors hover:text-white"
     : "transition-colors hover:text-slate-950";
@@ -54,7 +54,7 @@ export default function Footer() {
 
   return (
     <footer
-      className={`mt-12 flex flex-col items-center justify-center gap-4 rounded-[2rem] border px-6 py-5 text-sm ${footerClassName}`}
+      className={`mt-8 flex flex-col items-center justify-center gap-3 rounded-[8px] border px-5 py-4 text-[13px] ${footerClassName}`}
     >
       <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-between">
         <div className="flex gap-4 order-2 sm:order-1">
@@ -74,7 +74,7 @@ export default function Footer() {
             <a
               key={label}
               href={href}
-              className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${iconButtonClassName}`}
+              className={`flex h-8 w-8 items-center justify-center rounded-[8px] border transition ${iconButtonClassName}`}
             >
               <Icon className="h-4 w-4" aria-hidden />
               <span className="sr-only">{label}</span>
@@ -88,7 +88,7 @@ export default function Footer() {
             onClick={handleViewToggle}
             aria-label={viewToggleLabel}
             title={viewToggleLabel}
-            className={`group flex h-10 w-10 items-center justify-center rounded-full border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${controlButtonClassName}`}
+            className={`group flex h-8 w-8 items-center justify-center rounded-[8px] border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${controlButtonClassName}`}
           >
             <span
               className={`material-symbols-outlined text-xl ${themeIconClassName}`}
@@ -102,7 +102,7 @@ export default function Footer() {
             aria-pressed={isDark}
             aria-label={toggleLabel}
             title={toggleLabel}
-            className={`group relative flex h-10 w-20 items-center rounded-full border px-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${controlButtonClassName}`}
+            className={`group relative flex h-8 w-[4.5rem] items-center rounded-[999px] border px-1.5 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${controlButtonClassName}`}
           >
             <span
               className={`relative z-10 flex w-full items-center justify-between ${themeIconClassName}`}
@@ -118,7 +118,7 @@ export default function Footer() {
             </span>
             <span
               aria-hidden
-              className={`absolute inset-y-1 left-1 h-8 w-8 rounded-full shadow-sm transition-transform duration-300 ease-out ${thumbClassName} ${isDark ? "translate-x-0" : "translate-x-10"}`}
+              className={`absolute inset-y-1 left-1 h-6 w-6 rounded-full shadow-sm transition-transform duration-300 ease-out ${thumbClassName} ${isDark ? "translate-x-0" : "translate-x-10"}`}
             />
           </button>
         </div>

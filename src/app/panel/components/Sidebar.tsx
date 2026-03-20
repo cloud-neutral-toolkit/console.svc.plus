@@ -18,7 +18,7 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <SidebarRoot
-      className={`transition-all duration-300 ${collapsed ? "w-20" : "w-64"} border-r border-[color:var(--color-surface-border)] bg-white/82 p-4 text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur ${className}`}
+      className={`transition-all duration-300 ${collapsed ? "w-20" : "w-64"} border-r border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] p-3 text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur ${className}`}
     >
       <PanelSidebarContent onNavigate={onNavigate} collapsed={collapsed} />
     </SidebarRoot>

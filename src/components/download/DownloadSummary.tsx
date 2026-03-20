@@ -27,22 +27,22 @@ export default function DownloadSummary({
   ];
 
   return (
-    <section className="rounded-[2.4rem] border border-slate-900/10 bg-[linear-gradient(180deg,#ffffff,#faf7f2)] p-6 shadow-[0_22px_50px_rgba(15,23,42,0.05)] sm:p-8 lg:p-10">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
-        <div className="space-y-4">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-text-subtle">
+    <section className="rounded-[8px] border border-[color:var(--color-surface-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(242,245,248,0.92))] p-5 shadow-[var(--shadow-md)] sm:p-6 lg:p-7">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+        <div className="space-y-3">
+          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-text-subtle">
             {isChinese ? "下载中心" : "Download library"}
           </p>
           <h1
             className={
               isChinese
-                ? "text-[2.7rem] font-semibold leading-[0.9] tracking-[-0.08em] text-heading sm:text-[3.4rem]"
-                : "editorial-display text-[2.9rem] leading-[0.9] tracking-[-0.06em] text-heading sm:text-[3.6rem]"
+                ? "text-[1.8rem] font-semibold leading-[1.02] tracking-[-0.05em] text-heading sm:text-[2.2rem]"
+                : "text-[1.9rem] font-semibold leading-[1.02] tracking-[-0.04em] text-heading sm:text-[2.3rem]"
             }
           >
             {t.title}
           </h1>
-          <p className="max-w-2xl text-[1rem] leading-8 text-text-muted sm:text-[1.05rem]">
+          <p className="max-w-2xl text-[0.95rem] leading-7 text-text-muted sm:text-[1rem]">
             {t.description}
           </p>
         </div>
@@ -53,13 +53,13 @@ export default function DownloadSummary({
             return (
               <div
                 key={item.label}
-                className="rounded-[1.5rem] border border-slate-900/10 bg-white/85 p-4"
+                className="rounded-[8px] border border-[color:var(--color-surface-border)] bg-white/88 p-4"
               >
-                <div className="flex items-center gap-2 text-slate-600">
+                <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
                   <Icon className="h-4 w-4 text-primary" aria-hidden />
-                  <dt className="text-sm font-medium">{item.label}</dt>
+                  <dt className="text-[13px] font-medium">{item.label}</dt>
                 </div>
-                <dd className="mt-3 text-[2rem] font-semibold leading-none tracking-[-0.05em] text-slate-900">
+                <dd className="mt-2.5 text-[1.7rem] font-semibold leading-none tracking-[-0.04em] text-[var(--color-heading)]">
                   {item.value.toLocaleString(locale)}
                 </dd>
               </div>

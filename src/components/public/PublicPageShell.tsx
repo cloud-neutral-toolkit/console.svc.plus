@@ -25,19 +25,19 @@ export function PublicPageShell({
     <div className="relative min-h-screen bg-background text-text transition-colors duration-150">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.58),rgba(255,255,255,0))]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0))]"
       />
       <div className="relative">
         <UnifiedNavigation />
         <div
           className={cn(
-            "mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20",
+            "mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6 sm:pb-16",
             containerClassName,
           )}
         >
           <main
             className={cn(
-              "space-y-8 pt-6 sm:space-y-10 sm:pt-10",
+              "space-y-6 pt-4 sm:space-y-8 sm:pt-6",
               mainClassName,
             )}
           >
@@ -58,22 +58,22 @@ export function PublicPageIntro({
   className,
 }: PublicPageIntroProps) {
   return (
-    <header className={cn("space-y-4", className)}>
+    <header className={cn("space-y-3", className)}>
       {eyebrow ? (
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-text-subtle">
+        <p className="text-[0.75rem] font-semibold uppercase tracking-[0.22em] text-text-subtle">
           {eyebrow}
         </p>
       ) : null}
       <h1
         className={cn(
-          "max-w-4xl text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.06em] text-heading sm:text-[3.2rem]",
+          "max-w-4xl text-[1.75rem] font-semibold leading-[1.05] tracking-[-0.035em] text-heading sm:text-[2.2rem]",
           titleClassName,
         )}
       >
         {title}
       </h1>
       {subtitle ? (
-        <p className="max-w-3xl text-[1rem] leading-8 text-text-muted sm:text-[1.05rem]">
+        <p className="max-w-3xl text-[0.95rem] leading-7 text-text-muted sm:text-[1rem]">
           {subtitle}
         </p>
       ) : null}
