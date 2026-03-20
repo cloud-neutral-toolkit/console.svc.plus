@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { getBlogList, getDocCollections } from '@/lib/docsServiceClient'
+import { getBlogList } from '@/lib/docsServiceClient'
 import { PRODUCT_LIST } from '@/modules/products/registry'
 
 const baseUrl = 'https://console.svc.plus'
@@ -9,10 +9,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [{ posts }, collections] = await Promise.all([
-    getBlogList({ page: 1, pageSize: 500 }),
-    getDocCollections(),
-  ])
+  const { posts } = await getBlogList({ page: 1, pageSize: 500 })
 
   const staticEntries: MetadataRoute.Sitemap = [
     {
@@ -27,11 +24,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/blogs`,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs`,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
@@ -76,14 +68,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  const docsEntries: MetadataRoute.Sitemap = collections.flatMap((collection) =>
-    collection.versions.map((version) => ({
-      url: `${baseUrl}/docs/${collection.slug}/${version.slug}`,
-      lastModified: version.updatedAt ? new Date(version.updatedAt) : undefined,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    })),
-  )
-
-  return [...staticEntries, ...productEntries, ...blogEntries, ...docsEntries]
+  return [...staticEntries, ...productEntries, ...blogEntries]
 }

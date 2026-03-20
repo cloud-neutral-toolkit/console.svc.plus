@@ -4,6 +4,7 @@ import { withContentlayer } from "next-contentlayer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const docsSiteBaseUrl = (process.env.NEXT_PUBLIC_DOCS_BASE_URL || "https://docs.svc.plus").replace(/\/$/, "");
 
 const nextConfig = {
   // ===============================
@@ -85,6 +86,16 @@ const nextConfig = {
 
 export async function redirects() {
   return [
+    {
+      source: '/docs',
+      destination: `${docsSiteBaseUrl}/docs`,
+      permanent: true,
+    },
+    {
+      source: '/docs/:path*',
+      destination: `${docsSiteBaseUrl}/docs/:path*`,
+      permanent: true,
+    },
     {
       source: '/XStream',
       destination: '/xstream',
