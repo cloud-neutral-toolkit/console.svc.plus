@@ -9,7 +9,10 @@ import {
   deriveMaxAgeFromExpires,
   MFA_COOKIE_NAME,
 } from "@lib/authGateway";
-import { getAccountServiceApiBaseUrl } from "@server/serviceConfig";
+import {
+  getAccountServiceApiBaseUrl,
+  isSelfReferentialServiceTarget,
+} from "@server/serviceConfig";
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl();
 
@@ -63,6 +66,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: "missing_credentials", needMfa: false },
       { status: 400 },
+    );
+  }
+
+  if (
+    isSelfReferentialServiceTarget(
+      ACCOUNT_API_BASE,
+      request.headers.get("host"),
+    )
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "account_service_misconfigured",
+        needMfa: false,
+      },
+      { status: 502 },
     );
   }
 

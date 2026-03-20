@@ -20,6 +20,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "server-only": path.resolve(__dirname, "./empty-module.ts"),
       "@": path.resolve(__dirname, "..", "..", "src"),
       "@components": path.resolve(__dirname, "..", "..", "src", "components"),
       "@i18n": path.resolve(__dirname, "..", "..", "src", "i18n"),

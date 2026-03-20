@@ -2,11 +2,23 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { MFA_COOKIE_NAME, SESSION_COOKIE_NAME } from '@lib/authGateway'
-import { getAccountServiceApiBaseUrl } from '@server/serviceConfig'
+import {
+  getAccountServiceApiBaseUrl,
+  isSelfReferentialServiceTarget,
+} from '@server/serviceConfig'
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl()
 
 export async function GET(request: NextRequest) {
+  if (isSelfReferentialServiceTarget(ACCOUNT_API_BASE, request.headers.get('host'))) {
+    return NextResponse.json(
+      {
+        error: 'account_service_misconfigured',
+      },
+      { status: 502 },
+    )
+  }
+
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? ''
   const storedMfaToken = cookieStore.get(MFA_COOKIE_NAME)?.value ?? ''

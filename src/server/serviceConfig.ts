@@ -45,6 +45,19 @@ function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 }
 
+function normalizeServiceOrigin(baseUrl: string): string {
+  const normalized = normalizeBaseUrl(baseUrl)
+  try {
+    const parsed = new URL(normalized)
+    parsed.pathname = ''
+    parsed.search = ''
+    parsed.hash = ''
+    return normalizeBaseUrl(parsed.toString())
+  } catch {
+    return normalized
+  }
+}
+
 function normalizeBrowserBaseUrl(baseUrl: string): string {
   if (typeof window === 'undefined') {
     return normalizeBaseUrl(baseUrl)
@@ -81,7 +94,7 @@ function normalizeBrowserBaseUrl(baseUrl: string): string {
 export function getAccountServiceBaseUrl(): string {
   const configured = readEnvValue('ACCOUNT_SERVICE_URL', 'NEXT_PUBLIC_ACCOUNT_SERVICE_URL')
   const resolved = configured ?? getRuntimeDefaultAccountServiceUrl()
-  return normalizeBrowserBaseUrl(resolved)
+  return normalizeServiceOrigin(normalizeBrowserBaseUrl(resolved))
 }
 
 export function getAccountServiceApiBaseUrl(): string {
@@ -97,6 +110,36 @@ export function getAccountServiceApiBaseUrl(): string {
     const normalizedBase = normalizeBaseUrl(accountBaseUrl)
     return normalizeBaseUrl(`${normalizedBase}${apiPath}`)
   }
+}
+
+function normalizeHostCandidate(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return ''
+  }
+
+  const maybeUrl = /^[a-z]+:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  try {
+    const parsed = new URL(maybeUrl)
+    return parsed.host.toLowerCase()
+  } catch {
+    return trimmed
+      .replace(/^[^/]+:\/\//, '')
+      .split('/')[0]
+      .toLowerCase()
+  }
+}
+
+export function isSelfReferentialServiceTarget(
+  serviceBaseUrl: string,
+  requestHost?: string | null,
+): boolean {
+  const normalizedServiceHost = normalizeHostCandidate(serviceBaseUrl)
+  const normalizedRequestHost = normalizeHostCandidate(requestHost ?? '')
+  if (!normalizedServiceHost || !normalizedRequestHost) {
+    return false
+  }
+  return normalizedServiceHost === normalizedRequestHost
 }
 
 export function getServerServiceBaseUrl(): string {
