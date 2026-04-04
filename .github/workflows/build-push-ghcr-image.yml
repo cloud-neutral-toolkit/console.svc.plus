@@ -57,6 +57,7 @@ jobs:
       PRIMARY_DOMAIN: console.svc.plus
       NEXT_PUBLIC_RUNTIME_ENVIRONMENT: prod
       NEXT_PUBLIC_RUNTIME_REGION: cn
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
     steps:
       - name: Check Out Repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -84,6 +85,6 @@ jobs:
         env:
           IMAGE_REF: ${{ steps.metadata.outputs.image_ref }}
           IMAGE_LATEST_REF: ${{ steps.metadata.outputs.image_latest_ref }}
-          PUSH_LATEST: ${{ inputs.push_latest }}
+          PUSH_LATEST: ${{ inputs.push_latest || github.ref == 'refs/heads/main' }}
         run: |
           bash scripts/github-actions/build-and-push-frontend-image.sh
