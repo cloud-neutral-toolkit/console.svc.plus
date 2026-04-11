@@ -1,0 +1,225 @@
+name: Console Service Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pipeline.yaml"
+      - "Dockerfile"
+      - "package.json"
+      - "yarn.lock"
+      - "scripts/github-actions/build-and-push-frontend-image.sh"
+      - "scripts/github-actions/compute-frontend-release-metadata.sh"
+      - "scripts/github-actions/render-frontend-build-args.sh"
+      - "scripts/github-actions/prepare-frontend-build-context.sh"
+      - "scripts/github-actions/verify-frontend-release.sh"
+      - "scripts/prebuild.sh"
+      - "contentlayer.config.ts"
+      - "next.config.js"
+      - "next.config.mjs"
+      - "src/**"
+      - "public/**"
+  workflow_dispatch:
+    inputs:
+      target_host:
+        description: Ansible host or alias
+        required: false
+        default: "jp-xhttp-contabo.svc.plus"
+        type: string
+      run_apply:
+        description: Apply deployment
+        required: true
+        default: true
+        type: boolean
+      internal_service_token:
+        description: Optional ACP auth token
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: console-pipeline-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  PRIMARY_DOMAIN: console.svc.plus
+  SECONDARY_DOMAIN: console.onwalk.net
+  NEXT_PUBLIC_RUNTIME_ENVIRONMENT: prod
+  NEXT_PUBLIC_RUNTIME_REGION: cn
+  GHCR_REGISTRY: ghcr.io
+
+jobs:
+  prep:
+    name: Prep
+    runs-on: ubuntu-latest
+    outputs:
+      target_host: ${{ steps.inputs.outputs.target_host }}
+      run_apply: ${{ steps.inputs.outputs.run_apply }}
+      internal_service_token: ${{ steps.inputs.outputs.internal_service_token }}
+      image_tag: ${{ steps.metadata.outputs.image_tag }}
+      image_ref: ${{ steps.metadata.outputs.image_ref }}
+      image_latest_ref: ${{ steps.metadata.outputs.image_latest_ref }}
+      ghcr_namespace: ${{ steps.metadata.outputs.ghcr_namespace }}
+      push_latest: ${{ steps.push.outputs.push_latest }}
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Resolve Inputs
+        id: inputs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET_HOST: ${{ inputs.target_host }}
+          INPUT_RUN_APPLY: ${{ inputs.run_apply }}
+          INPUT_INTERNAL_SERVICE_TOKEN: ${{ inputs.internal_service_token }}
+        run: |
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            target_host="${INPUT_TARGET_HOST}"
+            run_apply="${INPUT_RUN_APPLY}"
+            internal_service_token="${INPUT_INTERNAL_SERVICE_TOKEN}"
+          else
+            target_host="jp-xhttp-contabo.svc.plus"
+            run_apply="true"
+            internal_service_token=""
+          fi
+
+          {
+            printf 'target_host=%s\n' "${target_host}"
+            printf 'run_apply=%s\n' "${run_apply}"
+            printf 'internal_service_token=%s\n' "${internal_service_token}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Compute Image Metadata
+        id: metadata
+        run: |
+          bash scripts/github-actions/compute-frontend-release-metadata.sh
+
+      - name: Resolve Push Latest
+        id: push
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [[ "${REF}" == "refs/heads/main" ]]; then
+            echo "push_latest=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "push_latest=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: prep
+    env:
+      PRIMARY_DOMAIN: ${{ env.PRIMARY_DOMAIN }}
+      NEXT_PUBLIC_RUNTIME_ENVIRONMENT: ${{ env.NEXT_PUBLIC_RUNTIME_ENVIRONMENT }}
+      NEXT_PUBLIC_RUNTIME_REGION: ${{ env.NEXT_PUBLIC_RUNTIME_REGION }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
+    outputs:
+      image_ref: ${{ needs.prep.outputs.image_ref }}
+      image_tag: ${{ needs.prep.outputs.image_tag }}
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set Up Docker Buildx
+        run: |
+          docker buildx create --name console-builder --use >/dev/null 2>&1 || docker buildx use console-builder
+          docker buildx inspect --bootstrap
+
+      - name: Log In To GHCR
+        env:
+          GHCR_USERNAME: ${{ vars.GHCR_USERNAME || github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN || github.token }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
+
+      - name: Publish Frontend Image
+        env:
+          IMAGE_REF: ${{ needs.prep.outputs.image_ref }}
+          IMAGE_LATEST_REF: ${{ needs.prep.outputs.image_latest_ref }}
+          PUSH_LATEST: ${{ needs.prep.outputs.push_latest }}
+        run: |
+          bash scripts/github-actions/build-and-push-frontend-image.sh
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs:
+      - prep
+      - build
+    env:
+      TARGET_HOST: ${{ needs.prep.outputs.target_host }}
+      RUN_APPLY: ${{ needs.prep.outputs.run_apply }}
+      FRONTEND_IMAGE: ${{ needs.prep.outputs.image_ref }}
+      INTERNAL_SERVICE_TOKEN: ${{ needs.prep.outputs.internal_service_token }}
+      PLAYBOOKS_REPO: git@github.com:x-evor/playbooks.git
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set Up Python
+        uses: actions/setup-python@42375524a763eb7d2e0d429c75e7d708d93f2851
+        with:
+          python-version: "3.11"
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ansible
+
+      - name: Configure SSH For Playbooks Checkout
+        env:
+          PLAYBOOKS_REPO_SSH_KEY: ${{ secrets.PLAYBOOKS_REPO_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${PLAYBOOKS_REPO_SSH_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Check Out Playbooks Repository
+        run: |
+          git clone "${PLAYBOOKS_REPO}" /tmp/playbooks
+
+      - name: Run Deploy Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          cd /tmp/playbooks
+
+          ansible_args=(
+            deploy_console_svc_plus.yml
+            --limit "${TARGET_HOST}"
+            --extra-vars "target_host=${TARGET_HOST}"
+            --extra-vars "frontend_image=${FRONTEND_IMAGE}"
+            --extra-vars "image_ref=${FRONTEND_IMAGE}"
+            --extra-vars "internal_service_token=${INTERNAL_SERVICE_TOKEN}"
+            --extra-vars "run_apply=${RUN_APPLY}"
+          )
+
+          if [[ "${RUN_APPLY}" != "true" ]]; then
+            ansible_args+=(--check --diff)
+          fi
+
+          ansible-playbook "${ansible_args[@]}"
+
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    needs:
+      - prep
+      - deploy
+    if: ${{ always() && needs.deploy.result == 'success' }}
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Verify Frontend Release
+        run: |
+          bash scripts/github-actions/verify-frontend-release.sh "${PRIMARY_DOMAIN}" "${SECONDARY_DOMAIN}"
