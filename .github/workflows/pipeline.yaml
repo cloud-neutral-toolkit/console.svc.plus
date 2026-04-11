@@ -158,6 +158,8 @@ jobs:
       FRONTEND_IMAGE: ${{ needs.prep.outputs.image_ref }}
       INTERNAL_SERVICE_TOKEN: ${{ needs.prep.outputs.internal_service_token }}
       PLAYBOOKS_REPO: git@github.com:x-evor/playbooks.git
+      GHCR_USERNAME: ${{ vars.GHCR_USERNAME || github.repository_owner }}
+      GHCR_PASSWORD: ${{ secrets.GHCR_TOKEN || github.token }}
     steps:
       - name: Check Out Repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -193,14 +195,17 @@ jobs:
         run: |
           cd /tmp/playbooks
 
+          if [[ "${RUN_APPLY}" == "true" ]]; then
+            dns_sync="true"
+          else
+            dns_sync="false"
+          fi
+
           ansible_args=(
+            -i inventory.ini
             deploy_console_svc_plus.yml
-            --limit "${TARGET_HOST}"
-            --extra-vars "target_host=${TARGET_HOST}"
-            --extra-vars "frontend_image=${FRONTEND_IMAGE}"
-            --extra-vars "image_ref=${FRONTEND_IMAGE}"
-            --extra-vars "internal_service_token=${INTERNAL_SERVICE_TOKEN}"
-            --extra-vars "run_apply=${RUN_APPLY}"
+            -l "${TARGET_HOST}"
+            -e "console_service_sync_dns=${dns_sync}"
           )
 
           if [[ "${RUN_APPLY}" != "true" ]]; then
