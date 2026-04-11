@@ -164,6 +164,18 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ansible
 
+      - name: Configure SSH For Deploy Host
+        env:
+          SINGLE_NODE_VPS_SSH_PRIVATE_KEY: ${{ secrets.SINGLE_NODE_VPS_SSH_PRIVATE_KEY }}
+          TARGET_HOST: ${{ needs.prep.outputs.target_host }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${SINGLE_NODE_VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${TARGET_HOST}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
       - name: Check Out Playbooks Repository
         run: |
           git clone "${PLAYBOOKS_REPO}" /tmp/playbooks
