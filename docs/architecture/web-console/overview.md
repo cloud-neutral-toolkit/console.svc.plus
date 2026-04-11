@@ -2,7 +2,7 @@
 
 ## Scope
 
-`console.svc.plus` is the browser-facing control plane. It is a Next.js App Router application that combines public pages, docs browsing, account/admin panels, and a BFF layer that forwards requests to downstream services.
+`console.svc.plus` is the browser-facing control plane. It is a Next.js App Router application that combines public pages, docs browsing, account/admin panels, and a BFF layer that forwards requests to downstream services. It never reads PostgreSQL or Prometheus directly for billing or usage.
 
 ## Architecture
 
@@ -30,7 +30,9 @@ flowchart TB
   Accounts["accounts.svc.plus"]
   Rag["rag-server.svc.plus"]
   DocsSvc["docs.svc.plus"]
+  Grafana["observability.svc.plus / Grafana"]
   External["Other upstream services"]
+  Subscription["/panel/subscription\nUsage / billing panel"]
 
   AuthAPI --> Accounts
   AdminAPI --> Accounts
@@ -39,6 +41,8 @@ flowchart TB
   UtilAPI --> DocsSvc
   UtilAPI --> External
   SandboxAPI --> Accounts
+  Subscription --> Accounts
+  Subscription -.-> Grafana
 ```
 
 ## Frontend Routes
@@ -79,11 +83,14 @@ flowchart TB
 ## Dependencies
 
 - `accounts.svc.plus` for identity, profile, sandbox, billing, and admin actions.
+- `accounts.svc.plus` for authoritative usage and billing summaries sourced from PostgreSQL.
 - `rag-server.svc.plus` for RAG query and AskAI.
 - `docs.svc.plus` for docs content and navigation data.
+- `observability.svc.plus` for Grafana dashboards and operational views only.
 - CDN / external providers for content, analytics, and integration checks.
 
 ## Notes
 
 - Route groups in parentheses, such as `(auth)`, are Next.js organizational folders and do not appear in the public URL.
 - The BFF layer is the main place where console-specific auth shaping, cookie management, and upstream proxying happen.
+- The subscription panel displays usage and billing data from accounts only and treats Grafana as an embedded observability surface, not a billing source.
