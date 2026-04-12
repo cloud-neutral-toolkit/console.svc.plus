@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(payload, { status: response.status })
   } catch (error) {
-    console.error('Failed to proxy sandbox binding (public)', error)
+    console.error('Failed to proxy guest node binding', error)
     return NextResponse.json<ErrorPayload>({ error: 'upstream_unreachable' }, { status: 502 })
   }
 }

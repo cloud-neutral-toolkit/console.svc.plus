@@ -9,7 +9,7 @@ import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
 import { useUserStore } from '@lib/userStore'
 import { fetchAgentNodes } from '../lib/fetchAgentNodes'
-import { fetchSandboxNodeBinding } from '../lib/sandboxNodeBinding'
+import { fetchGuestNodeBinding } from '../lib/guestNodeBinding'
 
 
 interface VlessNode {
@@ -46,8 +46,8 @@ export default function UserCenterAgentRoute() {
   const visibleNodes = useMemo(() => {
     return (nodes ?? []).filter((node) => {
       if (isGuestSandboxReadOnly) {
-        // In sandbox mode, allow internal agents so the user can see their bound node
-        // even if it belongs to the shared token bucket.
+        // Guest read-only mode still needs to expose the bound node even when the
+        // node belongs to the shared internal pool.
         const address = (node.address || '').trim()
         return address && address !== '*'
       }
@@ -64,7 +64,7 @@ export default function UserCenterAgentRoute() {
     }
     let cancelled = false
     void (async () => {
-      const binding = await fetchSandboxNodeBinding()
+      const binding = await fetchGuestNodeBinding()
       if (cancelled) {
         return
       }
@@ -74,7 +74,7 @@ export default function UserCenterAgentRoute() {
         return
       }
       setBoundNode({
-        name: binding.name || 'Sandbox Node',
+        name: binding.name || 'Guest Node',
         address: binding.address,
         port: 443,
         transport: 'tcp',
@@ -90,7 +90,7 @@ export default function UserCenterAgentRoute() {
     // Default behavior: show all displayable nodes.
     const base = visibleNodes.length > 0 ? [...visibleNodes] : []
 
-    // Guest sandbox behavior: if root has bound a preferred node, ensure it is first,
+    // Guest read-only behavior: if an admin bound a preferred node, ensure it is first,
     // but still show all regions/nodes to keep the demo experience useful.
     if (isGuestSandboxReadOnly && boundAddress) {
       const matched = nodes?.find((n) => n.address === boundAddress)
@@ -101,7 +101,7 @@ export default function UserCenterAgentRoute() {
       }
     }
 
-    // Fallback if no nodes were returned by the API but we are in sandbox mode
+    // Fallback if no nodes were returned by the API but the guest binding exists.
     if (isGuestSandboxReadOnly && boundNode && base.length === 0) {
       return [boundNode]
     }

@@ -9,6 +9,7 @@ import { translations } from "../i18n/translations";
 import LanguageToggle from "./LanguageToggle";
 // import { AskAIButton } from "./AskAIButton";
 import ReleaseChannelSelector from "./ReleaseChannelSelector";
+import { hasPublicUserEmail } from "@lib/publicUserIdentity";
 import { useUserStore } from "@lib/userStore";
 import { useMoltbotStore } from "@lib/moltbotStore";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -47,6 +48,7 @@ export default function UnifiedNavigation() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const isChinese = language === "zh";
+  const shouldRenderPublicEmail = hasPublicUserEmail(user?.email);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -356,9 +358,11 @@ export default function UnifiedNavigation() {
                           <p className="text-sm font-semibold text-text leading-none mb-1.5">
                             {user.username}
                           </p>
-                          <p className="text-[12px] text-text-muted leading-none break-all">
-                            {user.email}
-                          </p>
+                          {shouldRenderPublicEmail ? (
+                            <p className="text-[12px] text-text-muted leading-none break-all">
+                              {user.email}
+                            </p>
+                          ) : null}
                         </div>
 
                         <div className="space-y-0.5">

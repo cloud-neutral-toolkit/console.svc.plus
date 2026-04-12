@@ -33,7 +33,7 @@
 - 将 observability 工作区拆分为 tri-view，并优化 panel 助手路由。
 - 统一导航结构与持久化 AI sidebar 行为。
 - 登录与注册流程改为使用服务端解析后的 account service URL。
-- 体验账号与演示账号统一收敛到 `sandbox@svc.plus`。
+- 体验与演示模式不得在公开 UI 或会话载荷中暴露其后端承载账号身份。
 - 为集成配置增加基于 vault 的 token 查询能力。
 
 #### 文档与安装

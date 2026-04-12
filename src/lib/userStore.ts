@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { resolvePublicUserEmail } from '@lib/publicUserIdentity'
 
 export type UserRole = 'guest' | 'user' | 'operator' | 'admin'
 
@@ -65,8 +66,6 @@ const KNOWN_ROLE_MAP: Record<string, UserRole> = {
   member: 'user',
 }
 
-const GUEST_SANDBOX_TENANT_ID = 'guest-sandbox'
-const GUEST_SANDBOX_TENANT_NAME = 'Guest Sandbox'
 function normalizeRole(input?: string | null): UserRole {
   if (!input || typeof input !== 'string') {
     return 'guest'
@@ -153,6 +152,10 @@ async function fetchSessionUser(): Promise<User | null> {
       }
 
     const normalizedRole = normalizeRole(role)
+    const publicEmail = resolvePublicUserEmail({
+      email,
+      role: normalizedRole,
+    })
     const rawRole = typeof role === 'string' ? role.trim().toLowerCase() : ''
     const normalizedGroups = Array.isArray(groups)
       ? groups
@@ -218,9 +221,9 @@ async function fetchSessionUser(): Promise<User | null> {
       uuid: identifier,
       proxyUuid: normalizedProxyUuid,
       proxyUuidExpiresAt: normalizedProxyUuidExpiresAt,
-      email,
+      email: publicEmail,
       name: normalizedName,
-      username: normalizedUsername ?? email,
+      username: normalizedUsername ?? publicEmail,
       mfaEnabled: Boolean(mfaEnabled ?? mfa?.totpEnabled),
       mfaPending: Boolean(mfaPending ?? mfa?.totpPending) && !Boolean(mfaEnabled ?? mfa?.totpEnabled),
       mfa: normalizedMfa,

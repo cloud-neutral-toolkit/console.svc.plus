@@ -1,15 +1,15 @@
 'use client'
 
-export type SandboxNodeBinding = {
+export type GuestNodeBinding = {
   address: string
   name?: string
   updatedAt: number
   updatedBy?: string
 }
 
-export async function fetchSandboxNodeBinding(): Promise<SandboxNodeBinding | null> {
+export async function fetchGuestNodeBinding(): Promise<GuestNodeBinding | null> {
   try {
-    const response = await fetch('/api/sandbox/binding', { method: 'GET', cache: 'no-store' })
+    const response = await fetch('/api/guest/binding', { method: 'GET', cache: 'no-store' })
     if (!response.ok) {
       return null
     }
@@ -29,7 +29,7 @@ export async function fetchSandboxNodeBinding(): Promise<SandboxNodeBinding | nu
         typeof payload.updatedBy === 'string' && payload.updatedBy.trim().length > 0 ? payload.updatedBy.trim() : undefined,
     }
   } catch (error) {
-    console.warn('Failed to fetch sandbox node binding', error)
+    console.warn('Failed to fetch guest node binding', error)
     return null
   }
 }

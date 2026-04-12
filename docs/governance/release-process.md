@@ -31,7 +31,7 @@ Published commit: `0fab89e`
 - Split observability into a tri-view workspace and refined panel assistant routing.
 - Unified navigation structure and persistent AI sidebar behavior.
 - Improved login and registration flows by using server-resolved account service URLs.
-- Consolidated demo and experience account handling around `sandbox@svc.plus`.
+- Guest and demo access must not expose any backing account identity in public UI or session payloads.
 - Added vault-backed token lookup for integrations.
 
 #### Docs And Setup

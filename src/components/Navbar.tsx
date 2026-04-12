@@ -20,6 +20,7 @@ import { AskAIButton } from "./AskAIButton";
 import ReleaseChannelSelector, {
   ReleaseChannel,
 } from "./ReleaseChannelSelector";
+import { hasPublicUserEmail } from "@lib/publicUserIdentity";
 import { useUserStore } from "@lib/userStore";
 // import SearchComponent from './search'
 
@@ -61,6 +62,7 @@ export default function Navbar() {
     user?.username?.charAt(0)?.toUpperCase() ??
     user?.email?.charAt(0)?.toUpperCase() ??
     "?";
+  const shouldRenderPublicEmail = hasPublicUserEmail(user?.email);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -534,7 +536,9 @@ export default function Navbar() {
                         <p className="text-sm font-semibold text-text">
                           {user.username}
                         </p>
-                        <p className="text-xs text-text-muted">{user.email}</p>
+                        {shouldRenderPublicEmail ? (
+                          <p className="text-xs text-text-muted">{user.email}</p>
+                        ) : null}
                       </div>
                       <div className="py-1 text-sm text-text">
                         <Link
@@ -648,9 +652,11 @@ export default function Navbar() {
                         <p className="truncate text-sm font-semibold">
                           {user.username}
                         </p>
-                        <p className="truncate text-xs text-text-muted">
-                          {user.email}
-                        </p>
+                        {shouldRenderPublicEmail ? (
+                          <p className="truncate text-xs text-text-muted">
+                            {user.email}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </div>

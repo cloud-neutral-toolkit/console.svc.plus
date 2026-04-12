@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { SESSION_COOKIE_NAME, clearSessionCookie } from "@lib/authGateway";
+import { resolvePublicUserEmail } from "@lib/publicUserIdentity";
 import { getAccountServiceApiBaseUrl } from "@server/serviceConfig";
 
 const ACCOUNT_API_BASE = getAccountServiceApiBaseUrl();
@@ -212,10 +213,15 @@ export async function GET(request: NextRequest) {
   const normalizedUser = identifier
     ? { ...rawUser, id: identifier, uuid: identifier }
     : rawUser;
+  const publicEmail = resolvePublicUserEmail({
+    email: normalizedUser.email,
+    role: normalizedRole,
+  });
 
   return NextResponse.json({
     user: {
       ...normalizedUser,
+      email: publicEmail,
       mfaEnabled: derivedMfaEnabled,
       mfaPending: derivedMfaPending,
       mfa: normalizedMfa,

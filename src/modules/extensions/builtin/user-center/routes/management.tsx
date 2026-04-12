@@ -17,8 +17,6 @@ import UserGroupManagement, {
   type ManagedUser,
   type CreateManagedUserInput,
 } from "../management/components/UserGroupManagement";
-import SandboxNodeBindingPanel from "../management/components/SandboxNodeBindingPanel";
-import RootAssumeSandboxPanel from "../management/components/RootAssumeSandboxPanel";
 import HomepageVideoSettingsPanel from "../management/components/HomepageVideoSettingsPanel";
 import { EmailBlacklist } from "../management/components/EmailBlacklist";
 import Breadcrumbs from "@/app/panel/components/Breadcrumbs";
@@ -518,12 +516,6 @@ export default function UserCenterManagementRoute() {
         onCreateCustomUser={handleCreateCustomUser}
         onManageBlacklist={() => setIsBlacklistOpen(true)}
       />
-      {canCreateCustomUser ? (
-        <>
-          <RootAssumeSandboxPanel />
-          <SandboxNodeBindingPanel />
-        </>
-      ) : null}
       <EmailBlacklist
         isOpen={isBlacklistOpen}
         onClose={() => setIsBlacklistOpen(false)}

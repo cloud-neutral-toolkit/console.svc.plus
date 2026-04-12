@@ -7,8 +7,9 @@ import { Copy } from 'lucide-react'
 
 import { useLanguage } from '@i18n/LanguageProvider'
 import { translations } from '@i18n/translations'
+import { hasPublicUserEmail } from '@lib/publicUserIdentity'
 import { useUserStore } from '@lib/userStore'
-import { fetchSandboxNodeBinding } from '../lib/sandboxNodeBinding'
+import { fetchGuestNodeBinding } from '../lib/guestNodeBinding'
 
 import Card from './Card'
 import VlessQrCard from './VlessQrCard'
@@ -49,13 +50,13 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   const refresh = useUserStore((state) => state.refresh)
   const logout = useUserStore((state) => state.logout)
   const [copied, setCopied] = useState(false)
-  const [sandboxBoundNodeAddress, setSandboxBoundNodeAddress] = useState<string | null>(null)
+  const [guestBoundNodeAddress, setGuestBoundNodeAddress] = useState<string | null>(null)
 
   const displayName = useMemo(() => resolveDisplayName(user), [user])
   const uuid = user?.proxyUuid ?? user?.uuid ?? user?.id ?? '—'
   const vlessUuid = user?.proxyUuid ?? user?.uuid ?? user?.id ?? null
   const username = user?.username ?? '—'
-  const email = user?.email ?? '—'
+  const email = hasPublicUserEmail(user?.email) ? user?.email : '—'
   const docsUrl = mfaCopy.actions.docsUrl
   const isGuestSandboxReadOnly = Boolean(user?.isGuest && user?.isReadOnly)
   const guestUuidExpiresAtText = useMemo(() => {
@@ -121,16 +122,16 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
 
   useEffect(() => {
     if (!isGuestSandboxReadOnly) {
-      setSandboxBoundNodeAddress(null)
+      setGuestBoundNodeAddress(null)
       return
     }
     let cancelled = false
     void (async () => {
-      const binding = await fetchSandboxNodeBinding()
+      const binding = await fetchGuestNodeBinding()
       if (cancelled) {
         return
       }
-      setSandboxBoundNodeAddress(binding?.address ?? null)
+      setGuestBoundNodeAddress(binding?.address ?? null)
     })()
     return () => {
       cancelled = true
@@ -236,8 +237,8 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
         <VlessQrCard
           uuid={vlessUuid}
           copy={copy.cards.vless}
-          allowSandboxFallbackNode={isGuestSandboxReadOnly}
-          boundNodeAddress={sandboxBoundNodeAddress}
+          allowGuestReadOnlyFallbackNode={isGuestSandboxReadOnly}
+          boundNodeAddress={guestBoundNodeAddress}
         />
 
         <Card>

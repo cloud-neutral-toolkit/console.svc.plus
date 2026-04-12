@@ -24,7 +24,7 @@ flowchart TB
     AgentAPI["/api/agent-server/[...segments]\n/api/agent/[...segments]"]
     RagAPI["/api/rag/query\n/api/askai"]
     UtilAPI["/api/users\n/api/ping\n/api/content-meta\n/api/render-markdown\n/api/dl-index/*\n/api/marketing/home-stats\n/api/integrations/*\n/api/moltbot/chat\n/api/openclaw/assistant\n/api/task/[...segments]\n/api/xworkmate/profile"]
-    SandboxAPI["/api/sandbox/*"]
+    GuestAPI["/api/guest/*"]
   end
 
   Accounts["accounts.svc.plus"]
@@ -65,10 +65,10 @@ flowchart TB
 | Auth | `/api/auth/login`, `/api/auth/register`, `/api/auth/register/send`, `/api/auth/register/verify`, `/api/auth/verify-email`, `/api/auth/verify-email/send`, `/api/auth/session`, `/api/auth/token/exchange` | Login, registration, token exchange, session lookup | `accounts.svc.plus/api/auth/*` |
 | MFA | `/api/auth/mfa/status`, `/api/auth/mfa/setup`, `/api/auth/mfa/verify`, `/api/auth/mfa/disable` | TOTP setup and verification | `accounts.svc.plus/api/auth/*` |
 | OAuth / billing | `/api/auth/oauth/login/[provider]`, `/api/auth/stripe/checkout`, `/api/auth/stripe/portal`, `/api/auth/subscriptions`, `/api/auth/subscriptions/cancel` | OAuth redirects and billing actions | `accounts.svc.plus/api/auth/*` |
-| Admin | `/api/admin/settings`, `/api/admin/homepage-video`, `/api/admin/users/*`, `/api/admin/blacklist/*`, `/api/admin/sandbox/*` | Account admin operations | `accounts.svc.plus/api/*` |
+| Admin | `/api/admin/settings`, `/api/admin/homepage-video`, `/api/admin/users/*`, `/api/admin/blacklist/*` | Account admin operations | `accounts.svc.plus/api/*` |
 | Agent bridge | `/api/agent-server/[...segments]`, `/api/agent/[...segments]` | Agent registry/status and legacy alias | `accounts.svc.plus` |
 | RAG | `/api/rag/query`, `/api/askai` | Retrieval and answer generation | `rag-server.svc.plus` |
-| Sandbox / session shaping | `/api/sandbox/assume`, `/api/sandbox/assume/revert`, `/api/sandbox/assume/status`, `/api/sandbox/binding` | Guest / demo identity switching | `accounts.svc.plus/api/auth/*` and internal sandbox reads |
+| Guest / demo runtime | `/api/guest/binding` | Guest read-only node resolution for demo access | `accounts.svc.plus/api/sandbox/binding` |
 | Content / docs | `/api/content-meta`, `/api/render-markdown`, `/api/blogs/latest`, `/api/dl-index/*` | Docs/content rendering and download manifests | docs / CDN / download service |
 | Integrations | `/api/integrations/defaults`, `/api/integrations/probe`, `/api/marketing/home-stats` | Integration defaults, health probes, marketing metrics | config-dependent external services |
 | Misc | `/api/ping`, `/api/users`, `/api/xworkmate/profile`, `/api/task/[...segments]`, `/api/openclaw/assistant`, `/api/moltbot/chat`, `/api/render-markdown` | Health, user lookup, profile, task and assistant proxies | `accounts.svc.plus`, internal API, task services |
