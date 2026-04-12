@@ -16,6 +16,12 @@ You are an AI agent working inside this repository.
 - Keep changes scoped to the request; avoid unrelated refactors.
 - Prefer minimal edits that preserve existing behavior and style.
 
+## Release Traceability Default Rule
+
+- For changes touching CI/CD, image tags, deploy contracts, `/api/ping`, or `validate`, treat `skills/release-traceability/SKILL.md` as the default reference first.
+- Keep build output, runtime version, and validate output aligned through the whole release chain.
+- Do not add a deploy path that rebuilds images on the target host.
+
 ## Repository Constraints (Quick View)
 
 - App layer: src/app/**, src/components/**, src/lib/**, src/state/**, src/modules/\*\*

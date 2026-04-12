@@ -51,7 +51,20 @@ yarn test:e2e path/to/spec.test.ts
 
 ---
 
-## 2. Repository Mental Model (Read This First)
+## 2. Release Traceability Default Rule
+
+For any change touching CI/CD, image tags, deploy contracts, `/api/ping`, or `validate` behavior:
+
+- Treat `skills/release-traceability/SKILL.md` as the default reference before implementation.
+- Prefer release metadata that can be traced from `build` to `deploy` to `validate` without manual injection.
+- Keep the published image reference, runtime version, and validation output aligned.
+- Do not introduce a deploy path that rebuilds images on the target host.
+
+When in doubt, follow the skill first and keep the release chain fully auditable end to end.
+
+---
+
+## 3. Repository Mental Model (Read This First)
 
 This repository has **three clearly separated layers**:
 
@@ -91,7 +104,7 @@ Used for build-time or runtime wiring only.
 
 ---
 
-## 3. Import & Alias Rules (Critical)
+## 4. Import & Alias Rules (Critical)
 
 ### Dashboard code (src/\*\*)
 
@@ -112,7 +125,7 @@ import { UserCard } from "@/components/UserCard";
 
 ---
 
-## 4. TypeScript & Formatting Rules
+## 5. TypeScript & Formatting Rules
 
 - Strict mode enabled
 - Use `type` for type definitions, `interface` for object shapes
@@ -123,7 +136,7 @@ import { UserCard } from "@/components/UserCard";
 
 ---
 
-## 5. Naming Conventions
+## 6. Naming Conventions
 
 - Components: PascalCase (`UserProfile.tsx`)
 - Files: kebab-case for utilities (`user-utils.ts`), PascalCase for components
@@ -133,7 +146,7 @@ import { UserCard } from "@/components/UserCard";
 
 ---
 
-## 6. Error Handling & Logging
+## 7. Error Handling & Logging
 
 - Use try/catch for async operations
 - Return Result types or throw errors consistently
@@ -142,7 +155,7 @@ import { UserCard } from "@/components/UserCard";
 
 ---
 
-## 7. React Patterns
+## 8. React Patterns
 
 - Use `'use client'` directive for client components
 - Prefer function components with hooks
@@ -151,7 +164,7 @@ import { UserCard } from "@/components/UserCard";
 
 ---
 
-## 8. Global State Rules (Dashboard Only)
+## 9. Global State Rules (Dashboard Only)
 
 ✅ Zustand is the **only** allowed global state mechanism
 ❌ React Context for shared/global state is forbidden
@@ -162,7 +175,7 @@ Rule: If state must survive navigation or be shared → it lives in Zustand.
 
 ---
 
-## 9. URL-Synchronized State
+## 10. URL-Synchronized State
 
 Anything involving:
 
@@ -179,7 +192,7 @@ MUST be handled inside Zustand slices.
 
 ---
 
-## 10. Component State Rules
+## 11. Component State Rules
 
 Allowed:
 
@@ -194,7 +207,7 @@ Forbidden:
 
 ---
 
-## 11. packages/neurapress Rules (Very Important)
+## 12. packages/neurapress Rules (Very Important)
 
 packages/neurapress is treated as a vendored internal library.
 
@@ -214,7 +227,7 @@ MUST NOT:
 
 ---
 
-## 12. Testing Guidelines
+## 13. Testing Guidelines
 
 - Unit tests: Vitest with jsdom environment
 - E2E tests: Playwright
@@ -224,7 +237,7 @@ MUST NOT:
 
 ---
 
-## 13. Environment & Runtime Config
+## 14. Environment & Runtime Config
 
 - No new environment variables without approval
 - Runtime config must live in: src/config/runtime-service-config\*.yaml
@@ -233,13 +246,13 @@ MUST NOT:
 
 ---
 
-## 14. Cursor / Copilot Rules
+## 15. Cursor / Copilot Rules
 
 - No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` found
 
 ---
 
-## 15. TL;DR for AI Agents
+## 16. TL;DR for AI Agents
 
 - dashboard = application
 - packages = libraries
