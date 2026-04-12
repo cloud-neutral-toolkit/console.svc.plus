@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CANONICAL_DOMAIN="${1:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref>}"
-SERVED_DOMAINS="${2:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref>}"
-EXPECTED_IMAGE_REF="${3:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref>}"
+CANONICAL_DOMAIN="${1:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref> [request-base-url]}"
+SERVED_DOMAINS="${2:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref> [request-base-url]}"
+EXPECTED_IMAGE_REF="${3:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref> [request-base-url]}"
+REQUEST_BASE_URL="${4:-https://${CANONICAL_DOMAIN}}"
 EXPECTED_DASHBOARD_URL="https://${CANONICAL_DOMAIN}"
 
 curl_headers=(
@@ -76,26 +77,27 @@ require_http_200() {
 
 verify_domain() {
   local domain="$1"
-  local url="https://${domain}"
+  local request_base_url="${REQUEST_BASE_URL%/}"
+  local request_headers=("${curl_headers[@]}" -H "host: ${domain}")
   local homepage_html asset_path release_payload release_metadata
   local actual_image_ref actual_image_tag actual_release_commit actual_dashboard_url
   local release_lines
 
-  require_http_200 "${url}" "${curl_headers[@]}"
+  require_http_200 "${request_base_url}" "${request_headers[@]}"
   printf 'verified homepage for %s: 200\n' "${domain}" >&2
 
-  homepage_html="$(curl -fsSL "${curl_headers[@]}" "${url}")"
+  homepage_html="$(curl -fsSL "${request_headers[@]}" "${request_base_url}")"
   asset_path="$(printf '%s' "${homepage_html}" | grep -Eo '/_next/static/[^"'"'"' ]+\.(css|js)' | head -n 1)"
   if [[ -z "${asset_path}" ]]; then
-    echo "Could not find a _next/static asset on ${url}" >&2
+    echo "Could not find a _next/static asset on ${domain} via ${request_base_url}" >&2
     exit 1
   fi
 
-  require_http_200 "${url}${asset_path}" "${curl_headers[@]}"
-  printf 'verified static asset for %s: %s%s\n' "${domain}" "${url}" "${asset_path}" >&2
+  require_http_200 "${request_base_url}${asset_path}" "${request_headers[@]}"
+  printf 'verified static asset for %s: %s%s\n' "${domain}" "${request_base_url}" "${asset_path}" >&2
 
-  require_http_200 "${url}/api/ping" "${curl_headers[@]}"
-  release_payload="$(curl -fsSL "${curl_headers[@]}" "${url}/api/ping")"
+  require_http_200 "${request_base_url}/api/ping" "${request_headers[@]}"
+  release_payload="$(curl -fsSL "${request_headers[@]}" "${request_base_url}/api/ping")"
   release_metadata="$(parse_release_metadata "${release_payload}")"
 
   mapfile -t release_lines <<< "${release_metadata}"
