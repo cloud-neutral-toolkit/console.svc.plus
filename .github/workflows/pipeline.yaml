@@ -16,6 +16,7 @@ on:
       - "scripts/github-actions/render-frontend-runtime-env.sh"
       - "scripts/github-actions/prepare-frontend-build-context.sh"
       - "scripts/github-actions/run-console-deploy-playbook.sh"
+      - "scripts/github-actions/run-cloudflare-svc-plus-dns-playbook.sh"
       - "scripts/github-actions/verify-frontend-release.sh"
       - "scripts/prebuild.sh"
       - "contentlayer.config.ts"
@@ -47,6 +48,11 @@ concurrency:
 env:
   CANONICAL_DOMAIN: www.svc.plus
   SERVED_DOMAINS: www.svc.plus,console.svc.plus
+  APP_BASE_URL: https://www.svc.plus
+  NEXT_PUBLIC_APP_BASE_URL: https://www.svc.plus
+  NEXT_PUBLIC_SITE_URL: https://www.svc.plus
+  RUNTIME_HOSTNAME: www.svc.plus
+  NEXT_RUNTIME_HOSTNAME: www.svc.plus
   NEXT_PUBLIC_RUNTIME_ENVIRONMENT: prod
   NEXT_PUBLIC_RUNTIME_REGION: cn
   ACCOUNT_SERVICE_URL: https://accounts.svc.plus
@@ -165,6 +171,12 @@ jobs:
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: bash ../scripts/github-actions/run-console-deploy-playbook.sh
+
+      - name: Update Cloudflare svc.plus DNS
+        working-directory: playbooks
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: bash ../scripts/github-actions/run-cloudflare-svc-plus-dns-playbook.sh
 
   validate:
     name: Validate
