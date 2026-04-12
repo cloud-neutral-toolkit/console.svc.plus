@@ -59,14 +59,20 @@ export default function Header({
   const isLoading = useUserStore((state) => state.isLoading);
   const role: UserRole = user?.role ?? "guest";
   const badge = ROLE_BADGES[role];
+  const shouldRenderPublicEmail = hasPublicUserEmail({
+    email: user?.email,
+    role,
+  });
   const accountLabel =
-    user?.name ?? user?.username ?? user?.email ?? "Guest user";
+    user?.name ??
+    user?.username ??
+    (shouldRenderPublicEmail ? user?.email : undefined) ??
+    "Guest user";
   const accountInitial = resolveAccountInitial(accountLabel);
   const statusBadge = isLoading ? "Syncing" : badge.label;
   const badgeClasses = isLoading
     ? "bg-[var(--color-surface-muted)] text-[var(--color-text-subtle)] opacity-70"
     : badge.className;
-  const shouldRenderPublicEmail = hasPublicUserEmail(user?.email);
 
   return (
     <header className="sticky top-0 z-30 overflow-hidden border-b border-[color:var(--color-surface-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text)] shadow-[var(--shadow-soft)] backdrop-blur-xl transition-colors">

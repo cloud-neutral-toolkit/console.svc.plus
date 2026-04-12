@@ -41,14 +41,17 @@ export default function UnifiedNavigation() {
   const user = useUserStore((state) => state.user);
   const { toggleOpen } = useMoltbotStore();
   const nav = translations[language].nav;
+  const shouldRenderPublicEmail = hasPublicUserEmail({
+    email: user?.email,
+    role: user?.role,
+  });
   const accountInitial =
     user?.username?.charAt(0)?.toUpperCase() ??
-    user?.email?.charAt(0)?.toUpperCase() ??
+    (shouldRenderPublicEmail ? user?.email?.charAt(0)?.toUpperCase() : null) ??
     "?";
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const isChinese = language === "zh";
-  const shouldRenderPublicEmail = hasPublicUserEmail(user?.email);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -25,7 +25,18 @@ describe("publicUserIdentity", () => {
   });
 
   it("detects whether a public email should be rendered", () => {
-    expect(hasPublicUserEmail("")).toBe(false);
-    expect(hasPublicUserEmail("guest@svc.plus")).toBe(true);
+    expect(hasPublicUserEmail({ email: "" })).toBe(false);
+    expect(
+      hasPublicUserEmail({
+        email: "sandbox@svc.plus",
+        role: "guest",
+      }),
+    ).toBe(false);
+    expect(
+      hasPublicUserEmail({
+        email: "admin@svc.plus",
+        role: "admin",
+      }),
+    ).toBe(true);
   });
 });

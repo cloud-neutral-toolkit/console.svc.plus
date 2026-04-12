@@ -51,12 +51,16 @@ export default function UserOverview({ hideMfaMainPrompt = false }: UserOverview
   const logout = useUserStore((state) => state.logout)
   const [copied, setCopied] = useState(false)
   const [guestBoundNodeAddress, setGuestBoundNodeAddress] = useState<string | null>(null)
+  const shouldRenderPublicEmail = hasPublicUserEmail({
+    email: user?.email,
+    role: user?.role,
+  })
 
   const displayName = useMemo(() => resolveDisplayName(user), [user])
   const uuid = user?.proxyUuid ?? user?.uuid ?? user?.id ?? '—'
   const vlessUuid = user?.proxyUuid ?? user?.uuid ?? user?.id ?? null
   const username = user?.username ?? '—'
-  const email = hasPublicUserEmail(user?.email) ? user?.email : '—'
+  const email = shouldRenderPublicEmail ? user?.email : '—'
   const docsUrl = mfaCopy.actions.docsUrl
   const isGuestSandboxReadOnly = Boolean(user?.isGuest && user?.isReadOnly)
   const guestUuidExpiresAtText = useMemo(() => {

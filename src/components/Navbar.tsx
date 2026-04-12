@@ -58,11 +58,14 @@ export default function Navbar() {
   const user = useUserStore((state) => state.user);
   const nav = translations[language].nav;
   const accountCopy = nav.account;
+  const shouldRenderPublicEmail = hasPublicUserEmail({
+    email: user?.email,
+    role: user?.role,
+  });
   const accountInitial =
     user?.username?.charAt(0)?.toUpperCase() ??
-    user?.email?.charAt(0)?.toUpperCase() ??
+    (shouldRenderPublicEmail ? user?.email?.charAt(0)?.toUpperCase() : null) ??
     "?";
-  const shouldRenderPublicEmail = hasPublicUserEmail(user?.email);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
 
