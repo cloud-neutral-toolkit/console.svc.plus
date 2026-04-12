@@ -178,5 +178,4 @@ jobs:
         run: |
           bash scripts/github-actions/verify-frontend-release.sh \
             "${PRIMARY_DOMAIN}" \
-            "${SECONDARY_DOMAIN}" \
-            "${{ needs.build.outputs.image_ref }}"
+            "${SECONDARY_DOMAIN}"
