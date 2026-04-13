@@ -16,6 +16,22 @@ emit_lines() {
   require_env CANONICAL_DOMAIN
 
   local canonical_domain="${CANONICAL_DOMAIN}"
+  local release_image_ref="${IMAGE_REF-}"
+  local release_image_tag=""
+  local release_commit=""
+  local release_version=""
+
+  if [[ -n "${release_image_ref}" ]]; then
+    release_image_tag="$(printf '%s' "${release_image_ref}" | sed -E 's#^.*:([^:@]+)$#\1#')"
+    release_version="${release_image_tag}"
+
+    if [[ "${release_image_tag}" =~ ^sha-([0-9a-f]{7,40})$ ]]; then
+      release_commit="${BASH_REMATCH[1]}"
+    elif [[ "${release_image_tag}" =~ ^[0-9a-f]{7,40}$ ]]; then
+      release_commit="${release_image_tag}"
+    fi
+  fi
+
   printf 'NODE_BUILDER_IMAGE=%s\n' "${NODE_BUILDER_IMAGE:-node:22-bookworm}"
   printf 'NODE_RUNTIME_IMAGE=%s\n' "${NODE_RUNTIME_IMAGE:-node:22-slim}"
   printf 'CONTENTLAYER_BUILD=%s\n' "${CONTENTLAYER_BUILD:-true}"
@@ -36,6 +52,10 @@ emit_lines() {
   printf 'NEXT_PUBLIC_STRIPE_PRICE_XSCOPEHUB_SUBSCRIPTION=%s\n' "${NEXT_PUBLIC_STRIPE_PRICE_XSCOPEHUB_SUBSCRIPTION-}"
   printf 'NEXT_PUBLIC_STRIPE_PRICE_XCLOUDFLOW_PAYGO=%s\n' "${NEXT_PUBLIC_STRIPE_PRICE_XCLOUDFLOW_PAYGO-}"
   printf 'NEXT_PUBLIC_STRIPE_PRICE_XCLOUDFLOW_SUBSCRIPTION=%s\n' "${NEXT_PUBLIC_STRIPE_PRICE_XCLOUDFLOW_SUBSCRIPTION-}"
+  printf 'NEXT_PUBLIC_RELEASE_IMAGE=%s\n' "${release_image_ref}"
+  printf 'NEXT_PUBLIC_RELEASE_TAG=%s\n' "${release_image_tag}"
+  printf 'NEXT_PUBLIC_RELEASE_COMMIT=%s\n' "${release_commit}"
+  printf 'NEXT_PUBLIC_RELEASE_VERSION=%s\n' "${release_version}"
 }
 
 if [[ "${MODE}" == "--stdout" ]]; then

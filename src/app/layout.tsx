@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 import { AppProviders } from './AppProviders'
+import { resolveWebReleaseMetadata } from '@/lib/webReleaseMetadata'
 import { getConsoleIntegrationDefaults } from '@/server/consoleIntegrations'
 
 const DEFAULT_TITLE = 'Cloud-Neutral Console | Unified Cloud Native Tools'
@@ -76,12 +77,17 @@ const GA_ID = 'G-T4VM8G4Q42'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const assistantDefaults = getConsoleIntegrationDefaults()
+  const releaseMetadata = resolveWebReleaseMetadata()
 
   return (
     <html {...htmlAttributes}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#6366f1" />
+        {releaseMetadata.image ? <meta name="svc-plus-release-image" content={releaseMetadata.image} /> : null}
+        {releaseMetadata.tag ? <meta name="svc-plus-release-tag" content={releaseMetadata.tag} /> : null}
+        {releaseMetadata.commit ? <meta name="svc-plus-release-commit" content={releaseMetadata.commit} /> : null}
+        {releaseMetadata.version ? <meta name="svc-plus-release-version" content={releaseMetadata.version} /> : null}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"

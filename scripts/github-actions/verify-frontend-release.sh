@@ -5,7 +5,6 @@ CANONICAL_DOMAIN="${1:?usage: verify-frontend-release.sh <canonical-domain> <ser
 SERVED_DOMAINS="${2:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref> [request-base-url]}"
 EXPECTED_IMAGE_REF="${3:?usage: verify-frontend-release.sh <canonical-domain> <served-domains> <expected-image-ref> [request-base-url]}"
 REQUEST_BASE_URL="${4:-https://${CANONICAL_DOMAIN}}"
-EXPECTED_DASHBOARD_URL="https://${CANONICAL_DOMAIN}"
 
 curl_headers=(
   -H 'user-agent: Mozilla/5.0 (compatible; console-release-validator/1.0; +https://www.svc.plus)'
@@ -32,6 +31,7 @@ image_ref = os.environ["IMAGE_REF"].strip()
 match = re.search(r":([^:@]+)$", image_ref)
 tag = match.group(1) if match else ""
 commit = ""
+version = tag
 
 if re.fullmatch(r"[0-9a-f]{7,40}", tag, flags=re.IGNORECASE):
     commit = tag
@@ -40,26 +40,33 @@ else:
     if prefixed_match:
         commit = prefixed_match.group(1)
 
-if not image_ref or not tag or not commit:
+if not image_ref or not tag or not commit or not version:
     sys.exit(1)
 
 print(image_ref)
 print(tag)
 print(commit)
+print(version)
 PY
 }
 
-parse_release_metadata() {
-  local payload="$1"
-  RELEASE_PAYLOAD="${payload}" python3 - <<'PY'
-import json
+parse_homepage_release_metadata() {
+  local homepage_html="$1"
+  HOMEPAGE_HTML="${homepage_html}" python3 - <<'PY'
 import os
+import re
 
-payload = json.loads(os.environ["RELEASE_PAYLOAD"])
-print(payload.get("releaseImageRef", ""))
-print(payload.get("releaseImageTag", ""))
-print(payload.get("releaseCommit", ""))
-print(payload.get("dashboardUrl", ""))
+html = os.environ["HOMEPAGE_HTML"]
+
+def extract_meta(name: str) -> str:
+    pattern = rf'<meta[^>]+name=["\']{re.escape(name)}["\'][^>]+content=["\']([^"\']*)["\']'
+    match = re.search(pattern, html, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else ""
+
+print(extract_meta("svc-plus-release-image"))
+print(extract_meta("svc-plus-release-tag"))
+print(extract_meta("svc-plus-release-commit"))
+print(extract_meta("svc-plus-release-version"))
 PY
 }
 
@@ -79,8 +86,8 @@ verify_domain() {
   local domain="$1"
   local request_base_url="${REQUEST_BASE_URL%/}"
   local request_headers=("${curl_headers[@]}" -H "host: ${domain}")
-  local homepage_html asset_path release_payload release_metadata
-  local actual_image_ref actual_image_tag actual_release_commit actual_dashboard_url
+  local homepage_html asset_path release_metadata
+  local actual_image_ref actual_image_tag actual_release_commit actual_release_version
   local release_lines
 
   require_http_200 "${request_base_url}" "${request_headers[@]}"
@@ -96,49 +103,48 @@ verify_domain() {
   require_http_200 "${request_base_url}${asset_path}" "${request_headers[@]}"
   printf 'verified static asset for %s: %s%s\n' "${domain}" "${request_base_url}" "${asset_path}" >&2
 
-  require_http_200 "${request_base_url}/api/ping" "${request_headers[@]}"
-  release_payload="$(curl -fsSL "${request_headers[@]}" "${request_base_url}/api/ping")"
-  release_metadata="$(parse_release_metadata "${release_payload}")"
+  release_metadata="$(parse_homepage_release_metadata "${homepage_html}")"
 
   mapfile -t release_lines <<< "${release_metadata}"
   actual_image_ref="${release_lines[0]-}"
   actual_image_tag="${release_lines[1]-}"
   actual_release_commit="${release_lines[2]-}"
-  actual_dashboard_url="${release_lines[3]-}"
+  actual_release_version="${release_lines[3]-}"
 
-  if [[ -z "${actual_image_ref}" || -z "${actual_image_tag}" || -z "${actual_release_commit}" ]]; then
-    echo "Remote release metadata is incomplete for ${domain}: ${release_payload}" >&2
+  if [[ -z "${actual_image_ref}" || -z "${actual_image_tag}" || -z "${actual_release_commit}" || -z "${actual_release_version}" ]]; then
+    echo "Homepage release metadata is incomplete for ${domain}" >&2
     exit 1
   fi
 
-  if [[ ! "${actual_image_tag}" =~ ^[0-9a-f]{7,40}$ ]]; then
-    echo "Remote image tag must contain a commit id for ${domain}, got: ${actual_image_tag}" >&2
+  if [[ ! "${actual_release_commit}" =~ ^[0-9a-f]{7,40}$ ]]; then
+    echo "Homepage release commit must contain a commit id for ${domain}, got: ${actual_release_commit}" >&2
     exit 1
   fi
 
-  if [[ "${actual_release_commit}" != "${actual_image_tag}" ]]; then
-    echo "Remote release commit mismatch for ${domain}: expected ${actual_image_tag}, got ${actual_release_commit}" >&2
+  if [[ "${actual_release_version}" != "${actual_image_tag}" ]]; then
+    echo "Homepage release version mismatch for ${domain}: expected ${actual_image_tag}, got ${actual_release_version}" >&2
     exit 1
   fi
 
-  if [[ "${actual_dashboard_url}" != "${EXPECTED_DASHBOARD_URL}" ]]; then
-    echo "Remote dashboardUrl mismatch for ${domain}: expected ${EXPECTED_DASHBOARD_URL}, got ${actual_dashboard_url}" >&2
+  if [[ "${actual_release_commit}" != "${EXPECTED_RELEASE_COMMIT}" ]]; then
+    echo "Homepage release commit mismatch for ${domain}: expected ${EXPECTED_RELEASE_COMMIT}, got ${actual_release_commit}" >&2
     exit 1
   fi
 
-  printf 'verified release image for %s: %s\n' "${domain}" "${actual_image_ref}" >&2
-  printf 'verified release commit for %s: %s\n' "${domain}" "${actual_release_commit}" >&2
-  printf 'verified dashboardUrl for %s: %s\n' "${domain}" "${actual_dashboard_url}" >&2
+  printf 'verified homepage release image for %s: %s\n' "${domain}" "${actual_image_ref}" >&2
+  printf 'verified homepage release commit for %s: %s\n' "${domain}" "${actual_release_commit}" >&2
+  printf 'verified homepage release version for %s: %s\n' "${domain}" "${actual_release_version}" >&2
 
-  printf '%s\t%s\t%s\t%s\t%s\n' "${domain}" "${actual_image_ref}" "${actual_image_tag}" "${actual_release_commit}" "${actual_dashboard_url}"
+  printf '%s\t%s\t%s\t%s\t%s\n' "${domain}" "${actual_image_ref}" "${actual_image_tag}" "${actual_release_commit}" "${actual_release_version}"
 }
 
 mapfile -t expected_release_lines < <(parse_image_ref "${EXPECTED_IMAGE_REF}")
 EXPECTED_RELEASE_IMAGE_REF="${expected_release_lines[0]-}"
 EXPECTED_RELEASE_IMAGE_TAG="${expected_release_lines[1]-}"
 EXPECTED_RELEASE_COMMIT="${expected_release_lines[2]-}"
+EXPECTED_RELEASE_VERSION="${expected_release_lines[3]-}"
 
-if [[ -z "${EXPECTED_RELEASE_IMAGE_REF}" || -z "${EXPECTED_RELEASE_IMAGE_TAG}" || -z "${EXPECTED_RELEASE_COMMIT}" ]]; then
+if [[ -z "${EXPECTED_RELEASE_IMAGE_REF}" || -z "${EXPECTED_RELEASE_IMAGE_TAG}" || -z "${EXPECTED_RELEASE_COMMIT}" || -z "${EXPECTED_RELEASE_VERSION}" ]]; then
   echo "Expected image ref is invalid: ${EXPECTED_IMAGE_REF}" >&2
   exit 1
 fi
@@ -175,10 +181,10 @@ fi
 reference_image_ref=""
 reference_image_tag=""
 reference_release_commit=""
-reference_dashboard_url=""
+reference_release_version=""
 
 for row in "${verification_rows[@]}"; do
-  IFS=$'\t' read -r domain actual_image_ref actual_image_tag actual_release_commit actual_dashboard_url <<< "${row}"
+  IFS=$'\t' read -r domain actual_image_ref actual_image_tag actual_release_commit actual_release_version <<< "${row}"
 
   if [[ "${actual_image_ref}" != "${EXPECTED_RELEASE_IMAGE_REF}" ]]; then
     echo "Release image mismatch for ${domain}: expected ${EXPECTED_RELEASE_IMAGE_REF}, got ${actual_image_ref}" >&2
@@ -195,11 +201,21 @@ for row in "${verification_rows[@]}"; do
     exit 1
   fi
 
+  if [[ "${actual_release_version}" != "${EXPECTED_RELEASE_VERSION}" ]]; then
+    echo "Release version mismatch for ${domain}: expected ${EXPECTED_RELEASE_VERSION}, got ${actual_release_version}" >&2
+    exit 1
+  fi
+
   if [[ -z "${reference_image_ref}" ]]; then
     reference_image_ref="${actual_image_ref}"
     reference_image_tag="${actual_image_tag}"
     reference_release_commit="${actual_release_commit}"
-    reference_dashboard_url="${actual_dashboard_url}"
+    reference_release_version="${actual_release_version}"
     continue
+  fi
+
+  if [[ "${actual_image_ref}" != "${reference_image_ref}" || "${actual_image_tag}" != "${reference_image_tag}" || "${actual_release_commit}" != "${reference_release_commit}" || "${actual_release_version}" != "${reference_release_version}" ]]; then
+    echo "Release metadata drift detected across served domains." >&2
+    exit 1
   fi
 done
