@@ -17,6 +17,7 @@ on:
       - "scripts/github-actions/prepare-frontend-build-context.sh"
       - "scripts/github-actions/run-console-deploy-playbook.sh"
       - "scripts/github-actions/run-cloudflare-svc-plus-dns-playbook.sh"
+      - "scripts/github-actions/verify-frontend-release-over-ssh.sh"
       - "scripts/github-actions/verify-frontend-release.sh"
       - "scripts/prebuild.sh"
       - "contentlayer.config.ts"
